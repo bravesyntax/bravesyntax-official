@@ -96,7 +96,7 @@ export default async function PortfolioPage() {
               <span className="text-gradient">Speaks for Itself</span>
             </h1>
             <p className="pf-t-s text-lg text-zinc-400 font-mono max-w-2xl mx-auto leading-relaxed">
-              A curated selection of projects across design, development, and branding. Every piece here was built from scratch by our senior team.
+              A curated selection of projects across design, development, and branding. Every piece here was designed and built by us.
             </p>
           </div>
         </div>

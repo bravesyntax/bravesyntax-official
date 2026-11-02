@@ -12,7 +12,7 @@ import { pageMetadata, pageSchema } from "@/lib/seo";
 import { getContactInfo, type ContactInfo } from "@/lib/contact";
 import { getActiveJobs, getLatestPosts, getPortfolios } from "@/lib/content";
 import { getActiveCities } from "@/lib/locations";
-import { PDF_TOOLS } from "@/lib/navigation";
+import { PDF_TOOL_COUNT } from "@/lib/navigation";
 import { getActiveServices, type DbService } from "@/lib/services";
 import "./home.css";
 
@@ -79,11 +79,11 @@ const TECHS = [
 const FAQS: [string, string][] = [
   ["How much does a website cost?", "A landing page or 3-page site starts at ₹8,000, a custom 5–10 page website is ₹20,000–₹60,000, and web apps or large e-commerce builds start at ₹60,000. You get a fixed quote once we understand your requirements — see Services for what each package includes."],
   ["How long does a project take?", "It depends on scope: landing pages usually take 3–5 days, business websites 1–3 weeks, and e-commerce or custom web apps 3–8 weeks. You get a milestone-based timeline before we start."],
-  ["Do you work with international clients?", "Yes — India, UAE, UK, USA, Australia. All communication in English. We adjust to your timezone for meetings."],
+  ["Do you work with international clients?", "Yes. We work remotely, communicate in English and adjust meeting times to your timezone."],
   ["What do you need to get started?", "Brand assets (logo, colors if you have them), your goals, and examples of designs you like. We handle the rest."],
   ["Can I get revisions?", "Yes. Every package includes revisions: 2 rounds on Starter, and unlimited rounds within the agreed scope on Professional and Enterprise."],
   ["Do you provide hosting and maintenance?", "Yes. We set up hosting (AWS, Vercel, Hostinger, etc.) and offer monthly maintenance packages for updates, backups, monitoring."],
-  ["Are your PDF tools really free?", `Yes — ${PDF_TOOLS.length} PDF tools plus an AI background remover, 100% free, browser-based, local processing. No registration, no watermarks, no file limits.`],
+  ["Are your PDF tools really free?", `Yes — ${PDF_TOOL_COUNT} PDF tools plus an AI background remover, 100% free, browser-based, local processing. No registration, no watermarks, no file limits.`],
 ];
 
 /** Organisation schema from the admin settings and the live service list (no invented ratings or reviews). */
@@ -395,7 +395,7 @@ export default async function HomePage() {
               Our <span className="bsh-grad">4-Step Process</span>
             </h2>
             <p className="font-mono text-sm leading-relaxed" style={t2}>
-              Transparent, collaborative, and proven to deliver exceptional results every time.
+              Clear steps, with your sign-off at each stage, so you always know where the project stands.
             </p>
           </div>
 

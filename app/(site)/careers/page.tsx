@@ -39,7 +39,7 @@ const CLOCK = "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z";
 const PIN = "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z";
 
 const PERKS = [
-  ["Real Projects", "Work on live products used by real clients across India and globally.", SHIELD],
+  ["Real Projects", "Work on live websites and products for real clients.", SHIELD],
   ["Modern Stack", "Next.js, React, PHP, Tailwind, Figma — we use tools that matter.", "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"],
   ["Remote Friendly", "Work from anywhere. We care about output, not hours.", GLOBE],
   [
@@ -80,7 +80,7 @@ export default async function CareersPage({ searchParams }: Props) {
             <span className="text-gradient">digital experiences</span>
           </h1>
           <p className="font-mono text-zinc-400 text-lg max-w-2xl mx-auto leading-relaxed mb-8">
-            Join the Brave Syntax team. We&apos;re a small, focused team building exceptional web products for clients across India and beyond.
+            Join the Brave Syntax team. We&apos;re a small, focused team building websites and web products for real clients.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-sm text-zinc-400">
             <span className="flex items-center gap-2">

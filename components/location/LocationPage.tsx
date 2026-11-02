@@ -16,6 +16,7 @@ import {
   type City,
   type LocationService,
 } from "@/lib/locations";
+import { getSiteFacts } from "@/lib/content";
 import { buildMetadata, customSchema, locationSeoDefaults, resolveSeo, type SeoDefaults } from "@/lib/seo";
 import FeatureIcon from "@/components/ui/FeatureIcon";
 import LocationFaq from "./LocationFaq";
@@ -44,13 +45,13 @@ function pageStrings({ city, service, serviceSlug }: Resolved) {
   const place = placeName(city);
   if (!serviceSlug) {
     return {
-      h1: `Top Digital Agency in ${name}`,
-      intro: `Brave Syntax is a results-driven digital agency trusted by businesses across ${place}. From startups to enterprises, we build websites, brands, and digital experiences that convert.`,
+      h1: `Digital Agency in ${name}`,
+      intro: `Brave Syntax is a design and development agency working with businesses in ${place}, remotely. We build websites, web apps and brands for small businesses and growing companies, with a fixed quote before work starts.`,
     };
   }
   return {
     h1: `${service.label} in ${name}`,
-    intro: `Brave Syntax provides expert ${service.keyword} services for businesses in ${place}. Our team combines technical excellence with strategic thinking to deliver results that matter.`,
+    intro: `Brave Syntax provides expert ${service.keyword} services for businesses in ${place}, delivered remotely. You work directly with the people building your project, with a fixed quote before work starts.`,
   };
 }
 
@@ -82,12 +83,6 @@ export async function locationMetadata(citySlug: string, serviceSlug = ""): Prom
   return buildMetadata("location", seoKey(r), await seoDefaults(r), { forceNoindex: !(await isIndexableCity(r.city)) });
 }
 
-const STATS = [
-  ["50+", "Projects Delivered"],
-  ["3+", "Years Experience"],
-  ["100%", "Client Satisfaction"],
-];
-
 const WHY = [
   ["Premium Quality, Affordable Pricing", "Enterprise-quality work at SME-friendly prices. No hidden charges."],
   ["Fast Turnaround", "Most projects delivered in days, not months. We respect your deadlines."],
@@ -113,7 +108,10 @@ function HighlightCity({ text, city }: { text: string; city: string }) {
 export default async function LocationPage({ citySlug, serviceSlug = "" }: { citySlug: string; serviceSlug?: string }) {
   const r = await resolve(citySlug, serviceSlug);
   const { city, service } = r;
-  const [c, nearby, allServices, contact, extraSchema] = await Promise.all([content(r), getNearbyCities(city), getActiveLocationServices(), getContactInfo(), customSchema("location", seoKey(r))]);
+  const [c, nearby, allServices, contact, extraSchema, facts] = await Promise.all([content(r), getNearbyCities(city), getActiveLocationServices(), getContactInfo(), customSchema("location", seoKey(r)), getSiteFacts()]);
+  const stats: [string | number, string][] = facts
+    ? [[facts.projects, "Projects in our portfolio"], [facts.services, "Services offered"], ...(facts.since ? [[facts.since, "Building since"] as [number, string]] : [])]
+    : [];
 
   const features = parseFeatures(service.features_json);
   const contactParam = (service.contact_param ?? "").trim();
@@ -221,10 +219,10 @@ export default async function LocationPage({ citySlug, serviceSlug = "" }: { cit
         <div className="loc-wrap">
           <div style={{ textAlign: "center" }}>
             <p className="sec-label">By the numbers</p>
-            <h2 className="sec-title">Trusted by Businesses in {city.name}</h2>
+            <h2 className="sec-title">Brave Syntax at a Glance</h2>
           </div>
           <div className="loc-stats">
-            {STATS.map(([v, l]) => (
+            {stats.map(([v, l]) => (
               <div key={l} className="loc-stat">
                 <div className="loc-stat-v">{v}</div>
                 <div className="loc-stat-l">{l}</div>
@@ -239,7 +237,7 @@ export default async function LocationPage({ citySlug, serviceSlug = "" }: { cit
         <div className="loc-wrap">
           <p className="sec-label">What we offer</p>
           <h2 className="sec-title">{r.serviceSlug ? `${service.label} in ${city.name}` : `Services We Provide in ${city.name}`}</h2>
-          <p className="sec-sub">Everything your business needs to grow online — delivered by a dedicated team that cares about quality.</p>
+          <p className="sec-sub">Everything your business needs to grow online — from the people who design and build it.</p>
 
           <div className="loc-svc-pills">
             <Link href={`/${city.slug}`} className={`svc-pill${!r.serviceSlug ? " active" : ""}`}>

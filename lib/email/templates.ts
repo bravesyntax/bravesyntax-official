@@ -92,7 +92,7 @@ export function enquiryAutoReply(c: ContactInfo, d: Enquiry): Email {
       eyebrow: "Message received",
       title: `Thanks, ${d.name}. We're on it.`,
       body:
-        paragraph(`Your message reached our team. A project specialist will get back to you <strong>${esc(c.responseTime)}</strong> (${esc(c.hours)}).`) +
+        paragraph(`Your message reached our team. We'll get back to you <strong>${esc(c.responseTime)}</strong> (${esc(c.hours)}).`) +
         quote("Your message", preview) +
         paragraph("While you wait, see what we've built for other businesses:") +
         buttons([

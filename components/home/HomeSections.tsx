@@ -5,7 +5,7 @@ import { SectionBadge } from "@/components/ui/Icon";
 import { capitalize, categoryLabel, formatDate, type BlogPost, type Portfolio } from "@/lib/content";
 import { INDUSTRIES } from "@/lib/industries";
 import { mediaUrl } from "@/lib/media";
-import { PDF_TOOLS } from "@/lib/navigation";
+import { PDF_TOOL_COUNT, PDF_TOOLS } from "@/lib/navigation";
 
 // Home page sections that showcase the rest of the site: case studies, industries, free tools, the blog,
 // cities served, about and careers. Everything comes from the same data as the pages they link to.
@@ -44,7 +44,7 @@ export function FeaturedWork({ projects }: { projects: Portfolio[] }) {
   return (
     <section className="relative py-24 lg:py-32 bsh-lazy" aria-label="Featured work">
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
-        <Header badge="Featured Work" title="Recent" accent="Case Studies" text="Real projects for real businesses — the problem, what we built and what changed." href="/portfolio" cta="All case studies" />
+        <Header badge="Featured Work" title="Recent" accent="Work" text="A selection of websites and stores we've designed and built." href="/portfolio" cta="All projects" />
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((p, i) => {
             const metrics = [p.metric_1, p.metric_2, p.metric_3].filter(Boolean) as string[];
@@ -87,7 +87,7 @@ export function FeaturedWork({ projects }: { projects: Portfolio[] }) {
                     </div>
                   )}
                   <span className="mt-auto inline-flex items-center gap-1.5 border-t pt-4 font-mono text-xs text-emerald-400" style={border}>
-                    Read case study <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+                    View project <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
                   </span>
                 </div>
               </Link>
@@ -143,11 +143,11 @@ export function FreeTools() {
               Free Tools, <span className="bsh-grad">No Sign-Up</span>
             </h2>
             <p className="mb-6 font-mono text-sm leading-relaxed" style={t2}>
-              {PDF_TOOLS.length} PDF tools and an AI background remover that run right in your browser. Your files never leave your device — no watermarks, no limits.
+              {PDF_TOOL_COUNT} PDF tools and an AI background remover that run right in your browser. Your files never leave your device — no watermarks, no limits.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/pdf-tools" className="bsh-btn-primary inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 font-mono text-sm font-bold text-black hover:bg-emerald-400">
-                Open PDF tools <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                All {PDF_TOOL_COUNT} PDF tools <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
               <Link href="/bg-remover" className="bsh-btn-outline inline-flex items-center gap-2 rounded-xl border px-5 py-3 font-mono text-sm font-semibold">
                 Background remover
@@ -265,10 +265,10 @@ export function CitiesServed({ cities }: { cities: { name: string; slug: string;
         <div className="mx-auto mb-10 max-w-2xl text-center bsh-reveal">
           <SectionBadge>Where We Work</SectionBadge>
           <h2 className="mb-4 font-display text-4xl font-bold lg:text-5xl" style={t1}>
-            Serving Businesses <span className="bsh-grad">Across India</span>
+            Working Across <span className="bsh-grad">India, Remotely</span>
           </h2>
           <p className="font-mono text-sm leading-relaxed" style={t2}>
-            Remote-first, with clients in every major city — plus the UAE, UK, USA and Australia.
+            We work remotely, so your city is never a barrier. Pick yours to see how we can help.
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-2.5 bsh-reveal">
@@ -306,10 +306,10 @@ export function AboutAndCareers({ jobs }: { jobs: { title: string; type: string;
             A studio, not a <span className="bsh-grad">factory</span>
           </h2>
           <p className="mb-6 font-mono text-sm leading-relaxed" style={t2}>
-            A small senior team of designers and developers. You talk directly to the people building your product — no account managers, no hand-offs.
+            A small team of designers and developers. You talk directly to the people building your product, with no account managers in between.
           </p>
           <span className="mt-auto inline-flex items-center gap-2 font-mono text-sm text-emerald-400">
-            Meet the team <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            About us <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </span>
         </Link>
 

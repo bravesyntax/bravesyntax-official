@@ -7,16 +7,11 @@ type SearchDoc = { kind: "post" | "project"; title: string; slug: string; sub: s
 
 /** Published blog posts and case studies for the site search (titles only, so the list stays small). */
 async function searchDocs(): Promise<SearchDoc[]> {
-  try {
-    return await rows<SearchDoc>(sql`
-      (SELECT 'post' AS kind, title, slug, category AS sub FROM blog_posts WHERE is_published = 1 ORDER BY published_at DESC NULLS LAST LIMIT 60)
-      UNION ALL
-      (SELECT 'project' AS kind, title, slug, category AS sub FROM portfolios WHERE is_active = 1 AND COALESCE(slug, '') <> '' ORDER BY sort_order ASC LIMIT 40)
-    `);
-  } catch (err) {
-    console.error("[SiteHeader] search docs", err);
-    return [];
-  }
+  return rows<SearchDoc>(sql`
+    (SELECT 'post' AS kind, title, slug, category AS sub FROM blog_posts WHERE is_published = 1 ORDER BY published_at DESC NULLS LAST LIMIT 60)
+    UNION ALL
+    (SELECT 'project' AS kind, title, slug, category AS sub FROM portfolios WHERE is_active = 1 AND COALESCE(slug, '') <> '' ORDER BY sort_order ASC LIMIT 40)
+  `);
 }
 
 /** Server wrapper: feeds the client header the live services (Admin → Services), contact details (Admin → Settings)

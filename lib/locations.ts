@@ -80,14 +80,9 @@ export async function getNearbyCities(city: City): Promise<{ name: string; slug:
 
 /** Active cities in priority order (home page "cities we serve"). */
 export async function getActiveCities(limit = 12): Promise<{ name: string; slug: string; state: string }[]> {
-  try {
-    return (await sql`
-      SELECT name, slug, state FROM location_cities WHERE is_active = 1 ORDER BY sort_order ASC, name ASC LIMIT ${limit}
-    `) as { name: string; slug: string; state: string }[];
-  } catch (err) {
-    console.error("[getActiveCities]", err);
-    return [];
-  }
+  return (await sql`
+    SELECT name, slug, state FROM location_cities WHERE is_active = 1 ORDER BY sort_order ASC, name ASC LIMIT ${limit}
+  `) as { name: string; slug: string; state: string }[];
 }
 
 /** True when the city ranks inside the indexable tier (0-based rank by sort_order, then name). */
@@ -125,16 +120,11 @@ export function parseFeatures(json: string | null): Feature[] {
 
 /** Top-tier cities and all non-root services, for static generation and the sitemap. */
 export async function getIndexableLocationPaths(): Promise<{ cities: string[]; services: string[] }> {
-  try {
-    const cities = (await sql`
-      SELECT slug FROM location_cities WHERE is_active = 1 ORDER BY sort_order ASC, name ASC LIMIT ${LOCATION_INDEXABLE_CITY_LIMIT}
-    `) as { slug: string }[];
-    const services = (await sql`
-      SELECT slug FROM location_services WHERE is_active = 1 AND slug <> '' ORDER BY sort_order ASC
-    `) as { slug: string }[];
-    return { cities: cities.map((c) => c.slug), services: services.map((s) => s.slug) };
-  } catch (err) {
-    console.error("[getIndexableLocationPaths]", err);
-    return { cities: [], services: [] };
-  }
+  const cities = (await sql`
+    SELECT slug FROM location_cities WHERE is_active = 1 ORDER BY sort_order ASC, name ASC LIMIT ${LOCATION_INDEXABLE_CITY_LIMIT}
+  `) as { slug: string }[];
+  const services = (await sql`
+    SELECT slug FROM location_services WHERE is_active = 1 AND slug <> '' ORDER BY sort_order ASC
+  `) as { slug: string }[];
+  return { cities: cities.map((c) => c.slug), services: services.map((s) => s.slug) };
 }

@@ -26,6 +26,21 @@ export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 /** "artificial-intelligence" → "Artificial Intelligence", for category slugs shown to visitors. */
 export const categoryLabel = (slug: string) => (slug === "seo" ? "SEO" : slug.split("-").map(capitalize).join(" "));
 
+// ── Facts shown as numbers on the site (always real counts, never typed in by hand) ──
+// Like getSiteSettings, read errors in this file's list queries are rethrown: a cached page then keeps its last
+// good version, instead of being saved with an empty section.
+
+export type SiteFacts = { projects: number; services: number; since: number | null };
+
+export async function getSiteFacts(): Promise<SiteFacts | null> {
+  const [facts] = (await sql`
+    SELECT (SELECT COUNT(*) FROM portfolios WHERE is_active = 1)::int AS projects,
+           (SELECT COUNT(*) FROM services WHERE is_active = 1)::int AS services,
+           (SELECT MIN(year) FROM portfolios WHERE is_active = 1)::int AS since
+  `) as SiteFacts[];
+  return facts ?? null;
+}
+
 // ── Portfolio ─────────────────────────────────────────────────
 
 export type Portfolio = {
@@ -49,14 +64,9 @@ export type Portfolio = {
 };
 
 export async function getPortfolios(): Promise<Portfolio[]> {
-  try {
-    return (await sql`
-      SELECT * FROM portfolios WHERE is_active = 1 ORDER BY sort_order ASC, year DESC, id DESC
-    `) as Portfolio[];
-  } catch (err) {
-    console.error("[getPortfolios]", err);
-    return [];
-  }
+  return (await sql`
+    SELECT * FROM portfolios WHERE is_active = 1 ORDER BY sort_order ASC, year DESC, id DESC
+  `) as Portfolio[];
 }
 
 export const getPortfolioBySlug = cache(async (slug: string): Promise<Portfolio | null> => {
@@ -97,17 +107,12 @@ export const BLOG_PER_PAGE = 9;
 
 /** Categories that have published posts, most used first: the blog's filter tabs, so none can be empty. */
 export async function getBlogCategories(): Promise<{ slug: string; label: string }[]> {
-  try {
-    const rows = (await sql`
-      SELECT category AS slug, COUNT(*)::int AS n FROM blog_posts
-      WHERE is_published = 1 AND COALESCE(category, '') <> ''
-      GROUP BY category ORDER BY n DESC, category ASC
-    `) as { slug: string }[];
-    return rows.map((r) => ({ slug: r.slug, label: categoryLabel(r.slug) }));
-  } catch (err) {
-    console.error("[getBlogCategories]", err);
-    return [];
-  }
+  const rows = (await sql`
+    SELECT category AS slug, COUNT(*)::int AS n FROM blog_posts
+    WHERE is_published = 1 AND COALESCE(category, '') <> ''
+    GROUP BY category ORDER BY n DESC, category ASC
+  `) as { slug: string }[];
+  return rows.map((r) => ({ slug: r.slug, label: categoryLabel(r.slug) }));
 }
 
 export async function getBlogListing({ cat, tag, page }: { cat: string; tag: string; page: number }) {
@@ -181,14 +186,9 @@ export async function getRelatedPosts(post: BlogPost) {
 
 /** Newest published posts (home page). */
 export async function getLatestPosts(limit = 3): Promise<BlogPost[]> {
-  try {
-    return (await sql`
-      SELECT * FROM blog_posts WHERE is_published = 1 ORDER BY published_at DESC NULLS LAST, created_at DESC LIMIT ${limit}
-    `) as BlogPost[];
-  } catch (err) {
-    console.error("[getLatestPosts]", err);
-    return [];
-  }
+  return (await sql`
+    SELECT * FROM blog_posts WHERE is_published = 1 ORDER BY published_at DESC NULLS LAST, created_at DESC LIMIT ${limit}
+  `) as BlogPost[];
 }
 
 // ── Careers ───────────────────────────────────────────────────
@@ -210,12 +210,7 @@ export type CareerJob = {
 };
 
 export async function getActiveJobs(): Promise<CareerJob[]> {
-  try {
-    return (await sql`
-      SELECT * FROM career_jobs WHERE is_active = 1 ORDER BY is_featured DESC, sort_order ASC, created_at DESC
-    `) as CareerJob[];
-  } catch (err) {
-    console.error("[getActiveJobs]", err);
-    return [];
-  }
+  return (await sql`
+    SELECT * FROM career_jobs WHERE is_active = 1 ORDER BY is_featured DESC, sort_order ASC, created_at DESC
+  `) as CareerJob[];
 }

@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const HIGHLIGHTS = [
   ["✓ Fixed pricing", "No hourly billing"],
-  ["✓ Senior team", "No juniors, no outsourcing"],
+  ["✓ Direct contact", "No outsourcing"],
   ["✓ Fast delivery", "3–14 day turnarounds"],
   ["✓ Revisions included", "In every package"],
 ];
@@ -99,8 +99,7 @@ export default async function ServicesPage() {
               <span className="text-gradient">Under One Roof</span>
             </h1>
             <p className="sv-t-s text-lg text-zinc-400 font-mono max-w-2xl mx-auto leading-relaxed mb-10">
-              From a single landing page to a full e-commerce empire — we handle design, development, branding, and everything between. Fixed prices, senior
-              execution, zero surprises.
+              From a single landing page to a full e-commerce empire — we handle design, development, branding, and everything between. Fixed prices, direct communication, zero surprises.
             </p>
             <div className="flex flex-wrap justify-center gap-3 mb-12">
               {HIGHLIGHTS.map(([t, s]) => (

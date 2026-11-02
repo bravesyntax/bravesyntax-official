@@ -46,9 +46,9 @@ const VALUES = [
 
 const DIFFERENTIATORS = [
   ["No-template policy", "Every project is built from scratch. No drag-and-drop builders, no recycled themes. Your product is unique because your business is."],
-  ["Senior-only execution", "Your work is done by our senior team, not outsourced or handed to juniors. The person in your kickoff call is the person building your product."],
+  ["No outsourcing", "Your work isn't passed to a third party. The person in your kickoff call is the person building your product."],
   ["Flat pricing, zero surprises", "We quote a fixed price before we start. No time-and-materials billing, no scope creep invoices. What we quote is what you pay."],
-  ["Built for performance", "Lighthouse scores of 90+ on every project. We optimise images, fonts, and JavaScript as standard. Fast sites rank better and convert better."],
+  ["Built for performance", "We aim for high Lighthouse scores and optimise images, fonts, and JavaScript as standard. Fast sites rank better and convert better."],
   ["Handover & training included", "Every project includes documentation, CMS training, and a 30-day support window. We don't disappear after launch."],
   ["We speak plain English", "No buzzwords, no jargon. We explain technical decisions in language that makes sense, so you're always in control."],
 ];

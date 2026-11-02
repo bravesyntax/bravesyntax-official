@@ -130,9 +130,9 @@ export default async function ContactPage() {
               </div>
 
               <div className="bg-emerald-500/8 border border-emerald-500/20 rounded-2xl p-5">
-                <div className="text-emerald-400 text-xs font-mono font-bold mb-1">&#10003; Our Guarantee</div>
+                <div className="text-emerald-400 text-xs font-mono font-bold mb-1">&#10003; Our Promise</div>
                 <p className="ct-t-m text-xs text-zinc-500 font-mono leading-relaxed">
-                  Fixed pricing, no hidden costs, revisions until you&apos;re satisfied. If we can&apos;t deliver what we quoted, you don&apos;t pay.
+                  Fixed pricing, no hidden costs, and revision rounds included. The scope and price are agreed in writing before we start.
                 </p>
               </div>
             </div>

@@ -17,6 +17,9 @@ export function groupNavServices(services: NavService[]): NavServiceGroup[] {
 
 export type PdfTool = { name: string; slug: string; desc: string; group: string };
 
+/** How many tools public/js/pdf-tools.js has. PDF_TOOLS below is only the popular ones shown in menus. */
+export const PDF_TOOL_COUNT = 16;
+
 export const PDF_TOOLS: PdfTool[] = [
   { name: "Image to PDF", slug: "img2pdf", desc: "Convert images to PDF format", group: "Convert" },
   { name: "PDF to JPG", slug: "pdf2img", desc: "Extract pages as high-quality images", group: "Convert" },
