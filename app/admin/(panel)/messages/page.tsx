@@ -5,7 +5,7 @@ import { AdminPage, BackLink, Card, EmptyState, FilterTabs, Pagination, StatGrid
 import Icon, { ICONS } from "@/components/ui/Icon";
 import { rows, sql } from "@/lib/db";
 import { decodeRow } from "@/lib/html";
-import { bulkDeleteMessages, deleteMessage, replyToMessage } from "./actions";
+import { bulkDeleteMessages, deleteMessage, replyToMessage, setMessageStatus } from "./actions";
 
 export const metadata = { title: "Messages" };
 
@@ -15,6 +15,8 @@ type Message = {
   email: string;
   phone: string | null;
   service: string | null;
+  budget: string | null;
+  status: string;
   message: string;
   ip_address: string | null;
   is_read: number;
@@ -24,10 +26,18 @@ type Message = {
 type Props = { searchParams: Promise<{ view?: string; status?: string; page?: string }> };
 
 const PER_PAGE = 20;
+const STAGES: [string, string, string][] = [
+  ["new", "New", "bg-amber-500/10 text-amber-400 border-amber-500/20"],
+  ["contacted", "Contacted", "bg-sky-500/10 text-sky-400 border-sky-500/20"],
+  ["proposal", "Proposal sent", "bg-purple-500/10 text-purple-400 border-purple-500/20"],
+  ["won", "Won", "bg-brand/10 text-brand border-brand/20"],
+  ["lost", "Lost", "bg-zinc-700/50 text-zinc-500 border-zinc-700"],
+];
 
 function StatusBadge({ m, size = "list" }: { m: Message; size?: "list" | "view" }) {
   const pad = size === "view" ? "px-2.5 py-1 text-xs rounded-lg" : "px-2 py-0.5 text-[10px] rounded";
-  if (m.is_replied) return <span className={`inline-block ${pad} font-mono bg-accent/10 text-accent border border-accent/20`}>Replied</span>;
+  const stage = STAGES.find(([k]) => k === m.status) ?? STAGES[0];
+  return <span className={`inline-block border ${pad} font-mono ${stage[2]}`}>{stage[1]}</span>;
   if (!m.is_read) return <span className={`inline-block ${pad} font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20`}>New</span>;
   return <span className={`inline-block ${pad} font-mono bg-zinc-700/50 text-zinc-500`}>Read</span>;
 }
@@ -43,7 +53,16 @@ async function MessageView({ id }: { id: number }) {
     <>
       <div className="flex items-center justify-between mb-6">
         <BackLink href="/admin/messages">Back to Messages</BackLink>
-        <StatusBadge m={m} size="view" />
+        <form action={setMessageStatus} className="flex items-center gap-2">
+          <input type="hidden" name="id" value={m.id} />
+          <label htmlFor="stage" className="text-xs text-zinc-500">Status</label>
+          <select id="stage" name="status" defaultValue={m.status} className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-sm">
+            {STAGES.map(([k, label]) => (
+              <option key={k} value={k}>{label}</option>
+            ))}
+          </select>
+          <SubmitButton className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs hover:bg-zinc-800">Update</SubmitButton>
+        </form>
       </div>
 
       <Card className="mb-6">
@@ -60,10 +79,11 @@ async function MessageView({ id }: { id: number }) {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-4 gap-px bg-zinc-800/40">
+        <div className="grid sm:grid-cols-5 gap-px bg-zinc-800/40">
           {[
             ["Phone", m.phone || "Not provided"],
             ["Service", m.service || "Not specified"],
+            ["Budget", m.budget || "Not specified"],
             ["IP", m.ip_address ?? "Unknown"],
             ["Received", timeAgo(m.created_at)],
           ].map(([k, v]) => (
@@ -84,7 +104,7 @@ async function MessageView({ id }: { id: number }) {
         <div className="px-6 pb-5 flex items-center gap-3 flex-wrap">
           <a
             href={`mailto:${m.email}?subject=${encodeURIComponent("Re: Your enquiry — Brave Syntax")}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-light text-black font-mono font-semibold text-sm rounded-lg transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand hover:bg-brand-light text-black font-mono font-semibold text-sm rounded-lg transition-all"
           >
             <Icon d={ICONS.mail} className="w-4 h-4" strokeWidth={2} />
             Quick Reply (Gmail)
@@ -118,7 +138,7 @@ async function MessageView({ id }: { id: number }) {
               type="text"
               name="reply_subject"
               defaultValue="Re: Your enquiry — Brave Syntax"
-              className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-accent transition-colors"
+              className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-brand transition-colors"
             />
           </div>
           <div>
@@ -131,13 +151,13 @@ async function MessageView({ id }: { id: number }) {
               rows={10}
               required
               defaultValue={`Hi ${m.name},\n\nThank you for reaching out to Brave Syntax!\n\n`}
-              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-accent transition-colors resize-y"
+              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-brand transition-colors resize-y"
             />
           </div>
           <div className="flex items-center gap-3">
             <SubmitButton
               pending="Sending…"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-light text-black font-mono font-semibold text-sm rounded-xl transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-brand hover:bg-brand-light text-black font-mono font-semibold text-sm rounded-xl transition-all"
             >
               Send Reply via Email
             </SubmitButton>
@@ -150,13 +170,15 @@ async function MessageView({ id }: { id: number }) {
 }
 
 async function MessageList({ status, page }: { status: string; page: number }) {
-  const [counts] = await rows<{ total: number; unread: number; replied: number }>(sql`
+  const [counts] = await rows<{ total: number; unread: number; replied: number; pipeline: number; filtered: number }>(sql`
     SELECT COUNT(*)::int AS total,
            COUNT(*) FILTER (WHERE is_read = 0)::int AS unread,
-           COUNT(*) FILTER (WHERE is_replied = 1)::int AS replied
+           COUNT(*) FILTER (WHERE is_replied = 1)::int AS replied,
+           COUNT(*) FILTER (WHERE status IN ('new', 'contacted', 'proposal'))::int AS pipeline,
+           COUNT(*) FILTER (WHERE (${status} = 'all') OR (${status} = 'unread' AND is_read = 0) OR status = ${status})::int AS filtered
     FROM contact_messages
   `);
-  const filtered = status === "unread" ? counts.unread : status === "replied" ? counts.replied : counts.total;
+  const filtered = counts.filtered;
   const totalPages = Math.max(1, Math.ceil(filtered / PER_PAGE));
   const current = Math.min(Math.max(1, page), totalPages);
   const offset = (current - 1) * PER_PAGE;
@@ -164,7 +186,7 @@ async function MessageList({ status, page }: { status: string; page: number }) {
   const list = (
     await rows<Message>(sql`
       SELECT * FROM contact_messages
-      WHERE (${status} <> 'unread' OR is_read = 0) AND (${status} <> 'replied' OR is_replied = 1)
+      WHERE (${status} = 'all') OR (${status} = 'unread' AND is_read = 0) OR status = ${status}
       ORDER BY created_at DESC LIMIT ${PER_PAGE} OFFSET ${offset}
     `)
   ).map((m) => decodeRow(m));
@@ -177,7 +199,7 @@ async function MessageList({ status, page }: { status: string; page: number }) {
         stats={[
           [counts.total, "Total Messages", "text-white"],
           [counts.unread, "Unread", "text-amber-400"],
-          [counts.replied, "Replied", "text-accent"],
+          [counts.replied, "Replied", "text-brand"],
         ]}
       />
 
@@ -186,7 +208,7 @@ async function MessageList({ status, page }: { status: string; page: number }) {
           tabs={[
             ["all", "All"],
             ["unread", "Unread"],
-            ["replied", "Replied"],
+            ...STAGES.map(([k, label]): [string, string] => [k, label]),
           ]}
           active={status}
           hrefFor={(k) => href(k)}
@@ -201,7 +223,7 @@ async function MessageList({ status, page }: { status: string; page: number }) {
           <EmptyState>
             No messages{status !== "all" ? " in this filter" : ""}.{" "}
             {status !== "all" && (
-              <Link href={href("all")} className="text-accent text-xs font-mono hover:underline">
+              <Link href={href("all")} className="text-brand text-xs font-mono hover:underline">
                 View all messages
               </Link>
             )}
@@ -224,13 +246,13 @@ async function MessageList({ status, page }: { status: string; page: number }) {
               </thead>
               <tbody className="divide-y divide-zinc-800/50">
                 {list.map((m) => (
-                  <tr key={m.id} className={`group transition-colors hover:bg-zinc-800/30 ${!m.is_read ? "bg-accent/3" : ""}`}>
+                  <tr key={m.id} className={`group transition-colors hover:bg-zinc-800/30 ${!m.is_read ? "bg-brand/3" : ""}`}>
                     <td className="px-4 py-3 w-8">
                       <RowCheckbox formId="bulk-messages" value={m.id} />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 min-w-0">
-                        {!m.is_read && <span className="w-2 h-2 rounded-full bg-accent flex-shrink-0" title="Unread" />}
+                        {!m.is_read && <span className="w-2 h-2 rounded-full bg-brand flex-shrink-0" title="Unread" />}
                         <div className="min-w-0">
                           <div className={`font-mono text-sm text-white truncate max-w-[140px] ${!m.is_read ? "font-semibold" : "font-normal"}`}>{m.name}</div>
                           <div className="font-mono text-xs text-zinc-500 truncate max-w-[140px]">{m.email}</div>
@@ -239,6 +261,7 @@ async function MessageList({ status, page }: { status: string; page: number }) {
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
                       <div className="font-mono text-xs text-zinc-400 max-w-[160px] truncate">{m.service || "—"}</div>
+                      {m.budget && <div className="font-mono text-[11px] text-zinc-500">{m.budget}</div>}
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <span className="font-mono text-xs text-zinc-600 line-clamp-1 max-w-[200px]">{m.message.slice(0, 60)}…</span>
@@ -250,7 +273,7 @@ async function MessageList({ status, page }: { status: string; page: number }) {
                       <StatusBadge m={m} />
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/admin/messages?view=${m.id}`} className="inline-flex items-center gap-1 text-xs font-mono text-accent hover:text-accent-light transition-colors">
+                      <Link href={`/admin/messages?view=${m.id}`} className="inline-flex items-center gap-1 text-xs font-mono text-brand hover:text-brand-light transition-colors">
                         View &rarr;
                       </Link>
                     </td>
@@ -269,7 +292,7 @@ async function MessageList({ status, page }: { status: string; page: number }) {
 export default async function MessagesPage({ searchParams }: Props) {
   const sp = await searchParams;
   const viewId = Number(sp.view) || 0;
-  const status = sp.status === "unread" || sp.status === "new" ? "unread" : sp.status === "replied" ? "replied" : "all";
+  const status = sp.status === "unread" || STAGES.some(([k]) => k === sp.status) ? sp.status! : "all";
 
   return <AdminPage title="Messages">{viewId > 0 ? <MessageView id={viewId} /> : <MessageList status={status} page={Number(sp.page) || 1} />}</AdminPage>;
 }

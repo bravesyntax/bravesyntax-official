@@ -62,7 +62,7 @@ export default async function SeoOverviewPage() {
               <div className="grid flex-1 grid-cols-2 gap-4 md:grid-cols-4">
                 {[
                   [targets.length, "URLs tracked", "text-white"],
-                  [indexable.length, "Indexable", "text-accent"],
+                  [indexable.length, "Indexable", "text-brand"],
                   [bySeverity("error"), "Errors", bySeverity("error") ? "text-red-400" : "text-zinc-500"],
                   [bySeverity("warning"), "Warnings", bySeverity("warning") ? "text-amber-400" : "text-zinc-500"],
                 ].map(([n, label, cls]) => (
@@ -101,7 +101,7 @@ export default async function SeoOverviewPage() {
                               <span className="w-24 flex-shrink-0 text-[11px] text-zinc-500">{TYPE_LABEL[t.type]}</span>
                               <span className="min-w-0 flex-1 truncate text-zinc-200">{t.label}</span>
                               <span className="hidden truncate font-mono text-[11px] text-zinc-500 sm:block">{t.path}</span>
-                              <span className="text-xs text-accent">Fix</span>
+                              <span className="text-xs text-brand">Fix</span>
                             </Link>
                           </li>
                         ))}
@@ -113,7 +113,7 @@ export default async function SeoOverviewPage() {
                             <>
                               {" "}
                               — these come from the{" "}
-                              <Link href="/admin/seo/locations" className="text-accent hover:underline">
+                              <Link href="/admin/seo/locations" className="text-brand hover:underline">
                                 location templates
                               </Link>
                               , so one edit fixes them all.
@@ -159,7 +159,7 @@ export default async function SeoOverviewPage() {
 
           <Card className="p-5">
             <h2 className="mb-3 flex items-center gap-2 font-display font-semibold text-white">
-              <ShieldCheck className="h-4 w-4 text-accent" aria-hidden="true" /> Setup
+              <ShieldCheck className="h-4 w-4 text-brand" aria-hidden="true" /> Setup
             </h2>
             <ul className="space-y-2">
               {setup.map(([ok, label, href]) => (
@@ -176,10 +176,10 @@ export default async function SeoOverviewPage() {
           <Card className="p-5">
             <h2 className="mb-3 font-display font-semibold text-white">Files for search engines</h2>
             <div className="space-y-2 text-sm">
-              <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-zinc-300 hover:text-accent">
+              <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-zinc-300 hover:text-brand">
                 <MapIcon className="h-4 w-4 text-zinc-500" aria-hidden="true" /> sitemap.xml <ExternalLink className="h-3 w-3" aria-hidden="true" />
               </a>
-              <a href="/robots.txt" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-zinc-300 hover:text-accent">
+              <a href="/robots.txt" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-zinc-300 hover:text-brand">
                 <FileSearch className="h-4 w-4 text-zinc-500" aria-hidden="true" /> robots.txt <ExternalLink className="h-3 w-3" aria-hidden="true" />
               </a>
             </div>

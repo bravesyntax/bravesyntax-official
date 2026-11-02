@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Briefcase, Building2, Code2, FileText, GraduationCap, ImageIcon, Layers, Mail, Newspaper, Palette, Users, X, type LucideIcon } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { contactServiceHref, PDF_TOOLS, type NavService } from "@/lib/navigation";
+import { PDF_TOOLS, serviceHref, type NavService } from "@/lib/navigation";
 
 // Command palette search (from includes/search-overlay.php). Opens with Ctrl/Cmd+K.
 
@@ -44,7 +44,7 @@ function Highlight({ text, q }: { text: string; q: string }) {
   return (
     <>
       {text.slice(0, i)}
-      <mark className="bg-accent/20 text-accent rounded px-0.5 not-italic">{text.slice(i, i + q.length)}</mark>
+      <mark className="bg-primary/15 text-primary rounded px-0.5 not-italic">{text.slice(i, i + q.length)}</mark>
       {text.slice(i + q.length)}
     </>
   );
@@ -54,7 +54,7 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
   const router = useRouter();
   // Services come from Admin → Services, so search always matches what the site offers.
   const serviceItems = useMemo<Item[]>(
-    () => services.map((x) => ({ title: x.title, sub: x.category === "design" ? "Design service" : "Development service", url: contactServiceHref(x.title), icon: serviceIcon(x.category), section: "Services" })),
+    () => services.map((x) => ({ title: x.title, sub: x.category === "design" ? "Design service" : "Development service", url: serviceHref(x), icon: serviceIcon(x.category), section: "Services" })),
     [services],
   );
   const popular = useMemo(() => serviceItems.slice(0, 6), [serviceItems]);
@@ -155,7 +155,7 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
   if (!mounted) return null;
 
   const close = () => onOpenChange(false);
-  const activeCls = (i: number) => (i === activeIdx ? " bg-zinc-800/70" : "");
+  const activeCls = (i: number) => (i === activeIdx ? " bg-muted" : "");
   const ref = (i: number) => (el: HTMLAnchorElement | null) => {
     itemRefs.current[i] = el;
   };
@@ -165,15 +165,15 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={close} />
 
       <div
-        className="relative w-full max-w-[640px] bg-[#1c1c1e] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-[640px] bg-popover text-popover-foreground border rounded-2xl shadow-2xl overflow-hidden"
         style={{
           transform: visible ? "scale(1)" : "scale(.97)",
           opacity: visible ? 1 : 0,
           transition: "transform .15s cubic-bezier(.4,0,.2,1),opacity .15s ease",
         }}
       >
-        <div className="flex items-center gap-3 px-5 border-b border-zinc-800/80" style={{ height: 60 }}>
-          <svg className="w-[18px] h-[18px] text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center gap-3 px-5 border-b " style={{ height: 60 }}>
+          <svg className="w-[18px] h-[18px] text-muted-foreground flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -184,12 +184,12 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
             placeholder="Search anything…"
             autoComplete="off"
             spellCheck={false}
-            className="flex-1 bg-[transparent!important] text-[15px] text-white placeholder-zinc-600 focus:outline-none font-sans"
+            className="flex-1 bg-transparent text-[15px] text-foreground placeholder:text-muted-foreground focus:outline-none font-sans"
           />
           <button
             onClick={close}
             aria-label="Close search"
-            className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-400 hover:text-white transition-colors"
+            className="flex-shrink-0 flex items-center justify-center w-6 h-6 bg-muted hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
@@ -199,7 +199,7 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
           {hits === null ? (
             <div>
               <div className="px-5 pt-5 pb-1">
-                <p className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-2">Quick Actions</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest mb-2">Quick Actions</p>
                 <div className="space-y-0.5">
                   {QUICK_ACTIONS.map((a, i) => (
                     <Link
@@ -207,22 +207,22 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
                       ref={ref(i)}
                       href={a.url}
                       onClick={close}
-                      className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-zinc-800/70 transition-colors group cursor-pointer${activeCls(i)}`}
+                      className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors group cursor-pointer${activeCls(i)}`}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 border border-zinc-700/50 flex items-center justify-center flex-shrink-0 transition-colors">
-                        <a.icon className="w-4 h-4 text-zinc-400 group-hover:text-accent transition-colors" aria-hidden="true" />
+                      <div className="w-8 h-8 rounded-lg bg-background border flex items-center justify-center flex-shrink-0 transition-colors">
+                        <a.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" aria-hidden="true" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-[13px] text-zinc-200 font-medium leading-tight">{a.title}</div>
-                        <div className="text-[11px] text-zinc-500 mt-0.5 truncate">{a.sub}</div>
+                        <div className="text-[13px] text-foreground font-medium leading-tight">{a.title}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{a.sub}</div>
                       </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 flex-shrink-0 transition-colors" />
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-muted-foreground flex-shrink-0 transition-colors" />
                     </Link>
                   ))}
                 </div>
               </div>
               <div className="px-5 pt-4 pb-5">
-                {popular.length > 0 && <p className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest mb-2">Popular Services</p>}
+                {popular.length > 0 && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest mb-2">Popular Services</p>}
                 <div className="space-y-0.5">
                   {popular.map((p, j) => {
                     const i = QUICK_ACTIONS.length + j;
@@ -232,13 +232,13 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
                         ref={ref(i)}
                         href={p.url}
                         onClick={close}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-zinc-800/70 transition-colors group cursor-pointer${activeCls(i)}`}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted transition-colors group cursor-pointer${activeCls(i)}`}
                       >
-                        <div className="w-7 h-7 rounded-lg bg-zinc-800/80 border border-zinc-700/40 flex items-center justify-center flex-shrink-0">
-                          <p.icon className="w-3.5 h-3.5 text-zinc-500 group-hover:text-accent transition-colors" aria-hidden="true" />
+                        <div className="w-7 h-7 rounded-lg bg-background border flex items-center justify-center flex-shrink-0">
+                          <p.icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" aria-hidden="true" />
                         </div>
-                        <span className="text-[13px] text-zinc-400 group-hover:text-zinc-200 transition-colors">{p.title}</span>
-                        <ChevronRight className="w-3 h-3 text-zinc-700 group-hover:text-zinc-500 ml-auto flex-shrink-0 transition-colors" />
+                        <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors">{p.title}</span>
+                        <ChevronRight className="w-3 h-3 text-muted-foreground/60 group-hover:text-muted-foreground ml-auto flex-shrink-0 transition-colors" />
                       </Link>
                     );
                   })}
@@ -247,37 +247,37 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
             </div>
           ) : hits.length === 0 ? (
             <div className="px-5 py-12 text-center">
-              <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <p className="text-[13px] text-zinc-400 font-medium">No results found</p>
-              <p className="text-[11px] text-zinc-600 mt-1">Try different keywords</p>
+              <p className="text-[13px] text-muted-foreground font-medium">No results found</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Try different keywords</p>
             </div>
           ) : (
             <div className="px-3 py-3 space-y-0.5">
               {hits.map((item, i) => (
                 <Fragment key={item.title + item.section}>
                   {(i === 0 || hits[i - 1].section !== item.section) && (
-                    <p className="text-[11px] font-mono font-semibold text-zinc-500 uppercase tracking-widest px-3 pt-3 pb-1.5">{item.section}</p>
+                    <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest px-3 pt-3 pb-1.5">{item.section}</p>
                   )}
                   <Link
                     ref={ref(i)}
                     href={item.url}
                     onClick={close}
-                    className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-zinc-800/70 transition-colors group cursor-pointer${activeCls(i)}`}
+                    className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors group cursor-pointer${activeCls(i)}`}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/50 flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-4 h-4 text-zinc-400 group-hover:text-accent transition-colors" aria-hidden="true" />
+                    <div className="w-8 h-8 rounded-lg bg-background border flex items-center justify-center flex-shrink-0">
+                      <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[13px] text-zinc-200 font-medium leading-tight">
+                      <div className="text-[13px] text-foreground font-medium leading-tight">
                         <Highlight text={item.title} q={debounced} />
                       </div>
-                      <div className="text-[11px] text-zinc-500 mt-0.5 truncate">{item.sub}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{item.sub}</div>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 flex-shrink-0 transition-colors" />
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-muted-foreground flex-shrink-0 transition-colors" />
                   </Link>
                 </Fragment>
               ))}
@@ -285,7 +285,7 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
           )}
         </div>
 
-        <div className="flex items-center gap-4 px-5 py-3 border-t border-zinc-800/80 bg-zinc-900/40">
+        <div className="flex items-center gap-4 px-5 py-3 border-t  bg-muted/40">
           {[
             [["↑", "↓"], "to navigate"],
             [["↵"], "to select"],
@@ -293,16 +293,16 @@ export default function SearchPalette({ open, onOpenChange, services = [], docs 
           ].map(([keys, label]) => (
             <div key={label as string} className="flex items-center gap-1.5">
               {(keys as string[]).map((k) => (
-                <kbd key={k} className="inline-flex items-center justify-center min-w-5 h-5 px-1 bg-zinc-800 border border-zinc-700 rounded text-[10px] text-zinc-400 font-mono">
+                <kbd key={k} className="inline-flex items-center justify-center min-w-5 h-5 px-1 bg-muted border  rounded text-[10px] text-muted-foreground font-mono">
                   {k}
                 </kbd>
               ))}
-              <span className="text-[11px] text-zinc-600 ml-0.5">{label as string}</span>
+              <span className="text-[11px] text-muted-foreground ml-0.5">{label as string}</span>
             </div>
           ))}
           <div className="ml-auto flex items-center gap-1.5">
-            <span className="text-[11px] text-zinc-600">Ctrl</span>
-            <kbd className="inline-flex items-center justify-center w-5 h-5 bg-zinc-800 border border-zinc-700 rounded text-[10px] text-zinc-400 font-mono">K</kbd>
+            <span className="text-[11px] text-muted-foreground">Ctrl</span>
+            <kbd className="inline-flex items-center justify-center w-5 h-5 bg-muted border  rounded text-[10px] text-muted-foreground font-mono">K</kbd>
           </div>
         </div>
       </div>

@@ -86,7 +86,7 @@ async function PostForm({ row }: { row: Post | null }) {
             <span
               className={`px-2.5 py-1 text-xs font-mono rounded-lg border ${
                 row.is_published
-                  ? "bg-accent/15 text-accent border-accent/25"
+                  ? "bg-brand/15 text-brand border-brand/25"
                   : "bg-amber-500/15 text-amber-400 border-amber-500/25"
               }`}
             >
@@ -97,7 +97,7 @@ async function PostForm({ row }: { row: Post | null }) {
             </span>
           </div>
         ) : (
-          <span className="px-2.5 py-1 text-xs font-mono bg-accent/15 text-accent rounded-lg border border-accent/25">
+          <span className="px-2.5 py-1 text-xs font-mono bg-brand/15 text-brand rounded-lg border border-brand/25">
             New Post
           </span>
         )}
@@ -170,7 +170,7 @@ async function PostForm({ row }: { row: Post | null }) {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Search appearance</div>
               {row && (
-                <Link href={`/admin/seo/edit?type=post&key=${row.id}`} className="text-xs text-accent hover:underline">
+                <Link href={`/admin/seo/edit?type=post&key=${row.id}`} className="text-xs text-brand hover:underline">
                   Full SEO editor: focus keyword, previews, share image, schema →
                 </Link>
               )}
@@ -193,7 +193,7 @@ async function PostForm({ row }: { row: Post | null }) {
               name="is_published"
               label="Published"
               defaultChecked={row ? !!row.is_published : true}
-              color="peer-checked:bg-accent"
+              color="peer-checked:bg-brand"
             />
             <Toggle
               name="is_featured"
@@ -255,7 +255,7 @@ async function PostList({
       <StatGrid
         stats={[
           [counts.total, "Total Posts", "text-white"],
-          [counts.published, "Published", "text-accent"],
+          [counts.published, "Published", "text-brand"],
           [counts.draft, "Drafts", "text-amber-400"],
         ]}
       />
@@ -344,7 +344,7 @@ async function PostList({
                       <span
                         className={`inline-block px-2 py-0.5 text-[10px] font-mono rounded border ${
                           p.is_published
-                            ? "bg-accent/10 text-accent border-accent/20"
+                            ? "bg-brand/10 text-brand border-brand/20"
                             : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                         }`}
                       >
@@ -370,7 +370,7 @@ async function PostList({
                         ) : null}
                         <Link
                           href={`/admin/blog?edit=${p.id}`}
-                          className="text-xs text-accent hover:text-accent-light transition-colors"
+                          className="text-xs text-brand hover:text-brand-light transition-colors"
                           title="Edit"
                         >
                           <Pencil className="h-4 w-4" aria-hidden="true" />

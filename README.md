@@ -1,7 +1,7 @@
 # Brave Syntax website
 
 The bravesyntax.com agency site: public pages, free tools, 320 location pages and a full admin panel.
-Built with Next.js 15 (App Router), React 19, TypeScript and Tailwind v4, on Neon Postgres, designed to deploy on Vercel.
+Built with Next.js 16 (App Router), React 19, TypeScript and Tailwind v4, on Neon Postgres, designed to deploy on Vercel.
 `MIGRATION.md` records how it was moved from the old PHP site and why things work the way they do.
 
 ## Run it locally
@@ -9,7 +9,7 @@ Built with Next.js 15 (App Router), React 19, TypeScript and Tailwind v4, on Neo
 Needs Node 20 or newer.
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 cp .env.example .env.local   # then fill in the values
 npm run dev                  # http://localhost:3000
 ```
@@ -54,7 +54,7 @@ node scripts/admin-user.mjs unlock <username>
 | `app/admin` | Admin panel and sign-in |
 | `lib/seo.ts`, `lib/admin/seo-audit.ts` | SEO resolution and the audit behind Admin → SEO |
 | `lib/admin/images.ts` | Image uploads: Vercel Blob, or `public/uploads` when no token is set (not on Vercel) |
-| `middleware.ts` | Admin gate, admin-managed redirects, 410 responses |
+| `proxy.ts` | Admin gate, admin-managed redirects, 410 responses |
 | `lib/email` | Email layout and templates |
 | `scripts/migrate.mjs` | Applies a file from `db/migrations` |
 | `scripts/make-brand-images.mjs` | Regenerates the share image and app icon from the original logo |
@@ -74,3 +74,11 @@ never commit it or share it.
 
 Connect the repository to Vercel, set the variables above and connect two Blob stores (public for images, private with
 the `RESUME_BLOB` prefix for resumes). `vercel.json` runs server code in Singapore (`sin1`), next to the Neon database.
+
+## UI
+
+Public pages use [Velora UI](https://velora.colorlib.com/) (MIT, see `components/velora/LICENSE.txt`), with brand colours set in `app/globals.css`. `@tanstack/react-table` stays pinned to v8 because `components/velora/data-grid.tsx` is written for it. Use `npm install --legacy-peer-deps`; without the flag npm stalls resolving Next's optional `playwright` peer.
+
+## SEO
+
+City hub pages are indexed for the top 20 cities. City + service pages are indexed only for the cities in `SERVICE_PAGE_CITIES` (`lib/locations.ts`); the rest are `noindex, follow` and left out of the sitemap, because the same service page across every city reads too alike. Add a city to that list once its pages have their own content.

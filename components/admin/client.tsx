@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
+import { Modal, ModalClose, ModalContent, ModalFooter } from "@/components/velora/animated-modal";
 
 // Small interactive pieces shared by the admin pages.
 
@@ -34,20 +35,39 @@ export function FlashMessage({ type, message }: { type: "success" | "error"; mes
   );
 }
 
-/** Submit button that asks for confirmation first (onsubmit="return confirm(...)" on the PHP site). */
-export function ConfirmButton({ message, className, title, children }: { message: string; className: string; title?: string; children: ReactNode }) {
+function ConfirmDialog({ open, setOpen, message, onConfirm }: { open: boolean; setOpen: (open: boolean) => void; message: string; onConfirm: () => void }) {
   return (
-    <button
-      type="submit"
-      title={title}
-      aria-label={title}
-      className={className}
-      onClick={(e) => {
-        if (!confirm(message)) e.preventDefault();
-      }}
-    >
-      {children}
-    </button>
+    <Modal open={open} onOpenChange={setOpen}>
+      <ModalContent title="Are you sure?" description={message}>
+        <ModalFooter>
+          <ModalClose>Cancel</ModalClose>
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onConfirm();
+            }}
+            className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg bg-destructive px-4 text-sm font-medium text-white hover:opacity-90"
+          >
+            Confirm
+          </button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+/** Button that asks for confirmation in a dialog, then submits its form. */
+export function ConfirmButton({ message, className, title, children }: { message: string; className: string; title?: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  return (
+    <>
+      <button ref={button} type="button" title={title} aria-label={title} className={className} onClick={() => setOpen(true)}>
+        {children}
+      </button>
+      <ConfirmDialog open={open} setOpen={setOpen} message={message} onConfirm={() => button.current?.closest("form")?.requestSubmit()} />
+    </>
   );
 }
 
@@ -99,6 +119,7 @@ export function RowCheckbox({ formId, value }: { formId: string; value: number }
 /** "Delete N Selected" button, hidden until at least one row is ticked. */
 export function BulkDeleteButton({ formId, noun }: { formId: string; noun: string }) {
   const [count, setCount] = useState(0);
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     const update = () => setCount(rowBoxes(formId).filter((b) => b.checked).length);
     document.addEventListener("bulk-change", update);
@@ -107,15 +128,16 @@ export function BulkDeleteButton({ formId, noun }: { formId: string; noun: strin
 
   if (!count) return null;
   return (
-    <button
-      type="submit"
-      form={formId}
-      onClick={(e) => {
-        if (!confirm(`Permanently delete ${count} ${noun}?`)) e.preventDefault();
-      }}
-      className="px-4 py-2 text-xs font-mono bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-lg transition-all"
-    >
-      Delete {count} Selected
-    </button>
+    <>
+      <button type="button" onClick={() => setOpen(true)} className="px-4 py-2 text-xs font-mono bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-lg transition-all">
+        Delete {count} Selected
+      </button>
+      <ConfirmDialog
+        open={open}
+        setOpen={setOpen}
+        message={`Permanently delete ${count} ${noun}?`}
+        onConfirm={() => (document.getElementById(formId) as HTMLFormElement | null)?.requestSubmit()}
+      />
+    </>
   );
 }

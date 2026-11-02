@@ -33,12 +33,12 @@ export default async function LocationSeoPage({ searchParams }: Props) {
         <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="flex items-center gap-2 font-display font-semibold text-white">
-              <Wand2 className="h-4 w-4 text-accent" aria-hidden="true" /> Title &amp; description templates
+              <Wand2 className="h-4 w-4 text-brand" aria-hidden="true" /> Title &amp; description templates
             </h2>
             <p className="mt-1 max-w-2xl text-xs leading-relaxed text-zinc-500">
               Every city and city + service page gets its title and description from these, so {targets.length} pages stay unique and on-brand. Placeholders:{" "}
               {["{city}", "{state}", "{service}", "{keyword}", "{site}", "{suffix}"].map((p) => (
-                <code key={p} className="mx-0.5 rounded bg-zinc-800 px-1 py-0.5 font-mono text-[11px] text-accent">
+                <code key={p} className="mx-0.5 rounded bg-zinc-800 px-1 py-0.5 font-mono text-[11px] text-brand">
                   {p}
                 </code>
               ))}
@@ -62,7 +62,7 @@ export default async function LocationSeoPage({ searchParams }: Props) {
           ))}
           <div className="flex items-center gap-3 md:col-span-2">
             <SubmitButton className={smallPrimaryBtn}>Save templates</SubmitButton>
-            <span className="text-[11px] text-zinc-500">Clear a field to restore its default. H1 and intro text are set in <Link href="/admin/location?tab=overrides" className="text-accent hover:underline">Location Pages → Content overrides</Link>.</span>
+            <span className="text-[11px] text-zinc-500">Clear a field to restore its default. H1 and intro text are set in <Link href="/admin/location?tab=overrides" className="text-brand hover:underline">Location Pages → Content overrides</Link>.</span>
           </div>
         </form>
       </Card>
@@ -76,7 +76,7 @@ export default async function LocationSeoPage({ searchParams }: Props) {
         extra={
           <form className="flex items-center gap-2" action="/admin/seo/locations">
             <MapPin className="h-4 w-4 text-zinc-500" aria-hidden="true" />
-            <select name="city" defaultValue={selected} aria-label="City" className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 font-mono text-xs text-white focus:border-accent focus:outline-none">
+            <select name="city" defaultValue={selected} aria-label="City" className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 font-mono text-xs text-white focus:border-brand focus:outline-none">
               {cities.map((c) => (
                 <option key={c.key} value={c.key}>
                   {c.label}
@@ -84,7 +84,7 @@ export default async function LocationSeoPage({ searchParams }: Props) {
                 </option>
               ))}
             </select>
-            <button type="submit" className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:border-accent hover:text-accent">
+            <button type="submit" className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:border-brand hover:text-brand">
               Show
             </button>
           </form>

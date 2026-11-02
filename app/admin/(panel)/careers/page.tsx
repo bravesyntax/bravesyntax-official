@@ -326,7 +326,7 @@ function JobList({ jobs }: { jobs: Job[] }) {
             No job listings yet.{" "}
             <Link
               href="/admin/careers?tab=jobs&form=add"
-              className="text-accent hover:underline"
+              className="text-brand hover:underline"
             >
               + Add your first job
             </Link>
@@ -378,7 +378,7 @@ function JobList({ jobs }: { jobs: Job[] }) {
                     <td className="px-4 py-3 text-center">
                       <Link
                         href="/admin/careers?tab=applications"
-                        className="font-mono text-xs text-accent hover:underline"
+                        className="font-mono text-xs text-brand hover:underline"
                       >
                         {j.apps}
                       </Link>
@@ -387,7 +387,7 @@ function JobList({ jobs }: { jobs: Job[] }) {
                       <span
                         className={`inline-block px-2 py-0.5 text-[10px] font-mono rounded border ${
                           j.is_active
-                            ? "bg-accent/10 text-accent border-accent/20"
+                            ? "bg-brand/10 text-brand border-brand/20"
                             : "bg-zinc-700/50 text-zinc-500 border-zinc-700"
                         }`}
                       >
@@ -398,7 +398,7 @@ function JobList({ jobs }: { jobs: Job[] }) {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/admin/careers?tab=jobs&form=edit&id=${j.id}`}
-                          className="text-xs text-accent hover:text-accent-light"
+                          className="text-xs text-brand hover:text-brand-light"
                           title="Edit"
                         >
                           <Pencil className="h-4 w-4" aria-hidden="true" />
@@ -432,7 +432,7 @@ function ExternalLink({ url }: { url: string }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-sm font-mono text-accent hover:underline break-all"
+      className="text-sm font-mono text-brand hover:underline break-all"
     >
       {url}
     </a>
@@ -458,7 +458,7 @@ async function ApplicationView({ id }: { id: number }) {
       <a
         key="e"
         href={`mailto:${a.email}`}
-        className="text-sm font-mono text-accent hover:underline break-all"
+        className="text-sm font-mono text-brand hover:underline break-all"
       >
         {a.email}
       </a>,
@@ -489,7 +489,7 @@ async function ApplicationView({ id }: { id: number }) {
         <a
           key="r"
           href={`/api/admin/resume/${a.id}`}
-          className="inline-flex items-center gap-2 text-sm font-mono text-accent hover:underline"
+          className="inline-flex items-center gap-2 text-sm font-mono text-brand hover:underline"
         >
           ⬇ Download Resume
         </a>
@@ -513,8 +513,8 @@ async function ApplicationView({ id }: { id: number }) {
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <div className="px-6 py-5 border-b border-zinc-800 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-accent/15 border border-accent/25 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg font-display font-bold text-accent">
+            <div className="w-12 h-12 rounded-xl bg-brand/15 border border-brand/25 flex items-center justify-center flex-shrink-0">
+              <span className="text-lg font-display font-bold text-brand">
                 {a.name.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -658,7 +658,7 @@ async function ApplicationList({ unread }: { unread: number }) {
                 {apps.map((a) => (
                   <tr
                     key={a.id}
-                    className={`transition-colors hover:bg-zinc-800/30 ${!a.is_read ? "bg-accent/[0.03]" : ""}`}
+                    className={`transition-colors hover:bg-zinc-800/30 ${!a.is_read ? "bg-brand/[0.03]" : ""}`}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -672,7 +672,7 @@ async function ApplicationList({ unread }: { unread: number }) {
                             {a.name}
                             {!a.is_read && (
                               <span
-                                className="w-2 h-2 rounded-full bg-accent"
+                                className="w-2 h-2 rounded-full bg-brand"
                                 aria-label="Unread"
                               />
                             )}
@@ -701,7 +701,7 @@ async function ApplicationList({ unread }: { unread: number }) {
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/admin/careers?tab=applications&view=${a.id}`}
-                        className="text-xs font-mono text-accent hover:underline"
+                        className="text-xs font-mono text-brand hover:underline"
                       >
                         View
                       </Link>
@@ -740,7 +740,7 @@ export default async function CareersAdminPage({ searchParams }: Props) {
   const showForm = tab === "jobs" && (sp.form === "add" || !!editJob);
 
   const tabCls = (active: boolean) =>
-    `px-4 py-2 text-xs font-mono rounded-lg transition-all ${active ? "bg-accent text-black font-bold" : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white"}`;
+    `px-4 py-2 text-xs font-mono rounded-lg transition-all ${active ? "bg-brand text-black font-bold" : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white"}`;
 
   return (
     <AdminPage title="Careers">
@@ -750,7 +750,7 @@ export default async function CareersAdminPage({ searchParams }: Props) {
           [
             jobs.filter((j) => j.is_active).length,
             "Open Positions",
-            "text-accent",
+            "text-brand",
           ],
           [jobs.length, "Total Jobs", "text-blue-400"],
           [counts.total, "Applications", "text-purple-400"],

@@ -17,7 +17,7 @@ export const SEO_PAGES: SeoPageDef[] = [
     slug: "home",
     label: "Home",
     path: "/",
-    title: "Brave Syntax | Web Design & Development Agency in India",
+    title: "Web Design & Development Agency in India | Brave Syntax",
     description: "Brave Syntax designs and builds fast, conversion-focused websites, web apps, Shopify stores and brand identities for growing businesses in India and worldwide.",
     schemaType: "Organization",
     changeFrequency: "daily",

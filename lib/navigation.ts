@@ -1,7 +1,10 @@
 // Menu data shared by the header mega menu and mobile drawer (from includes/header.php).
 
 /** Header menu groups, built from the admin-managed services table (see app/(site)/layout.tsx). */
-export type NavService = { title: string; category: string };
+export type NavService = { title: string; category: string; slug: string };
+
+/** A service's own page; services without a slug yet fall back to the contact form. */
+export const serviceHref = (s: { title: string; slug: string }) => (s.slug ? `/services/${s.slug}` : contactServiceHref(s.title));
 export type NavServiceGroup = { id: string; name: string; items: string[] };
 
 export function groupNavServices(services: NavService[]): NavServiceGroup[] {
@@ -39,10 +42,10 @@ export const PDF_TOOL_GROUPS: [string, PdfTool[]][] = Object.entries(
 );
 
 export const NAV_LINKS = [
+  { href: "/portfolio", label: "Work" },
   { href: "/industries", label: "Industries" },
+  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/blog", label: "Blogs" },
   { href: "/careers", label: "Careers" },
 ];
 

@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import LocationPage, { locationMetadata } from "@/components/location/LocationPage";
 import { getIndexableLocationPaths } from "@/lib/locations";
-import "../location.css";
 
 type Props = { params: Promise<{ city: string; service: string }> };
 
 export async function generateStaticParams() {
-  const { cities, services } = await getIndexableLocationPaths();
-  return cities.flatMap((city) => services.map((service) => ({ city, service })));
+  const { serviceCities, services } = await getIndexableLocationPaths();
+  return serviceCities.flatMap((city) => services.map((service) => ({ city, service })));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

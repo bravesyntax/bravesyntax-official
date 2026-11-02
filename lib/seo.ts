@@ -42,7 +42,7 @@ export const SEO_SETTING_DEFAULTS = {
   seo_default_description: "Brave Syntax designs and builds fast, conversion-focused websites, web apps, e-commerce stores and brands for growing businesses.",
   // Sized so every active city/service combination lands in the 30–60 / 120–160 character ranges.
   seo_loc_city_title: "Web Design & Development in {city}{suffix}",
-  seo_loc_city_description: "{site} is a digital agency in {city}, {state}: websites, web apps, e-commerce, UI/UX and branding. Free consultation and fixed quotes.",
+  seo_loc_city_description: "{site} builds websites, web apps and online stores for businesses in {city}, {state}, with UI/UX, branding and fixed quotes.",
   seo_loc_service_title: "{service} in {city}{suffix}",
   seo_loc_service_description: "Professional {keyword} in {city}, {state} by {site}. Fast, SEO-ready and built to convert. Free consultation, fixed quotes.",
 } as const;
@@ -198,7 +198,7 @@ export async function pageSchema(slug: string): Promise<object[]> {
       "@type": settings.orgType === "WebSite" ? "Organization" : settings.orgType,
       name: settings.orgName,
       url: SITE_URL,
-      ...(settings.orgLogo ? { logo: settings.orgLogo } : {}),
+      logo: settings.orgLogo || `${SITE_URL}/brand/logo-on-light.png`,
       contactPoint: {
         "@type": "ContactPoint",
         email: contact.email,
@@ -231,11 +231,19 @@ export async function customSchema(type: SeoEntity, key: string): Promise<object
 
 // ── Blog posts and case studies ──────────────────────────────────────────────
 
+/** Shortens text to about 155 characters at a word boundary. */
+function clipDescription(text: string, max = 155): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:.\s]+$/, "")}…`;
+}
+
 export function postSeoDefaults(post: { title: string; slug: string; excerpt: string | null; featured_image: string | null; published_at?: Date | null; updated_at?: Date | null }): SeoDefaults {
   return {
     title: post.title,
     suffix: true,
-    description: post.excerpt ?? "",
+    description: clipDescription(post.excerpt ?? ""),
     path: `/blog/${encodeURIComponent(post.slug)}`,
     image: post.featured_image ? absoluteMediaUrl("blog", post.featured_image, SITE_URL) : "",
     type: "article",
@@ -248,10 +256,14 @@ export function projectSeoDefaults(project: { title: string; slug: string | null
   return {
     title: `${project.title} — Case Study`,
     suffix: true,
-    description: project.description || `A ${project.category ?? "web"} project delivered by ${SITE_NAME}.`,
+    description: clipDescription(project.description || `A ${project.category ?? "web"} project delivered by ${SITE_NAME}.`),
     path: `/portfolio/${project.slug ?? ""}`,
     image: project.image ? absoluteMediaUrl("portfolio", project.image, SITE_URL) : "",
   };
+}
+
+export function serviceSeoDefaults(s: { title: string; slug: string; tagline: string; description: string }): SeoDefaults {
+  return { title: `${s.title} Services`, suffix: true, description: clipDescription(s.description || s.tagline), path: `/services/${s.slug}` };
 }
 
 // ── Location pages ───────────────────────────────────────────────────────────

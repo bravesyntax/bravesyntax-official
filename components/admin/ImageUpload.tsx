@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FileDrop } from "@/components/velora/file-drop";
 import { mediaUrl, type MediaKind } from "@/lib/media";
 
 // Featured image field for blog posts and portfolio items. The file uploads as soon as it's picked — to Vercel
@@ -16,7 +17,7 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
   const [busy, setBusy] = useState(false);
 
   async function onPick(file: File | undefined) {
-    if (!file) return;
+    if (!file || busy) return;
     if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) return setStatus("Invalid file type.");
     if (file.size > MAX_BYTES) return setStatus("Image too large. Max 5 MB.");
     setPreview(URL.createObjectURL(file));
@@ -59,25 +60,13 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
       <div className="flex items-start gap-5">
         <div className="flex-1">
           {mode ? (
-            <label className="group relative flex flex-col items-center justify-center w-full h-40 bg-zinc-800/30 border-2 border-dashed border-zinc-700 hover:border-accent/50 rounded-xl cursor-pointer transition-all overflow-hidden">
-              {preview ? (
+            <>
+              {preview && (
                 // eslint-disable-next-line @next/next/no-img-element -- local object-URL preview
-                <img src={preview} alt="" className="absolute inset-0 w-full h-full object-cover" />
-              ) : (
-                <span className="flex flex-col items-center gap-2">
-                  <svg className="w-8 h-8 text-zinc-600 group-hover:text-accent/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <span className="text-xs font-mono text-zinc-500">Click to upload</span>
-                </span>
+                <img src={preview} alt="" className="mb-3 h-40 w-full rounded-xl border object-cover" />
               )}
-              <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif" className="sr-only" disabled={busy} onChange={(e) => onPick(e.target.files?.[0])} />
-            </label>
+              <FileDrop accept=".jpg,.jpeg,.png,.webp,.gif" multiple={false} onFiles={(files) => onPick(files[0])} />
+            </>
           ) : (
             <p className="text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
               Image uploads on Vercel need a Blob store (BLOB_READ_WRITE_TOKEN). Existing images stay as they are.

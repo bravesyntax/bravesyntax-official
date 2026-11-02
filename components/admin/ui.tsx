@@ -50,7 +50,7 @@ export function FilterTabs({ tabs, active, hrefFor }: { tabs: [string, string][]
           key={k}
           href={hrefFor(k)}
           className={`px-4 py-2 text-xs font-mono rounded-lg transition-all ${
-            active === k ? "bg-accent text-black font-bold" : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white"
+            active === k ? "bg-brand text-black font-bold" : "bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white"
           }`}
         >
           {label}
@@ -85,7 +85,7 @@ export function Pagination({ page, totalPages, total, perPage, hrefFor }: { page
             &laquo; Prev
           </Link>
         )}
-        <span className="px-3 py-1.5 text-xs font-mono bg-accent/10 text-accent rounded-lg">
+        <span className="px-3 py-1.5 text-xs font-mono bg-brand/10 text-brand rounded-lg">
           {page} / {totalPages}
         </span>
         {page < totalPages && (

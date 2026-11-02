@@ -34,8 +34,8 @@ export default function IconPicker({ defaultValue }: { defaultValue: string }) {
             type="button"
             title={name}
             onClick={() => setIcon(path)}
-            className={`w-10 h-10 bg-zinc-800/50 border rounded-lg flex items-center justify-center hover:border-accent/50 transition-all ${
-              icon === path ? "border-accent bg-accent/10" : "border-zinc-700"
+            className={`w-10 h-10 bg-zinc-800/50 border rounded-lg flex items-center justify-center hover:border-brand/50 transition-all ${
+              icon === path ? "border-brand bg-brand/10" : "border-zinc-700"
             }`}
           >
             <svg className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -52,7 +52,7 @@ export default function IconPicker({ defaultValue }: { defaultValue: string }) {
         onChange={(e) => setIcon(e.target.value)}
         placeholder="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
         aria-label="Custom SVG path"
-        className="mt-2 w-full px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-accent transition-colors"
+        className="mt-2 w-full px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-brand transition-colors"
       />
     </div>
   );

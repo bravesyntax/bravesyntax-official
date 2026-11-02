@@ -4,13 +4,16 @@ import { sql } from "./db";
 
 // Location SEO pages: /{city} and /{city}/{service} (pages/location.php + router.php).
 
-export type City = { name: string; slug: string; state: string; sort_order: number };
+export type Sector = { name: string; need: string };
+export type City = { name: string; slug: string; state: string; sort_order: number; about: string; sectors: Sector[] };
 export type LocationService = {
   slug: string;
   label: string;
   keyword: string;
   contact_param: string | null;
   features_json: string | null;
+  about: string;
+  faqs: [string, string][];
 };
 export type Feature = { icon: string; title: string; desc: string };
 
@@ -18,25 +21,46 @@ export type Feature = { icon: string; title: string; desc: string };
 export const CITY_SLUG_RE = /^[a-z][a-z0-9-]{0,49}$/;
 
 /** Only the top N cities (by sort_order, name) are indexable and in the sitemap; the rest are noindex,follow. */
+/**
+ * Cities whose service pages (/{city}/{service}) are indexed: where we're based, and the largest markets. The same
+ * service page across 20 cities reads ~66% alike, which search engines treat as doorway pages; city hub pages have
+ * their own written content and stay indexed. Other service pages still work for visitors, as noindex,follow.
+ */
+export const SERVICE_PAGE_CITIES = ["ghaziabad", "noida", "delhi", "mumbai", "bangalore"];
+
 export const LOCATION_INDEXABLE_CITY_LIMIT = Number(process.env.LOCATION_INDEXABLE_CITY_LIMIT ?? 20);
 
 export const ALSO_AVAILABLE_LIMIT = 6;
 
+function parseList<T>(raw: string | null): T[] {
+  if (!raw) return [];
+  try {
+    const v = JSON.parse(raw);
+    return Array.isArray(v) ? (v as T[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export const getActiveCity = cache(async (slug: string): Promise<City | null> => {
   if (!CITY_SLUG_RE.test(slug)) return null;
   const rows = (await sql`
-    SELECT name, slug, state, sort_order FROM location_cities WHERE slug = ${slug} AND is_active = 1 LIMIT 1
-  `) as City[];
-  return rows[0] ?? null;
+    SELECT name, slug, state, sort_order, COALESCE(about, '') AS about, sectors_json FROM location_cities WHERE slug = ${slug} AND is_active = 1 LIMIT 1
+  `) as (Omit<City, "sectors"> & { sectors_json: string | null })[];
+  if (!rows[0]) return null;
+  const { sectors_json, ...city } = rows[0];
+  return { ...city, sectors: parseList<Sector>(sectors_json) };
 });
 
 /** Active service by slug; '' is the "all services" row used on city root pages. */
 export const getLocationService = cache(async (slug: string): Promise<LocationService | null> => {
   const rows = (await sql`
-    SELECT slug, label, keyword, contact_param, features_json FROM location_services
+    SELECT slug, label, keyword, contact_param, features_json, COALESCE(about, '') AS about, faq_json FROM location_services
     WHERE slug = ${slug} AND is_active = 1 LIMIT 1
-  `) as LocationService[];
-  return rows[0] ?? null;
+  `) as (Omit<LocationService, "faqs"> & { faq_json: string | null })[];
+  if (!rows[0]) return null;
+  const { faq_json, ...service } = rows[0];
+  return { ...service, faqs: parseList<[string, string]>(faq_json) };
 });
 
 export const FALLBACK_SERVICE: LocationService = {
@@ -45,6 +69,8 @@ export const FALLBACK_SERVICE: LocationService = {
   keyword: "digital agency",
   contact_param: "",
   features_json: null,
+  about: "",
+  faqs: [],
 };
 
 export async function getOverride(citySlug: string, serviceSlug: string) {
@@ -118,13 +144,14 @@ export function parseFeatures(json: string | null): Feature[] {
   ];
 }
 
-/** Top-tier cities and all non-root services, for static generation and the sitemap. */
-export async function getIndexableLocationPaths(): Promise<{ cities: string[]; services: string[] }> {
+/** Top-tier cities, the cities with indexed service pages, and all non-root services, for static generation and the sitemap. */
+export async function getIndexableLocationPaths(): Promise<{ cities: string[]; serviceCities: string[]; services: string[] }> {
   const cities = (await sql`
     SELECT slug FROM location_cities WHERE is_active = 1 ORDER BY sort_order ASC, name ASC LIMIT ${LOCATION_INDEXABLE_CITY_LIMIT}
   `) as { slug: string }[];
   const services = (await sql`
     SELECT slug FROM location_services WHERE is_active = 1 AND slug <> '' ORDER BY sort_order ASC
   `) as { slug: string }[];
-  return { cities: cities.map((c) => c.slug), services: services.map((s) => s.slug) };
+  const slugs = cities.map((c) => c.slug);
+  return { cities: slugs, serviceCities: slugs.filter((c) => SERVICE_PAGE_CITIES.includes(c)), services: services.map((s) => s.slug) };
 }

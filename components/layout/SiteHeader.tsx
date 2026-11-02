@@ -20,7 +20,7 @@ export default async function SiteHeader() {
   const [services, c, docs] = await Promise.all([getActiveServices(), getContactInfo(), searchDocs()]);
   return (
     <Header
-      services={services.map(({ title, category }) => ({ title, category }))}
+      services={services.map(({ title, category, slug }) => ({ title, category, slug }))}
       contact={{ email: c.email, phone: c.phone, phoneHref: c.phoneHref, whatsappHref: c.whatsappHref }}
       searchDocs={docs.map((d) => ({ title: d.title, url: d.kind === "post" ? `/blog/${d.slug}` : `/portfolio/${d.slug}`, kind: d.kind, sub: d.sub }))}
     />

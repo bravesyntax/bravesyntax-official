@@ -1,10 +1,13 @@
 "use client";
 
+import { ArrowUpRight, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import Icon from "@/components/ui/Icon";
+import { BlurFade } from "@/components/velora/blur-fade";
+import { FollowingPointer } from "@/components/velora/following-pointer";
 import { mediaUrl } from "@/lib/media";
+import { cn } from "@/lib/utils";
 
 export type PortfolioCard = {
   id: number;
@@ -24,8 +27,6 @@ const FILTERS: [Filter, string][] = [
   ["design", "Design"],
   ["development", "Development"],
 ];
-const EXTERNAL = "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14";
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** Reads ?filter= from the URL. Rendered inside <Suspense> so the page itself stays static. */
 export function FilteredPortfolioGrid({ projects }: { projects: PortfolioCard[] }) {
@@ -39,106 +40,67 @@ export default function PortfolioGrid({ projects, filter }: { projects: Portfoli
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4 py-10">
-        <div className="pf2-tabs">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex gap-1 rounded-full border bg-muted/50 p-1">
           {FILTERS.map(([k, label]) => (
-            <Link key={k} href={`/portfolio?filter=${k}`} scroll={false} className={`pf2-tab ${filter === k ? "active" : ""}`}>
+            <Link
+              key={k}
+              href={`/portfolio?filter=${k}`}
+              scroll={false}
+              aria-current={filter === k ? "page" : undefined}
+              className={cn("rounded-full px-4 py-1.5 text-sm transition-colors", filter === k ? "bg-background font-medium shadow-sm" : "text-muted-foreground hover:text-foreground")}
+            >
               {label}
             </Link>
           ))}
         </div>
-        <span className="pf2-mut2 text-sm">
+        <span className="text-sm text-muted-foreground">
           {shown.length} {shown.length === 1 ? "project" : "projects"}
         </span>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-5">
+      <div className="mt-8 grid gap-6 md:grid-cols-2">
         {shown.map((p, i) => (
-          <article
-            key={`${filter}-${p.id}`}
-            className="pf2-card pf2-card-hover group"
-            style={{ animation: `slide-up .5s ease-out ${i * 0.05}s forwards`, opacity: 0 }}
-          >
-            <div className="pf2-thumb">
-              {p.image ? (
-                <Image src={mediaUrl("portfolio", p.image)} alt={p.title} fill sizes="(min-width: 768px) 50vw, 100vw" />
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                  <div className="pf2-ph-icon">
-                    <span style={{ color: "var(--p-mut2)" }}>
-                      <Icon
-                        d={
-                          p.cat === "design"
-                            ? "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
-                            : "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                        }
-                        className="w-5 h-5"
-                      />
-                    </span>
-                  </div>
-                  <span className="pf2-mut2 text-xs text-center px-4">{p.title}</span>
+          <BlurFade key={`${filter}-${p.id}`} delay={(i % 2) * 0.08} className="h-full">
+            <article className="group flex h-full flex-col overflow-hidden rounded-3xl border bg-card transition-shadow hover:shadow-xl hover:shadow-primary/5">
+              <FollowingPointer label="View project" className="relative aspect-[16/10] overflow-hidden bg-muted">
+                <Link href={p.slug ? `/portfolio/${p.slug}` : p.liveUrl || "#"} aria-label={p.title} className="block size-full">
+                  {p.image && <Image src={mediaUrl("portfolio", p.image)} alt={p.title} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />}
+                </Link>
+              </FollowingPointer>
+              <div className="flex flex-1 flex-col p-6">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="font-medium text-primary capitalize">{p.cat}</span>
+                  {p.year && <span>· {p.year}</span>}
                 </div>
-              )}
-            </div>
-
-            <div className="p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="pf2-badge">{capitalize(p.cat)}</span>
-                <span className="pf2-mut2 text-xs ml-auto">{p.year}</span>
-              </div>
-
-              {p.liveUrl ? (
-                <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 group/link mb-2">
-                  <h2 className="pf2-h text-[15px] group-hover/link:text-emerald-400 transition-colors">{p.title}</h2>
-                  <span style={{ color: "var(--p-primary)" }}>
-                    <Icon d={EXTERNAL} className="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-all flex-shrink-0" strokeWidth={2} />
-                  </span>
-                </a>
-              ) : (
-                <h2 className="pf2-h text-[15px] mb-2">{p.title}</h2>
-              )}
-
-              {p.desc && <p className="pf2-mut text-[13px] leading-relaxed mb-4 line-clamp-2">{p.desc}</p>}
-
-              {(p.tags.length > 0 || p.slug) && (
-                <div className="pf2-divider pt-4 flex flex-wrap items-center gap-1.5">
-                  {p.tags.slice(0, 3).map((t) => (
-                    <span key={t} className="pf2-badge pf2-badge-outline">
-                      {t}
-                    </span>
-                  ))}
+                <h2 className="mt-2 text-xl font-medium tracking-tight">{p.title}</h2>
+                {p.desc && <p className="mt-2 line-clamp-3 flex-1 text-sm text-muted-foreground">{p.desc}</p>}
+                {p.tags.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {p.tags.slice(0, 4).map((t) => (
+                      <span key={t} className="rounded-full border px-2.5 py-0.5 text-xs text-muted-foreground">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-5 flex items-center gap-4 border-t pt-4 text-sm font-medium">
                   {p.slug && (
-                    <Link href={`/portfolio/${p.slug}`} className={`pf2-btn pf2-btn-ghost ${!p.liveUrl ? "ml-auto" : ""} text-xs`}>
-                      Case Study &rarr;
+                    <Link href={`/portfolio/${p.slug}`} className="inline-flex items-center gap-1 text-primary hover:underline">
+                      Project details <ArrowUpRight className="size-4" aria-hidden="true" />
                     </Link>
                   )}
                   {p.liveUrl && (
-                    <a
-                      href={p.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`pf2-btn pf2-btn-ghost ${!p.slug ? "ml-auto" : ""} text-xs`}
-                    >
-                      Visit
-                      <Icon d="M14 5l7 7m0 0l-7 7m7-7H3" className="w-3.5 h-3.5" strokeWidth={2} />
+                    <a href={p.liveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                      Live site <ExternalLink className="size-3.5" aria-hidden="true" />
                     </a>
                   )}
                 </div>
-              )}
-            </div>
-          </article>
+              </div>
+            </article>
+          </BlurFade>
         ))}
       </div>
-
-      {shown.length === 0 && (
-        <div className="text-center py-24">
-          <p className="pf2-h text-lg mb-2">No projects here yet</p>
-          <p className="pf2-mut text-sm mb-6">Nothing in this category for now. Browse everything instead.</p>
-          <Link href="/portfolio?filter=all" scroll={false} className="pf2-btn pf2-btn-outline">
-            View all work
-          </Link>
-        </div>
-      )}
     </>
   );
 }

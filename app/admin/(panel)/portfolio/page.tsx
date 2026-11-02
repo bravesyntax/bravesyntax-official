@@ -95,7 +95,7 @@ function ProjectForm({ row }: { row: Project | null }) {
         {row && (
           <div className="flex items-center gap-3">
             {row.slug && (
-              <Link href={`/admin/seo/edit?type=project&key=${row.id}`} className="text-xs text-accent hover:underline">
+              <Link href={`/admin/seo/edit?type=project&key=${row.id}`} className="text-xs text-brand hover:underline">
                 SEO for this case study →
               </Link>
             )}
@@ -381,7 +381,7 @@ async function ProjectList({
         cols="grid-cols-2 sm:grid-cols-4"
         stats={[
           [counts.total, "Total", "text-white"],
-          [counts.active, "Active", "text-accent"],
+          [counts.active, "Active", "text-brand"],
           [counts.design, "Design", "text-purple-400"],
           [counts.development, "Dev", "text-blue-400"],
         ]}
@@ -479,7 +479,7 @@ async function ProjectList({
                           href={p.live_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-mono text-xs text-accent hover:underline truncate block max-w-[180px]"
+                          className="font-mono text-xs text-brand hover:underline truncate block max-w-[180px]"
                         >
                           {p.live_url.replace(/^https?:\/\//, "")}
                         </a>
@@ -503,7 +503,7 @@ async function ProjectList({
                       <span
                         className={`inline-block px-2 py-0.5 text-[10px] font-mono rounded border ${
                           p.is_active
-                            ? "bg-accent/10 text-accent border-accent/20"
+                            ? "bg-brand/10 text-brand border-brand/20"
                             : "bg-zinc-700/50 text-zinc-500 border-zinc-700"
                         }`}
                       >
@@ -524,7 +524,7 @@ async function ProjectList({
                         ) : null}
                         <Link
                           href={`/admin/portfolio?edit=${p.id}`}
-                          className="text-xs text-accent hover:text-accent-light transition-colors"
+                          className="text-xs text-brand hover:text-brand-light transition-colors"
                           title="Edit"
                         >
                           <Pencil className="h-4 w-4" aria-hidden="true" />

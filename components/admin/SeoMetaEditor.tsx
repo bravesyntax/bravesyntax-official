@@ -57,7 +57,7 @@ function Panel({ icon: Icon, title, children, aside }: { icon: typeof Search; ti
     <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Icon className="h-4 w-4 text-accent" aria-hidden="true" />
+          <Icon className="h-4 w-4 text-brand" aria-hidden="true" />
           {title}
         </h3>
         {aside}

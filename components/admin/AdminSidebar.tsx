@@ -57,10 +57,10 @@ function NavContent({ unread, isActive, onNavigate }: { unread: number; isActive
                     onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                      active ? "bg-accent/10 font-medium text-accent" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                      active ? "bg-brand/10 font-medium text-brand" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                     }`}
                   >
-                    <Icon className={`h-4 w-4 flex-shrink-0 ${active ? "text-accent" : "text-zinc-500 group-hover:text-zinc-300"}`} aria-hidden="true" />
+                    <Icon className={`h-4 w-4 flex-shrink-0 ${active ? "text-brand" : "text-zinc-500 group-hover:text-zinc-300"}`} aria-hidden="true" />
                     {label}
                     {href === "/admin/messages" && unread > 0 && (
                       <span className="ml-auto rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white" aria-label={`${unread} unread`}>

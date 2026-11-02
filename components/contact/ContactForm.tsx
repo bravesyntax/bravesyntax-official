@@ -1,19 +1,24 @@
 "use client";
 
+import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { submitContact, type ContactState } from "@/app/(site)/contact/actions";
-import Icon, { ICONS } from "@/components/ui/Icon";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { confettiBurst } from "@/components/velora/confetti";
+import { DotsLoader } from "@/components/velora/loaders";
+import { RippleButton } from "@/components/velora/ripple-button";
+import { Stepper } from "@/components/velora/stepper";
+import { cn } from "@/lib/utils";
 
-const BUDGETS = ["Under ₹10,000", "₹10,000–₹30,000", "₹30,000–₹75,000", "₹75,000+"];
+const BUDGETS = ["Under ₹10,000", "₹10,000–₹30,000", "₹30,000–₹75,000", "₹75,000+", "Not sure yet"];
 const CUSTOM = "Custom / Not Listed";
 const MESSAGE_MAX = 2000;
-
-const inputCls =
-  "ct-input w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 transition-all placeholder-zinc-600";
-const labelCls = "ct-label block text-xs font-mono text-zinc-400 mb-2";
-const Required = () => <span className="ct-required text-emerald-400">*</span>;
+const STEPS = ["About you", "Your project", "Details"];
 
 const initial: ContactState = { status: "idle", errors: [], values: {} };
 
@@ -28,48 +33,47 @@ export function PrefilledContactForm({ services, turnstileSiteKey }: { services:
   return <ContactForm services={services} turnstileSiteKey={turnstileSiteKey} prefill={{ service, message }} />;
 }
 
-export default function ContactForm({
-  services,
-  turnstileSiteKey,
-  prefill = { service: "", message: "" },
-}: {
-  services: string[];
-  turnstileSiteKey: string;
-  prefill?: Prefill;
-}) {
+export default function ContactForm({ services, turnstileSiteKey, prefill = { service: "", message: "" } }: { services: string[]; turnstileSiteKey: string; prefill?: Prefill }) {
   const [state, action, pending] = useActionState(submitContact, initial);
   const v = state.status === "error" ? state.values : { service: prefill.service, message: prefill.message };
+  const announcer = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (state.status === "ok") {
+      const r = announcer.current?.getBoundingClientRect();
+      confettiBurst(r ? { x: r.left + r.width / 2, y: r.top + 20 } : {});
+    }
+  }, [state.status]);
 
   return (
-    <>
-      {state.status === "ok" && (
-        <div className="mb-6 px-5 py-4 bg-emerald-500/15 border border-emerald-500/30 rounded-xl flex items-start gap-3" role="status">
-          <Icon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
-          <p className="text-emerald-300 font-mono text-sm">{state.message}</p>
-        </div>
-      )}
-
-      {state.errors.length > 0 && (
-        <div className="ct-error mb-6 px-5 py-4 bg-red-500/15 border border-red-500/30 rounded-xl" role="alert">
-          {state.errors.map((e) => (
-            <p key={e} className="text-red-400 font-mono text-sm flex items-start gap-2">
-              <span className="flex-shrink-0 mt-0.5">&#9888;</span>
-              {e}
-            </p>
-          ))}
-        </div>
-      )}
-
-      <div className="ct-form-card bg-zinc-900/50 border border-zinc-800/60 rounded-3xl p-7 lg:p-10">
-        <h2 className="ct-t-p text-xl font-display font-bold text-white mb-1">Send Us a Message</h2>
-        <p className="ct-t-m text-xs text-zinc-600 font-mono mb-7">
-          Fields marked <Required /> are required.
-        </p>
-
-        {/* Re-mounting on each result restores values after an error and clears the form after success. */}
-        <FormBody key={JSON.stringify(state)} action={action} pending={pending} values={v} services={services} turnstileSiteKey={turnstileSiteKey} />
+    <div className="rounded-3xl border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
+      <div ref={announcer}>
+        {state.status === "ok" ? (
+          <div className="py-10 text-center" role="status">
+            <CheckCircle2 className="mx-auto size-12 text-primary" aria-hidden="true" />
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight">Message sent</h2>
+            <p className="mx-auto mt-2 max-w-md text-muted-foreground">{state.message}</p>
+          </div>
+        ) : (
+          <>
+            <h2 className="text-xl font-semibold tracking-tight">Tell us about your project</h2>
+            <p className="mt-1 text-sm text-muted-foreground">It takes about a minute.</p>
+            {state.errors.length > 0 && (
+              <div className="mt-5 rounded-xl border border-destructive/30 bg-destructive/10 p-4" role="alert">
+                {state.errors.map((e) => (
+                  <p key={e} className="flex items-start gap-2 text-sm text-destructive">
+                    <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                    {e}
+                  </p>
+                ))}
+              </div>
+            )}
+            {/* Re-mounting on each result restores the submitted values after an error. */}
+            <FormBody key={JSON.stringify(state)} action={action} pending={pending} values={v} services={services} turnstileSiteKey={turnstileSiteKey} hasErrors={state.errors.length > 0} />
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -79,138 +83,150 @@ function FormBody({
   values,
   services,
   turnstileSiteKey,
+  hasErrors,
 }: {
   action: (fd: FormData) => void;
   pending: boolean;
   values: Record<string, string>;
   services: string[];
   turnstileSiteKey: string;
+  hasErrors: boolean;
 }) {
+  const [step, setStep] = useState(0);
   const [formTs, setFormTs] = useState("");
   const [budget, setBudget] = useState(values.budget ?? "");
   const [count, setCount] = useState((values.message ?? "").length);
-
+  const panels = useRef<(HTMLDivElement | null)[]>([]);
   // Set in the browser: a server-rendered value would be the build time of this static page.
   useEffect(() => setFormTs(String(Date.now())), []);
 
   const selected = (values.service ?? "").trim().toLowerCase();
   const known = services.some((s) => s.trim().toLowerCase() === selected) || selected === CUSTOM.toLowerCase();
-  const serviceDefault =
-    services.find((s) => s.trim().toLowerCase() === selected) ?? (selected === CUSTOM.toLowerCase() ? CUSTOM : values.service ?? "");
+  const serviceDefault = services.find((s) => s.trim().toLowerCase() === selected) ?? (selected === CUSTOM.toLowerCase() ? CUSTOM : values.service) ?? "";
+
+  /** Only move on once the visible fields are valid, with the browser's own messages. */
+  const next = () => {
+    const fields = panels.current[step]?.querySelectorAll<HTMLInputElement>("input, select, textarea") ?? [];
+    for (const f of fields) if (!f.reportValidity()) return;
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  };
+  const goTo = (i: number) => {
+    if (i < step) setStep(i);
+    else if (i === step + 1) next();
+  };
+
+  const selectCls = "h-11 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
   return (
-    <form action={action} className="space-y-5">
+    <form action={action} className="mt-6">
+      <Stepper steps={STEPS} current={step} onStepClick={goTo} className="mb-7" />
       <input type="hidden" name="form_ts" value={formTs} />
-      {/* Honeypot — invisible to humans */}
+      {/* Honeypot: invisible to humans */}
       <div style={{ position: "absolute", left: -9999, height: 0, overflow: "hidden" }} aria-hidden="true">
         <label>
           Leave this empty <input type="text" name="website_url" tabIndex={-1} autoComplete="off" defaultValue="" />
         </label>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5">
-        <div>
-          <label htmlFor="ct_name" className={labelCls}>
-            Full Name <Required />
-          </label>
-          <input type="text" id="ct_name" name="name" required minLength={2} defaultValue={values.name} placeholder="Arjun Mehta" className={inputCls} />
+      {/* All steps stay in the DOM, so every field submits with the form. */}
+      <div ref={(el) => void (panels.current[0] = el)} className={cn("grid gap-5 sm:grid-cols-2", step !== 0 && "hidden")}>
+        <div className="grid gap-2 sm:col-span-2">
+          <Label htmlFor="ct_name">Full name</Label>
+          <Input id="ct_name" name="name" required minLength={2} maxLength={100} autoComplete="name" defaultValue={values.name} placeholder="Your name" className="h-11" />
         </div>
-        <div>
-          <label htmlFor="ct_email" className={labelCls}>
-            Email Address <Required />
-          </label>
-          <input type="email" id="ct_email" name="email" required defaultValue={values.email} placeholder="arjun@company.com" className={inputCls} />
+        <div className="grid gap-2">
+          <Label htmlFor="ct_email">Email address</Label>
+          <Input id="ct_email" type="email" name="email" required maxLength={150} autoComplete="email" defaultValue={values.email} placeholder="you@company.com" className="h-11" />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="ct_phone">
+            Phone <span className="font-normal text-muted-foreground">(optional)</span>
+          </Label>
+          <Input id="ct_phone" type="tel" name="phone" maxLength={30} autoComplete="tel" defaultValue={values.phone} placeholder="+91 98765 43210" className="h-11" />
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5">
-        <div>
-          <label htmlFor="ct_phone" className={labelCls}>
-            Phone Number
-          </label>
-          <input type="tel" id="ct_phone" name="phone" defaultValue={values.phone} placeholder="+91 98765 43210" className={inputCls} />
-        </div>
-        <div>
-          <label htmlFor="ct_service" className={labelCls}>
-            Service Needed
-          </label>
-          <select id="ct_service" name="service" defaultValue={serviceDefault} className={inputCls}>
+      <div ref={(el) => void (panels.current[1] = el)} className={cn("grid gap-5", step !== 1 && "hidden")}>
+        <div className="grid gap-2">
+          <Label htmlFor="ct_service">What do you need?</Label>
+          <select id="ct_service" name="service" defaultValue={serviceDefault} className={selectCls}>
             <option value="">Select a service…</option>
             {services.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
-            {/* A service from a link that isn't in the list (e.g. an industry) is still pre-selected. */}
+            {/* A value from a link that isn't in the list (e.g. an industry or a plan) is still pre-selected. */}
             {values.service && !known && <option value={values.service}>{values.service}</option>}
             <option value={CUSTOM}>{CUSTOM}</option>
           </select>
         </div>
-      </div>
-
-      <div>
-        <span className={labelCls}>Approximate Budget</span>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Approximate budget">
-          {BUDGETS.map((b) => (
-            <button
-              key={b}
-              type="button"
-              role="radio"
-              aria-checked={budget === b}
-              onClick={() => setBudget(b)}
-              className={`budget-tile ct-input text-center px-3 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl font-mono text-xs transition-all hover:border-zinc-500 cursor-pointer ${
-                budget === b ? "!bg-emerald-500/15 !border-emerald-500/50 !text-emerald-300 text-emerald-300" : "text-zinc-400"
-              }`}
-            >
-              {b}
-            </button>
-          ))}
-        </div>
-        <input type="hidden" name="budget" value={budget} />
-      </div>
-
-      <div>
-        <label htmlFor="ct_message" className={labelCls}>
-          Project Details <Required />
-        </label>
-        <textarea
-          id="ct_message"
-          name="message"
-          rows={6}
-          required
-          minLength={10}
-          maxLength={MESSAGE_MAX}
-          defaultValue={values.message}
-          onChange={(e) => setCount(e.target.value.length)}
-          placeholder="Tell us about your project — what you need, your timeline, any inspiration links, and specific requirements..."
-          className={`${inputCls} resize-none`}
-        />
-        <div className="flex justify-between mt-1.5">
-          <span className="ct-t-m text-[10px] font-mono text-zinc-700">More detail = faster, more accurate quote</span>
-          <span className="ct-t-m text-[10px] font-mono text-zinc-700" style={count > 1800 ? { color: "#f59e0b" } : undefined}>
-            {count} / {MESSAGE_MAX}
-          </span>
+        <div className="grid gap-2">
+          <span className="text-sm leading-none font-medium">Approximate budget</span>
+          <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Approximate budget">
+            {BUDGETS.map((b) => (
+              <button
+                key={b}
+                type="button"
+                role="radio"
+                aria-checked={budget === b}
+                onClick={() => setBudget(b)}
+                className={cn("rounded-lg border px-3 py-2.5 text-left text-sm transition-colors", budget === b ? "border-primary bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:bg-muted")}
+              >
+                {b}
+              </button>
+            ))}
+          </div>
+          <input type="hidden" name="budget" value={budget === "Not sure yet" ? "" : budget} />
         </div>
       </div>
 
-      {turnstileSiteKey && <Turnstile siteKey={turnstileSiteKey} />}
+      <div ref={(el) => void (panels.current[2] = el)} className={cn("grid gap-5", step !== 2 && "hidden")}>
+        <div className="grid gap-2">
+          <Label htmlFor="ct_message">Project details</Label>
+          <Textarea
+            id="ct_message"
+            name="message"
+            rows={6}
+            required
+            minLength={10}
+            maxLength={MESSAGE_MAX}
+            defaultValue={values.message}
+            onChange={(e) => setCount(e.target.value.length)}
+            placeholder="What you need, your timeline, and any examples you like."
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>More detail means a faster, more accurate quote.</span>
+            <span className={count > 1800 ? "text-warning" : undefined}>
+              {count} / {MESSAGE_MAX}
+            </span>
+          </div>
+        </div>
+        {turnstileSiteKey && <Turnstile siteKey={turnstileSiteKey} />}
+      </div>
 
-      <button
-        type="submit"
-        disabled={pending || !formTs}
-        className={`group w-full flex items-center justify-center gap-2.5 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-sm rounded-xl transition-all shadow-[0_0_30px_rgba(16,185,129,.25)] hover:shadow-[0_0_50px_rgba(16,185,129,.4)] active:scale-[.99] ${pending ? "opacity-80" : ""}`}
-      >
-        <span>{pending ? "Sending…" : "Send Message"}</span>
-        {pending ? (
-          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-        ) : (
-          <Icon d={ICONS.arrowRight} className="w-4 h-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
+      <div className="mt-7 flex items-center gap-3">
+        {step > 0 && (
+          <Button type="button" variant="outline" className="h-11 rounded-full px-5" onClick={() => setStep(step - 1)}>
+            <ArrowLeft aria-hidden="true" /> Back
+          </Button>
         )}
-      </button>
-      <p className="ct-t-m text-center text-[10px] font-mono text-zinc-700 mt-2">Your data is never shared or sold. We hate spam as much as you do.</p>
+        {step < STEPS.length - 1 ? (
+          <Button type="button" className="ml-auto h-11 rounded-full px-6" onClick={next}>
+            Continue <ArrowRight aria-hidden="true" />
+          </Button>
+        ) : (
+          <RippleButton type="submit" disabled={pending || !formTs} className="ml-auto h-11 rounded-full bg-primary px-7 text-sm font-medium text-primary-foreground disabled:opacity-60">
+            {pending ? <DotsLoader size="sm" label="Sending" /> : "Send message"}
+          </RippleButton>
+        )}
+      </div>
+      {hasErrors && step !== 0 && (
+        <button type="button" className="mt-3 text-xs text-muted-foreground underline" onClick={() => setStep(0)}>
+          Check your details
+        </button>
+      )}
+      <p className="mt-5 text-center text-xs text-muted-foreground">Your details are only used to reply to you. See our privacy policy.</p>
     </form>
   );
 }
@@ -224,14 +240,12 @@ type TurnstileApi = {
 function Turnstile({ siteKey }: { siteKey: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(() => typeof window !== "undefined" && "turnstile" in window);
-
   useEffect(() => {
     const api = (window as unknown as { turnstile?: TurnstileApi }).turnstile;
     if (!ready || !api || !ref.current) return;
     const id = api.render(ref.current, { sitekey: siteKey, theme: "auto" });
     return () => api.remove(id);
   }, [ready, siteKey]);
-
   return (
     <>
       <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" onReady={() => setReady(true)} />

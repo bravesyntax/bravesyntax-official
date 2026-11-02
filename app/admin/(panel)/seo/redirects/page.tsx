@@ -33,8 +33,8 @@ export default async function RedirectsPage({ searchParams }: Props) {
         <Card className="h-fit p-6">
           <h2 className="font-display font-semibold text-white">{editing ? "Edit redirect" : "Add a redirect"}</h2>
           <p className="mt-1 text-xs leading-relaxed text-zinc-500">
-            Send visitors and Google from an old URL to a new one. Use <code className="font-mono text-accent">/old-blog/*</code> to move a whole section; a{" "}
-            <code className="font-mono text-accent">*</code> in the destination receives the rest of the path.
+            Send visitors and Google from an old URL to a new one. Use <code className="font-mono text-brand">/old-blog/*</code> to move a whole section; a{" "}
+            <code className="font-mono text-brand">*</code> in the destination receives the rest of the path.
           </p>
           <form key={editing?.id ?? "new"} action={saveRedirect} className="mt-5 space-y-4">
             {editing && <input type="hidden" name="id" value={editing.id} />}
@@ -54,7 +54,7 @@ export default async function RedirectsPage({ searchParams }: Props) {
               <legend className={labelCls}>Type</legend>
               <div className="space-y-2">
                 {Object.entries(STATUS).map(([code, [label, help]]) => (
-                  <label key={code} className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-800 p-3 has-[:checked]:border-accent/50 has-[:checked]:bg-accent/5">
+                  <label key={code} className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-800 p-3 has-[:checked]:border-brand/50 has-[:checked]:bg-brand/5">
                     <input type="radio" name="status_code" value={code} defaultChecked={(editing?.status_code ?? 301) === Number(code)} className="mt-0.5 accent-emerald-500" />
                     <span>
                       <span className="block text-sm text-white">{label}</span>
@@ -90,7 +90,7 @@ export default async function RedirectsPage({ searchParams }: Props) {
               <p className="mt-0.5 text-xs text-zinc-500">{list.length} {q ? "matching" : "total"} · hits count every visit that was redirected</p>
             </div>
             <form action="/admin/seo/redirects" className="flex gap-2">
-              <input name="q" defaultValue={q} placeholder="Search paths or notes" aria-label="Search redirects" className="w-56 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 font-mono text-xs text-white focus:border-accent focus:outline-none" />
+              <input name="q" defaultValue={q} placeholder="Search paths or notes" aria-label="Search redirects" className="w-56 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 font-mono text-xs text-white focus:border-brand focus:outline-none" />
             </form>
           </div>
           {list.length === 0 ? (
@@ -116,7 +116,7 @@ export default async function RedirectsPage({ searchParams }: Props) {
                           {r.status_code !== 410 && (
                             <>
                               <ArrowRight className="h-3 w-3 text-zinc-600" aria-hidden="true" />
-                              <span className="break-all text-accent">{r.destination}</span>
+                              <span className="break-all text-brand">{r.destination}</span>
                             </>
                           )}
                         </div>

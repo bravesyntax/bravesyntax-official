@@ -1,9 +1,9 @@
 import "server-only";
 import { SITE_URL } from "@/lib/config";
 import { rows, sql } from "@/lib/db";
-import { LOCATION_INDEXABLE_CITY_LIMIT } from "@/lib/locations";
+import { LOCATION_INDEXABLE_CITY_LIMIT, SERVICE_PAGE_CITIES } from "@/lib/locations";
 import {
-  applySeo, fillLocationTemplates, getSeoSettings, pageDefaults, postSeoDefaults, projectSeoDefaults,
+  applySeo, fillLocationTemplates, getSeoSettings, pageDefaults, postSeoDefaults, projectSeoDefaults, serviceSeoDefaults,
   type ResolvedSeo, type SeoDefaults, type SeoEntity, type SeoRecord, type SeoSettings,
 } from "@/lib/seo";
 import { DESCRIPTION_RANGE, SEO_PAGES, TITLE_RANGE } from "@/lib/seo-pages";
@@ -61,7 +61,7 @@ type City = { slug: string; name: string; state: string };
 type Service = { slug: string; label: string; keyword: string };
 
 async function loadRaw() {
-  const [records, settings, posts, projects, cities, services] = await Promise.all([
+  const [records, settings, posts, projects, cities, services, serviceRows] = await Promise.all([
     rows<SeoRecord & { entity_type: SeoEntity; entity_key: string }>(sql`
       SELECT entity_type, entity_key, title, description, focus_keyword, og_image, canonical_url, noindex, schema_json, updated_at FROM seo_meta
     `),
@@ -72,8 +72,11 @@ async function loadRaw() {
     rows<Project>(sql`SELECT id, title, slug, description, category, image, is_active FROM portfolios ORDER BY sort_order ASC, id DESC`),
     rows<City>(sql`SELECT slug, name, state FROM location_cities WHERE is_active = 1 ORDER BY sort_order ASC, name ASC`),
     rows<Service>(sql`SELECT slug, label, keyword FROM location_services WHERE is_active = 1 AND slug <> '' ORDER BY sort_order ASC`),
+    rows<{ title: string; slug: string; tagline: string; description: string }>(sql`
+      SELECT title, slug, COALESCE(tagline, '') AS tagline, COALESCE(description, '') AS description FROM services WHERE is_active = 1 AND COALESCE(slug, '') <> '' ORDER BY sort_order ASC
+    `),
   ]);
-  return { records, settings, posts, projects, cities, services };
+  return { records, settings, posts, projects, cities, services, serviceRows };
 }
 
 function build(raw: Awaited<ReturnType<typeof loadRaw>>): SeoTarget[] {
@@ -85,6 +88,7 @@ function build(raw: Awaited<ReturnType<typeof loadRaw>>): SeoTarget[] {
   };
 
   for (const p of SEO_PAGES) push("page", p.slug, p.label, p.path, pageDefaults(p.slug));
+  for (const s of raw.serviceRows) push("page", `services/${s.slug}`, s.title, `/services/${s.slug}`, serviceSeoDefaults(s));
   for (const p of raw.posts) push("post", String(p.id), p.title, p.category ?? "", postSeoDefaults(p), p.is_published ? null : "Draft");
   for (const p of raw.projects) {
     if (!p.slug) continue; // no public URL
@@ -95,7 +99,7 @@ function build(raw: Awaited<ReturnType<typeof loadRaw>>): SeoTarget[] {
     push("location", c.slug, c.name, c.state, { ...fillLocationTemplates(raw.settings, { city: c.name, state: c.state }), path: `/${c.slug}` }, tier);
     for (const s of raw.services) {
       const d = fillLocationTemplates(raw.settings, { city: c.name, state: c.state, service: s });
-      push("location", `${c.slug}/${s.slug}`, `${s.label} in ${c.name}`, c.state, { ...d, path: `/${c.slug}/${s.slug}` }, tier);
+      push("location", `${c.slug}/${s.slug}`, `${s.label} in ${c.name}`, c.state, { ...d, path: `/${c.slug}/${s.slug}` }, tier ?? (SERVICE_PAGE_CITIES.includes(c.slug) ? null : "Service page outside the priority cities"));
     }
   });
 

@@ -4,12 +4,13 @@ import { redirect } from "next/navigation";
 import { BulkDeleteButton, ConfirmButton, RowCheckbox, SelectAll, SubmitButton } from "@/components/admin/client";
 import IconPicker from "@/components/admin/IconPicker";
 import { AdminPage, BackLink, Card, EmptyState, FilterTabs, iconBtnDelete, iconBtnEdit, iconBtnToggle, inputCls, labelCls, primaryBtn, smallPrimaryBtn, StatGrid, Th, Toggle } from "@/components/admin/ui";
+import { jsonToLines, jsonToPairs } from "@/lib/admin/lines";
 import { rows, sql } from "@/lib/db";
 import { bulkDeleteServices, deleteService, saveService, toggleService } from "./actions";
 
 export const metadata = { title: "Services" };
 
-type Service = { id: number; title: string; category: string; description: string; icon: string | null; sort_order: number; is_active: number };
+type Service = { id: number; title: string; category: string; description: string; icon: string | null; slug: string | null; tagline: string | null; overview: string | null; includes_json: string | null; best_for_json: string | null; timeline: string | null; faq_json: string | null; sort_order: number; is_active: number };
 type Props = { searchParams: Promise<{ edit?: string; form?: string; cat?: string }> };
 
 async function ServiceForm({ row }: { row: Service | null }) {
@@ -49,6 +50,41 @@ async function ServiceForm({ row }: { row: Service | null }) {
             <textarea id="description" name="description" rows={3} required defaultValue={row?.description} placeholder="What this service includes..." className={`${inputCls} resize-y`} />
           </div>
           <IconPicker defaultValue={row?.icon ?? ""} />
+          <fieldset className="space-y-5 rounded-xl border border-zinc-800 p-5">
+            <legend className="px-2 text-sm font-semibold text-white">Service page {row?.slug && <a href={`/services/${row.slug}`} target="_blank" rel="noopener noreferrer" className="ml-2 text-xs font-normal text-brand hover:underline">View page</a>}</legend>
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label htmlFor="slug" className={labelCls}>Page URL <span className="text-zinc-600">(empty = from the title)</span></label>
+                <input id="slug" name="slug" defaultValue={row?.slug ?? ""} placeholder="custom-website-development" className={inputCls} />
+              </div>
+              <div>
+                <label htmlFor="timeline" className={labelCls}>Typical timeline</label>
+                <input id="timeline" name="timeline" maxLength={120} defaultValue={row?.timeline ?? ""} placeholder="1–3 weeks" className={inputCls} />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="tagline" className={labelCls}>Tagline <span className="text-zinc-600">(one line under the title)</span></label>
+              <input id="tagline" name="tagline" maxLength={200} defaultValue={row?.tagline ?? ""} className={inputCls} />
+            </div>
+            <div>
+              <label htmlFor="overview" className={labelCls}>Overview <span className="text-zinc-600">(leave a blank line between paragraphs)</span></label>
+              <textarea id="overview" name="overview" rows={6} defaultValue={row?.overview ?? ""} className={`${inputCls} resize-y`} />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label htmlFor="includes" className={labelCls}>What&apos;s included <span className="text-zinc-600">(one per line)</span></label>
+                <textarea id="includes" name="includes" rows={6} defaultValue={jsonToLines(row?.includes_json)} className={`${inputCls} resize-y`} />
+              </div>
+              <div>
+                <label htmlFor="best_for" className={labelCls}>Best for <span className="text-zinc-600">(one per line)</span></label>
+                <textarea id="best_for" name="best_for" rows={6} defaultValue={jsonToLines(row?.best_for_json)} className={`${inputCls} resize-y`} />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="faqs" className={labelCls}>FAQ <span className="text-zinc-600">(one per line: Question | Answer)</span></label>
+              <textarea id="faqs" name="faqs" rows={5} defaultValue={jsonToPairs(row?.faq_json)} className={`${inputCls} resize-y`} />
+            </div>
+          </fieldset>
           <div>
             <label htmlFor="sort_order" className={labelCls}>
               Sort Order
@@ -87,7 +123,7 @@ async function ServiceList({ cat }: { cat: string }) {
         cols="grid-cols-2 sm:grid-cols-4"
         stats={[
           [counts.total, "Total", "text-white"],
-          [counts.active, "Active", "text-accent"],
+          [counts.active, "Active", "text-brand"],
           [counts.design, "Design", "text-purple-400"],
           [counts.dev, "Dev", "text-blue-400"],
         ]}
@@ -172,7 +208,7 @@ async function ServiceList({ cat }: { cat: string }) {
                     <td className="px-4 py-3 text-center">
                       <span
                         className={`inline-block px-2 py-0.5 text-[10px] font-mono rounded border ${
-                          s.is_active ? "bg-accent/10 text-accent border-accent/20" : "bg-zinc-700/50 text-zinc-500 border-zinc-700"
+                          s.is_active ? "bg-brand/10 text-brand border-brand/20" : "bg-zinc-700/50 text-zinc-500 border-zinc-700"
                         }`}
                       >
                         {s.is_active ? "Active" : "Hidden"}

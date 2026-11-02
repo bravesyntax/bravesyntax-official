@@ -115,9 +115,11 @@ export async function getBlogCategories(): Promise<{ slug: string; label: string
   return rows.map((r) => ({ slug: r.slug, label: categoryLabel(r.slug) }));
 }
 
-export async function getBlogListing({ cat, tag, page }: { cat: string; tag: string; page: number }) {
+export async function getBlogListing({ cat, tag, q = "", page }: { cat: string; tag: string; q?: string; page: number }) {
   const catFilter = cat !== "all" && /^[a-z0-9-]{1,50}$/.test(cat) ? cat : null;
   const tagLike = tag ? `%${tag}%` : null;
+  // % and _ in what a visitor types are literal characters, not wildcards.
+  const qLike = q ? `%${q.replace(/[\\%_]/g, "\\$&")}%` : null;
   try {
     // MySQL's LIKE was case-insensitive under its collation, so ILIKE keeps the same matching.
     const [{ total }] = (await sql`
@@ -125,6 +127,7 @@ export async function getBlogListing({ cat, tag, page }: { cat: string; tag: str
       WHERE is_published = 1
         AND (${catFilter}::text IS NULL OR category = ${catFilter})
         AND (${tagLike}::text IS NULL OR tags ILIKE ${tagLike})
+        AND (${qLike}::text IS NULL OR title ILIKE ${qLike} OR excerpt ILIKE ${qLike} OR tags ILIKE ${qLike})
     `) as { total: number }[];
 
     const totalPages = Math.max(1, Math.ceil(total / BLOG_PER_PAGE));
@@ -136,12 +139,13 @@ export async function getBlogListing({ cat, tag, page }: { cat: string; tag: str
       WHERE is_published = 1
         AND (${catFilter}::text IS NULL OR category = ${catFilter})
         AND (${tagLike}::text IS NULL OR tags ILIKE ${tagLike})
+        AND (${qLike}::text IS NULL OR title ILIKE ${qLike} OR excerpt ILIKE ${qLike} OR tags ILIKE ${qLike})
       ORDER BY published_at DESC NULLS LAST, created_at DESC
       LIMIT ${BLOG_PER_PAGE} OFFSET ${offset}
     `) as BlogPost[];
 
     let featured: BlogPost | null = null;
-    if (current === 1 && !catFilter && !tag) {
+    if (current === 1 && !catFilter && !tag && !q) {
       const rows = (await sql`
         SELECT * FROM blog_posts WHERE is_published = 1 AND is_featured = 1 ORDER BY published_at DESC NULLS LAST LIMIT 1
       `) as BlogPost[];
@@ -207,6 +211,7 @@ export type CareerJob = {
   salary_range: string | null;
   is_featured: number;
   deadline: Date | null;
+  created_at: Date | null;
 };
 
 export async function getActiveJobs(): Promise<CareerJob[]> {

@@ -10,6 +10,17 @@ import { sendMail } from "@/lib/mailer";
 
 const PAGE = "/admin/messages";
 
+const STAGES = ["new", "contacted", "proposal", "won", "lost"];
+
+export async function setMessageStatus(fd: FormData) {
+  await requireAdmin();
+  const id = intField(fd, "id");
+  const status = String(fd.get("status") ?? "");
+  if (!STAGES.includes(status)) await finish("error", "Unknown status.", `${PAGE}?view=${id}`);
+  await sql`UPDATE contact_messages SET status = ${status} WHERE id = ${id}`;
+  await finish("success", "Status updated.", `${PAGE}?view=${id}`);
+}
+
 export async function deleteMessage(fd: FormData) {
   await requireAdmin();
   await sql`DELETE FROM contact_messages WHERE id = ${intField(fd, "id")}`;
@@ -39,7 +50,7 @@ export async function replyToMessage(fd: FormData) {
   const sent = await sendMail({ to: msg.email, subject, html, replyTo: contact.email });
   if (!sent) await finish("error", "Failed to send email. Check your SMTP/mail configuration.", back);
 
-  await sql`UPDATE contact_messages SET is_replied = 1, is_read = 1 WHERE id = ${id}`;
+  await sql`UPDATE contact_messages SET is_replied = 1, is_read = 1, status = CASE WHEN status = 'new' THEN 'contacted' ELSE status END WHERE id = ${id}`;
   await finish("success", `Reply sent successfully to ${msg.email}.`, back);
 }
 

@@ -34,7 +34,7 @@ export default async function LegalAdminPage({ searchParams }: Props) {
               {current.isDefault ? "Showing the default text, written from your business details. Edit and publish to customise it." : `Last published ${new Date(current.updated).toLocaleString("en-GB", { timeZone: "Asia/Kolkata" })}`}
             </p>
           </div>
-          <a href={`/${slug}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-accent hover:underline">
+          <a href={`/${slug}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-brand hover:underline">
             View page <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
           </a>
         </div>

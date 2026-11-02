@@ -30,10 +30,10 @@ export default function SeoShell({ active, children }: { active: SeoTab; childre
                 href={href}
                 aria-current={on ? "page" : undefined}
                 className={`inline-flex items-center gap-2 border-b-2 px-3 py-3 text-sm transition-colors ${
-                  on ? "border-accent font-medium text-white" : "border-transparent text-zinc-400 hover:text-white"
+                  on ? "border-brand font-medium text-white" : "border-transparent text-zinc-400 hover:text-white"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${on ? "text-accent" : ""}`} aria-hidden="true" />
+                <Icon className={`h-4 w-4 ${on ? "text-brand" : ""}`} aria-hidden="true" />
                 {label}
               </Link>
             );

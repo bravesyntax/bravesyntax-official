@@ -10,7 +10,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Resume uploads are not configured." }, { status: 503 });
   }
 
-  const body = (await request.json()) as HandleUploadBody;
+  const body = (await request.json().catch(() => null)) as HandleUploadBody | null;
+  if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   try {
     const result = await handleUpload({
       token: resumeBlobToken(),

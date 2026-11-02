@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import LocationPage, { locationMetadata } from "@/components/location/LocationPage";
 import { getIndexableLocationPaths } from "@/lib/locations";
-import "./location.css";
 
 type Props = { params: Promise<{ city: string }> };
 

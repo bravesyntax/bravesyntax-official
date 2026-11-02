@@ -1,89 +1,79 @@
+import { ArrowRight, ArrowUpRight, Boxes, Check, Clock, Code2, Eraser, FileText, Gauge, Handshake, LockKeyhole, ShieldCheck, Wallet } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import FaqList from "@/components/home/FaqList";
-import { AboutAndCareers, CitiesServed, FeaturedWork, FreeTools, IndustriesGrid, LatestInsights } from "@/components/home/HomeSections";
-import HomeEffects from "@/components/home/HomeEffects";
-import ServicesAccordion from "@/components/home/ServicesAccordion";
-import StickyCta from "@/components/home/StickyCta";
 import JsonLd from "@/components/JsonLd";
-import Icon, { SectionBadge } from "@/components/ui/Icon";
+import { container, CtaLink, IconChip, Section, SectionHeading, ShimmerLink } from "@/components/site/ui";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { AnimatedList } from "@/components/velora/animated-list";
+import { BrowserMockup } from "@/components/velora/browser-mockup";
+import { BentoCard, BentoGrid } from "@/components/velora/bento-grid";
+import { BlurFade } from "@/components/velora/blur-fade";
+import { HoverCards } from "@/components/velora/card-hover-effect";
+import { DirectionAwareHover } from "@/components/velora/direction-aware-hover";
+import { EvervaultCard } from "@/components/velora/evervault-card";
+import { GlowingEffect } from "@/components/velora/glowing-effect";
+import { GridPattern } from "@/components/velora/grid-pattern";
+import { NumberTicker } from "@/components/velora/number-ticker";
+import { WordRotate } from "@/components/velora/word-rotate";
+import { BorderBeam } from "@/components/velora/border-beam";
+import { Marquee } from "@/components/velora/marquee";
+import { OrbitingCircles } from "@/components/velora/orbiting-circles";
+import { ScrollVelocity } from "@/components/velora/scroll-velocity";
+import { SpotlightCard } from "@/components/velora/spotlight-card";
+import { Terminal } from "@/components/velora/terminal";
+import { TextHighlighter } from "@/components/velora/text-highlighter";
+import { TextShimmer } from "@/components/velora/text-shimmer";
+import { Timeline } from "@/components/velora/timeline";
+import { WobbleCard } from "@/components/velora/wobble-card";
+import { WorldMap } from "@/components/velora/world-map";
 import { SITE_URL } from "@/lib/config";
-import { pageMetadata, pageSchema } from "@/lib/seo";
+import { cn } from "@/lib/utils";
 import { getContactInfo, type ContactInfo } from "@/lib/contact";
-import { getActiveJobs, getLatestPosts, getPortfolios } from "@/lib/content";
+import { CardsCarousel, CarouselCard } from "@/components/velora/apple-cards-carousel";
+import { categoryLabel, formatDate, getActiveJobs, getLatestPosts, getPortfolios, getSiteFacts } from "@/lib/content";
+import { INDUSTRIES } from "@/lib/industries";
 import { getActiveCities } from "@/lib/locations";
-import { PDF_TOOL_COUNT } from "@/lib/navigation";
+import { mediaUrl } from "@/lib/media";
+import { PDF_TOOL_COUNT, PDF_TOOLS, serviceHref } from "@/lib/navigation";
+import { pageMetadata, pageSchema } from "@/lib/seo";
 import { getActiveServices, type DbService } from "@/lib/services";
-import "./home.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata("home");
 }
 
-const t1 = { color: "var(--bsh-t1)" };
-const t2 = { color: "var(--bsh-t2)" };
-const t3 = { color: "var(--bsh-t3)" };
-
-const ARROW = "M13 7l5 5m0 0l-5 5m5-5H6";
-const DEFAULT_ICON = "M13 10V3L4 14h7v7l9-11h-7z";
-
-const TRUST_BADGES = [
-  ["M5 13l4 4L19 7", "Custom-Built", "No templates, no shortcuts"],
-  ["M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z", "Direct Access", "Work with who's building it"],
-  ["M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", "Ongoing Support", "Here after launch, too"],
+const GHAZIABAD: [number, number] = [28.67, 77.45];
+const HUBS: { label: string; lat: number; lng: number }[] = [
+  { label: "Mumbai", lat: 19.08, lng: 72.88 },
+  { label: "Bangalore", lat: 12.97, lng: 77.59 },
+  { label: "Kolkata", lat: 22.57, lng: 88.36 },
+  { label: "Ahmedabad", lat: 23.02, lng: 72.57 },
+  { label: "Hyderabad", lat: 17.39, lng: 78.49 },
 ];
 
-const SERVICE_ICONS = [
-  "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4",
-  "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
-  "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z",
-  "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01",
-  "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
-  "M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z",
-];
-
-const STEPS = [
-  ["01", "Discovery", "Analyze goals, audience, competitors. Get a detailed brief and timeline before we code."],
-  ["02", "Design", "High-fidelity Figma mockups. Interactive prototypes so you see exactly what you're getting."],
-  ["03", "Development", "Pixel-perfect, clean code. Cross-browser testing, mobile-first, performance, accessibility."],
-  ["04", "Launch", "Smooth deployment with zero downtime, plus training, documentation and 30–90 days of support."],
-];
-
-const COMMITMENTS = [
-  ["M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", "Fixed-Price Quotes", "No surprise costs. What we quote is what you pay."],
-  ["M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4", "You Own Everything", "Full source code and design files. No lock-in."],
-  ["M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z", "One Direct Contact", "You work with the person building your project."],
-  ["M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z", "Milestone Check-Ins", "Real progress at each stage, not just a reveal."],
-  ["M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", "Documented Handover", "Clear docs and a walkthrough when we ship."],
-  ["M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z", "Honest Scoping", "If something won't move the needle, we'll say so."],
-];
-
-const TECHS = [
-  ["PHP", "bg-indigo-500/10 border-indigo-500/20 text-indigo-400"],
-  ["JavaScript", "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"],
-  ["React", "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"],
-  ["Tailwind CSS", "bg-sky-500/10 border-sky-500/20 text-sky-400"],
-  ["WordPress", "bg-blue-500/10 border-blue-500/20 text-blue-400"],
-  ["Shopify", "bg-green-500/10 border-green-500/20 text-green-400"],
-  ["Figma", "bg-pink-500/10 border-pink-500/20 text-pink-400"],
-  ["MySQL", "bg-orange-500/10 border-orange-500/20 text-orange-400"],
-  ["Laravel", "bg-red-500/10 border-red-500/20 text-red-400"],
-  ["Next.js", "bg-zinc-500/10 border-zinc-500/30 text-zinc-300"],
-  ["Adobe XD", "bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-400"],
-  ["Google Analytics", "bg-amber-500/10 border-amber-500/20 text-amber-400"],
-  ["Vercel", "bg-zinc-500/10 border-zinc-500/30 text-zinc-300"],
-  ["AWS", "bg-orange-500/10 border-orange-500/20 text-orange-300"],
-  ["GitHub", "bg-zinc-500/10 border-zinc-500/30 text-zinc-300"],
+const STEPS: [string, string, string][] = [
+  ["Discovery", "We learn your goals, audience and competitors, then send a written brief, a fixed quote and a timeline before any work starts.", "Written brief · Fixed quote"],
+  ["Design", "You see high-fidelity designs and a clickable prototype, so you know exactly what you're getting before a line of code is written.", "Figma designs · Your sign-off"],
+  ["Development", "We build it with clean, tested code on a staging link you can open any time, with weekly updates along the way.", "Staging access · Weekly updates"],
+  ["Launch", "A smooth deployment with zero downtime, plus training, documentation and 30–90 days of support afterwards.", "Handover · Support window"],
 ];
 
 const FAQS: [string, string][] = [
-  ["How much does a website cost?", "A landing page or 3-page site starts at ₹8,000, a custom 5–10 page website is ₹20,000–₹60,000, and web apps or large e-commerce builds start at ₹60,000. You get a fixed quote once we understand your requirements — see Services for what each package includes."],
+  ["How much does a website cost?", "A landing page or 3-page site starts at ₹8,000, a custom 5–10 page website is ₹20,000–₹60,000, and web apps or large e-commerce builds start at ₹60,000. You get a fixed quote once we understand your requirements. See Services for what each package includes."],
   ["How long does a project take?", "It depends on scope: landing pages usually take 3–5 days, business websites 1–3 weeks, and e-commerce or custom web apps 3–8 weeks. You get a milestone-based timeline before we start."],
   ["Do you work with international clients?", "Yes. We work remotely, communicate in English and adjust meeting times to your timezone."],
-  ["What do you need to get started?", "Brand assets (logo, colors if you have them), your goals, and examples of designs you like. We handle the rest."],
+  ["What do you need to get started?", "Brand assets (logo and colours if you have them), your goals, and examples of designs you like. We handle the rest."],
   ["Can I get revisions?", "Yes. Every package includes revisions: 2 rounds on Starter, and unlimited rounds within the agreed scope on Professional and Enterprise."],
-  ["Do you provide hosting and maintenance?", "Yes. We set up hosting (AWS, Vercel, Hostinger, etc.) and offer monthly maintenance packages for updates, backups, monitoring."],
-  ["Are your PDF tools really free?", `Yes — ${PDF_TOOL_COUNT} PDF tools plus an AI background remover, 100% free, browser-based, local processing. No registration, no watermarks, no file limits.`],
+  ["Do you provide hosting and maintenance?", "Yes. We set up hosting (Vercel, AWS, Hostinger and others) in your own accounts, and offer monthly maintenance plans for updates, backups and monitoring."],
+  ["Are your PDF tools really free?", `Yes. ${PDF_TOOL_COUNT} PDF tools plus an AI background remover, all free and running in your browser. No registration, no watermarks, and your files aren't uploaded.`],
+];
+
+const FEED = [
+  ["Design approved", "Your sign-off, recorded"],
+  ["Staging updated", "New build ready to review"],
+  ["Weekly update sent", "Progress, next steps, blockers"],
+  ["Live on your domain", "Backups and monitoring on"],
 ];
 
 /** Organisation schema from the admin settings and the live service list (no invented ratings or reviews). */
@@ -97,458 +87,473 @@ function localBusinessSchema(c: ContactInfo, services: DbService[]) {
     email: c.email,
     ...(c.phone ? { telephone: c.phone } : {}),
     ...(c.address ? { address: { "@type": "PostalAddress", streetAddress: c.address, addressCountry: "IN" } } : {}),
-    areaServed: ["IN", "GB", "US", "AE", "AU"],
     serviceType: services.map((x) => x.title),
     ...(c.socials.length ? { sameAs: c.socials.map((x) => x.url) } : {}),
   };
 }
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+// Tells search engines the site's name, so results show "Brave Syntax" rather than the bare domain.
+const WEBSITE_SCHEMA = { "@context": "https://schema.org", "@type": "WebSite", name: "Brave Syntax", alternateName: "BraveSyntax", url: SITE_URL };
 
 export default async function HomePage() {
-  const [schema, services, contact, projects, posts, jobs, cities] = await Promise.all([
+  const [schema, services, contact, projects, posts, jobs, cities, facts] = await Promise.all([
     pageSchema("home"),
     getActiveServices(),
     getContactInfo(),
     getPortfolios(),
-    getLatestPosts(3),
+    getLatestPosts(6),
     getActiveJobs(),
     getActiveCities(16),
+    getSiteFacts(),
   ]);
-  // Case studies with a public page, in the order set in Admin → Portfolio.
-  const featuredWork = projects.filter((p) => p.slug).slice(0, 3);
-  // The first six active services (Admin → Services, by sort order) are featured; the full list follows below.
-  const top6 = services.slice(0, 6).map((s, i) => ({ ...s, icon: s.icon || SERVICE_ICONS[i] || DEFAULT_ICON }));
-  const marquee = services.map((s) => s.title);
+  const work = projects.filter((p) => p.slug).slice(0, 3);
+  const showcase = projects.filter((p) => p.slug && p.image).slice(0, 1);
+  const techs = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Postgres", "Figma", "Shopify", "WordPress", "Laravel", "Vercel"];
 
   return (
     <>
-      <JsonLd data={[...schema, localBusinessSchema(contact, services)]} />
-      <HomeEffects />
+      <JsonLd data={[...schema, WEBSITE_SCHEMA, localBusinessSchema(contact, services)]} />
 
       {/* ═══ HERO ═══ */}
-      <section className="relative pt-32 pb-24 lg:pt-44 lg:pb-36 overflow-hidden" aria-label="Hero">
-        <div className="bsh-dots-sm absolute inset-0 bsh-hero-parallax opacity-40" aria-hidden="true" data-parallax-speed="0.5" />
-        <div className="bsh-fade-b absolute inset-0" aria-hidden="true" />
-        <div className="absolute top-0 right-0 w-[560px] h-[560px] bg-emerald-500/[.07] rounded-full blur-[120px] pointer-events-none bsh-hero-parallax" data-parallax-speed="0.3" aria-hidden="true" />
-        <div className="absolute bottom-0 left-0 w-[380px] h-[380px] bg-emerald-600/[.05] rounded-full blur-[100px] pointer-events-none bsh-hero-parallax" data-parallax-speed="0.4" aria-hidden="true" />
-
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-center mb-10">
-            <div className="bsh-hero-badge bsh-badge inline-flex items-center gap-2.5 px-4 py-2 rounded-full">
-              <span className="relative flex h-2 w-2" aria-hidden="true">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span className="text-[10px] sm:text-xs font-mono" style={{ color: "var(--bsh-badge-text)" }}>
-                Available for new projects
-              </span>
-            </div>
-          </div>
-
-          <div className="text-center max-w-5xl mx-auto">
-            <h1 className="bsh-hero-title text-5xl sm:text-6xl lg:text-8xl font-display font-bold leading-[1.05] tracking-tight mb-8" style={t1}>
-              Build Digital
-              <br />
-              <span className="bsh-grad">Products That</span>
-              <br />
-              Convert &amp; Scale
+      <section className="relative isolate overflow-hidden" aria-label="Introduction">
+        <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/15 via-primary/5 to-background" aria-hidden="true" />
+        <GridPattern aria-hidden width={64} height={64} className="absolute inset-0 -z-10 size-full stroke-foreground/5 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+        <div className={`${container} grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:py-20`}>
+          <div>
+            <BlurFade>
+              <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-background/70 p-1 pr-3 text-sm shadow-sm ring-1 ring-border backdrop-blur transition-colors hover:text-primary">
+                <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">Now booking</span>
+                <TextShimmer>Taking on new projects</TextShimmer>
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            </BlurFade>
+            <h1 className="mt-6 text-4xl font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl">
+              Web design and development that <span className="bg-linear-to-r from-brand-from via-brand-via to-brand-to bg-clip-text text-transparent">wins you customers</span>
             </h1>
-
-            <p className="bsh-hero-desc text-lg lg:text-xl font-mono max-w-3xl mx-auto leading-relaxed mb-10" style={t2}>
-              Strategic design and precise development for brands that want to stand out, grow fast, and dominate their market.
-            </p>
-
-            <div className="bsh-hero-buttons flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
-              <Link
-                href="/contact"
-                className="bsh-btn-primary group inline-flex items-center gap-2.5 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-sm rounded-xl shadow-[0_0_40px_rgba(16,185,129,.25)]"
-              >
-                Start Your Project
-                <Icon d={ARROW} className="w-4 h-4 transition-transform group-hover:translate-x-1" strokeWidth={2.5} />
-              </Link>
-              <Link href="/portfolio" className="bsh-btn-outline inline-flex items-center gap-2 px-8 py-4 bg-transparent border font-mono font-semibold text-sm rounded-xl backdrop-blur-sm">
-                View Our Work
-              </Link>
-            </div>
-
-            <div className="bsh-hero-stats bsh-stat-bar grid grid-cols-3 gap-px rounded-2xl overflow-hidden border max-w-2xl mx-auto">
-              {TRUST_BADGES.map(([icon, title, label]) => (
-                <div key={title} className="bsh-stat-cell backdrop-blur-sm px-4 py-5 text-center flex flex-col items-center gap-2">
-                  <Icon d={icon} className="w-5 h-5 text-emerald-400" />
-                  <div className="text-sm lg:text-base font-display font-bold" style={t1}>
-                    {title}
-                  </div>
-                  <div className="text-[10px] font-mono" style={t3}>
-                    {label}
-                  </div>
-                </div>
+            <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">A design and development studio for growing businesses in India. You get a fixed quote, direct access to the people building your project, and code you own.</p>
+            <BlurFade delay={0.15}>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <ShimmerLink href="/contact">Start your project</ShimmerLink>
+                <CtaLink href="/portfolio" variant="outline">
+                  See our work
+                </CtaLink>
+              </div>
+            </BlurFade>
+            <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+              {["Fixed quote", "Direct access", "You own the code"].map((t) => (
+                <li key={t} className="flex items-center gap-1.5">
+                  <Check className="size-4 text-primary" aria-hidden="true" /> {t}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
+
+          <BlurFade delay={0.1}>
+            <div className="grid grid-cols-6 gap-3">
+              {showcase[0] && (
+                <Link href={`/portfolio/${showcase[0].slug}`} className="group relative col-span-6 overflow-hidden rounded-2xl border bg-card/80 p-3 shadow-sm backdrop-blur transition-colors hover:border-primary/50 sm:col-span-4 sm:row-span-2">
+                  <BrowserMockup url={(showcase[0].live_url ?? "bravesyntax.com").replace(/^https?:\/\//, "").replace(/\/$/, "")}>
+                    <div className="relative aspect-video w-full bg-muted">
+                      <Image src={mediaUrl("portfolio", showcase[0].image!)} alt={`${showcase[0].title} website`} fill priority sizes="(min-width: 1024px) 34vw, (min-width: 640px) 66vw, 100vw" className="object-cover object-top" />
+                    </div>
+                  </BrowserMockup>
+                  <p className="mt-3 flex items-center justify-between gap-2 px-1 text-sm">
+                    <span className="truncate font-medium">{showcase[0].title}</span>
+                    <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground group-hover:text-primary">
+                      Recent work <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                    </span>
+                  </p>
+                </Link>
+              )}
+              <div className="col-span-3 flex min-h-32 flex-col justify-between rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur sm:col-span-2">
+                <p className="text-xs text-muted-foreground">We build</p>
+                <p className="text-2xl font-semibold tracking-tight text-primary">
+                  <WordRotate words={["Websites", "Web apps", "Stores", "Brands"]} />
+                </p>
+              </div>
+              <div className="relative col-span-3 flex min-h-32 flex-col justify-between overflow-hidden rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur sm:col-span-2">
+                <BorderBeam size={70} duration={8} />
+                <Wallet className="size-5 text-primary" aria-hidden="true" />
+                <div>
+                  <p className="text-sm font-medium">Fixed quote</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Price agreed in writing first.</p>
+                </div>
+              </div>
+              {facts && (
+                <dl className="col-span-3 grid grid-cols-2 gap-2 rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur">
+                  {[
+                    [facts.projects, "Projects"],
+                    [facts.services, "Services"],
+                  ].map(([value, label]) => (
+                    <div key={label} className="flex flex-col-reverse">
+                      <dt className="mt-1 text-xs text-muted-foreground">{label}</dt>
+                      <dd className="text-3xl font-semibold tracking-tight">
+                        <NumberTicker value={Number(value)} />
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              <Link href="/pdf-tools" className={cn("group flex items-center gap-3 rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur transition-colors hover:border-primary/50", facts ? "col-span-3" : "col-span-6")}>
+                <IconChip>
+                  <FileText className="size-5" aria-hidden="true" />
+                </IconChip>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium group-hover:text-primary">{PDF_TOOL_COUNT} free PDF tools</span>
+                  <span className="block text-xs text-muted-foreground">No sign-up, right in your browser.</span>
+                </span>
+              </Link>
+            </div>
+          </BlurFade>
         </div>
       </section>
 
-      {/* ═══ MARQUEE ═══ */}
-      <div className="bsh-mq-section border-y overflow-hidden py-4" aria-hidden="true">
-        <div className="bsh-mq-fade-l absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none" />
-        <div className="bsh-mq-fade-r absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none" />
-        <div className="bsh-mq-track flex whitespace-nowrap gap-0">
-          {[...marquee, ...marquee, ...marquee].map((tag, i) => (
-            <span key={i} className="inline-flex items-center gap-2 px-5 text-[11px] font-mono uppercase tracking-widest" style={t3}>
-              <span className="w-1 h-1 rounded-full bg-emerald-500/60" />
-              {tag}
-            </span>
-          ))}
-        </div>
+      {/* ═══ SERVICE STRIP ═══ */}
+      <div className="overflow-hidden border-y bg-muted/30 py-4" aria-hidden="true">
+        <ScrollVelocity baseVelocity={2}>
+          <span className="flex items-center gap-8 pr-8 text-sm font-medium text-muted-foreground">
+            {services.map((s) => (
+              <span key={s.title} className="flex items-center gap-8 whitespace-nowrap">
+                {s.title}
+                <span className="size-1 rounded-full bg-primary" />
+              </span>
+            ))}
+          </span>
+        </ScrollVelocity>
       </div>
 
       {/* ═══ SERVICES ═══ */}
-      <section id="services" className="py-24 lg:py-32 relative bsh-lazy" aria-label="Services">
-        <div className="bsh-grid-md absolute inset-0" aria-hidden="true" />
-        <div className="bsh-fade-b absolute inset-0" aria-hidden="true" />
-
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-14 bsh-reveal">
-            <div className="max-w-xl">
-              <SectionBadge>What We Build</SectionBadge>
-              <h2 className="text-4xl lg:text-5xl font-display font-bold mb-4" style={t1}>
-                End-to-End <span className="bsh-grad">Design &amp; Dev</span>
-              </h2>
-              <p className="font-mono text-sm leading-relaxed" style={t2}>
-                From concept to deployment. Design, development, deployment, and everything in between.
-              </p>
-            </div>
-            <Link
-              href="/services"
-              className="flex-shrink-0 inline-flex items-center gap-2 text-sm font-mono text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 hover:border-emerald-400/50 px-5 py-2.5 rounded-lg transition-all"
-            >
-              All Services &rarr;
-            </Link>
-          </div>
-
-          {/* Desktop card grid (hidden on mobile via CSS) */}
-          <div className="bsh-grid-cards grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {top6.map((s, i) => (
-              <article key={s.title} className={`bsh-card bsh-reveal bsh-reveal-stagger-${(i % 6) + 1} group relative border rounded-2xl p-6 backdrop-blur-sm cursor-default`}>
-                <div className="absolute top-0 right-0 w-12 h-12 overflow-hidden rounded-tr-2xl pointer-events-none" aria-hidden="true">
-                  <div className="absolute top-0 right-0 w-px h-6 bg-gradient-to-b from-emerald-500/40 to-transparent group-hover:from-emerald-400/60 transition-colors" />
-                  <div className="absolute top-0 right-0 h-px w-6 bg-gradient-to-l from-emerald-500/40 to-transparent group-hover:from-emerald-400/60 transition-colors" />
-                </div>
-                <div className="mb-5 w-11 h-11 bg-emerald-500/10 group-hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl flex items-center justify-center transition-all">
-                  <Icon d={s.icon} className="w-5 h-5 text-emerald-400" />
-                </div>
-                <h3 className="text-base font-display font-semibold group-hover:text-emerald-300 transition-colors mb-2" style={t1}>
-                  {s.title}
-                </h3>
-                <p className="text-xs font-mono leading-relaxed mb-5" style={t3}>
-                  {s.description}
-                </p>
-                <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: "var(--bsh-border)" }}>
-                  <span className="text-[10px] font-mono uppercase tracking-widest inline-flex items-center gap-1.5" style={t3}>
-                    <span className="w-1 h-1 rounded-full bg-emerald-500/50" aria-hidden="true" />
-                    {capitalize(s.category)}
-                  </span>
-                  <span className="text-emerald-500/40 group-hover:text-emerald-400 transition-colors text-base leading-none">&rarr;</span>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {/* Mobile accordion (shown only on mobile via CSS) */}
-          <ServicesAccordion items={top6} />
-
-          <div className="mt-12 text-center bsh-reveal">
-            <Link href="/contact" className="bsh-btn-primary inline-flex items-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-sm rounded-xl">
-              Discuss Your Project
-              <Icon d={ARROW} className="w-4 h-4" strokeWidth={2.5} />
-            </Link>
-          </div>
+      <Section id="services" label="Services">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <SectionHeading eyebrow="What we do" title="One team, from first sketch to launch day">
+            No juggling a separate designer, developer and SEO freelancer. Pick a service to see how it works and what you get.
+          </SectionHeading>
+          <CtaLink href="/services" variant="outline">
+            Services and pricing
+          </CtaLink>
         </div>
-      </section>
+        <BlurFade delay={0.1} className="mt-10">
+          <HoverCards columns={3} items={services.map((s) => ({ title: s.title, description: s.tagline || s.description, href: serviceHref(s) }))} />
+        </BlurFade>
+      </Section>
 
       {/* ═══ WHY US ═══ */}
-      <section className="py-24 lg:py-32 relative bsh-lazy" style={{ backgroundColor: "var(--bsh-bg-alt)" }} aria-label="Why choose Brave Syntax">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16 bsh-reveal">
-            <SectionBadge>Why Us</SectionBadge>
-            <h2 className="text-4xl lg:text-5xl font-display font-bold mb-4" style={t1}>
-              Built Different,
-              <br />
-              <span className="bsh-grad">Delivered Better</span>
-            </h2>
-            <p className="font-mono text-sm leading-relaxed" style={t2}>
-              Technical excellence meets creative design — products that don&apos;t just look good, they perform and convert.
-            </p>
+      <Section muted label="Why Brave Syntax">
+        <SectionHeading
+          center
+          eyebrow="Why Brave Syntax"
+          title={
+            <>
+              Straightforward, <TextHighlighter>by design</TextHighlighter>
+            </>
+          }
+        >
+          No jargon, no surprise invoices, and no disappearing after launch.
+        </SectionHeading>
+        <BentoGrid className="mt-12 md:grid-cols-3">
+          <BentoCard
+            className="md:col-span-2"
+            name="You always know where things stand"
+            description="A staging link you can open any time, weekly updates, and your sign-off at every stage."
+            icon={<Clock className="size-5 text-primary" aria-hidden="true" />}
+            background={
+              <div className="absolute inset-x-6 top-5 mx-auto max-w-sm" aria-hidden="true">
+                <AnimatedList delay={2400}>
+                  {FEED.map(([t, d]) => (
+                    <div key={t} className="flex items-center gap-3 rounded-xl border bg-background/90 p-3 shadow-sm">
+                      <span className="size-2 rounded-full bg-primary" />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium">{t}</span>
+                        <span className="block truncate text-xs text-muted-foreground">{d}</span>
+                      </span>
+                    </div>
+                  ))}
+                </AnimatedList>
+              </div>
+            }
+          />
+          <BentoCard
+            name="Fixed-price quotes"
+            description="The scope and price are agreed in writing first. New requests are quoted before we do them."
+            icon={<Wallet className="size-5 text-primary" aria-hidden="true" />}
+            href="/services#pricing"
+            cta="See pricing"
+            background={
+              <div className="absolute inset-0 flex items-start justify-center pt-10 text-6xl font-semibold tracking-tight text-primary/15" aria-hidden="true">
+                ₹8,000+
+              </div>
+            }
+          />
+          <BentoCard
+            name="Modern, proven tools"
+            description="We choose what fits the job, and we explain why in plain language."
+            icon={<Code2 className="size-5 text-primary" aria-hidden="true" />}
+            background={
+              <div className="absolute inset-x-0 top-0 flex h-56 items-center justify-center" aria-hidden="true">
+                <OrbitingCircles radius={78} duration={26} iconSize={34}>
+                  {["Next", "React", "TS", "SQL"].map((t) => (
+                    <span key={t} className="grid size-full place-items-center rounded-full border bg-background font-mono text-[10px] text-muted-foreground">
+                      {t}
+                    </span>
+                  ))}
+                </OrbitingCircles>
+                <Boxes className="size-7 text-primary" />
+              </div>
+            }
+          />
+          <BentoCard
+            className="md:col-span-2"
+            name="You own everything"
+            description="Full source code, design files and accounts in your name. No lock-in, and a documented handover when we ship."
+            icon={<LockKeyhole className="size-5 text-primary" aria-hidden="true" />}
+            background={
+              <div className="absolute inset-x-6 top-4" aria-hidden="true">
+                <Terminal title="handover" lines={["$ deploy --to your-account", "✓ Code in your repository", "✓ Domain and hosting in your name", "✓ Docs and walkthrough delivered"]} />
+              </div>
+            }
+          />
+        </BentoGrid>
+      </Section>
+
+      {/* ═══ WORK ═══ */}
+      {work.length > 0 && (
+        <Section label="Selected work">
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <SectionHeading eyebrow="Selected work" title="Recent projects">
+              A selection of websites and stores we&apos;ve designed and built.
+            </SectionHeading>
+            <CtaLink href="/portfolio" variant="outline">
+              All projects
+            </CtaLink>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div
-              className="bsh-card-solid bsh-reveal lg:col-span-2 relative border rounded-2xl p-8 overflow-hidden group hover:border-emerald-500/30 transition-all duration-300"
-              style={{ borderColor: "var(--bsh-border)", background: "var(--bsh-card-solid)" }}
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[.03] rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
-              <div className="bsh-code-wrap relative mb-6 rounded-xl p-4 font-mono text-xs border">
-                <div className="flex items-center gap-1.5 mb-3" aria-hidden="true">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
-                  <span className="ml-2 text-[10px]" style={t3}>
-                    brave-syntax.php
-                  </span>
-                </div>
-                <div className="space-y-1 text-[11px]" aria-label="Code example">
-                  <div>
-                    <span className="bsh-ck">function</span> <span className="bsh-cf">deliver</span>
-                    <span style={t2}>(</span>
-                    <span className="bsh-cv">$project</span>
-                    <span style={t2}>) {"{"}</span>
-                  </div>
-                  <div className="pl-4">
-                    <span className="bsh-cc">{"// Clean code · On time · Within budget"}</span>
-                  </div>
-                  <div className="pl-4">
-                    <span className="bsh-ckw">return</span> <span className="text-emerald-300">$this</span>
-                    <span style={t2}>-&gt;</span>
-                    <span className="text-yellow-300">buildExceptional</span>
-                    <span style={t2}>($project);</span>
-                  </div>
-                  <div style={t2}>{"}"}</div>
-                </div>
-              </div>
-              <h3 className="text-xl font-display font-bold group-hover:text-emerald-300 transition-colors mb-2" style={t1}>
-                Clean Code. Real Results.
-              </h3>
-              <p className="font-mono text-sm leading-relaxed" style={t2}>
-                Hand-crafted with semantic, maintainable code. No templates, no shortcuts — purpose-built solutions that perform.
-              </p>
-            </div>
-
-            <div className="bsh-card bsh-reveal border rounded-2xl p-6 group">
-              <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-5">
-                <Icon d="M13 10V3L4 14h7v7l9-11h-7z" className="w-6 h-6 text-emerald-400" />
-              </div>
-              <div className="text-3xl font-display font-bold text-emerald-400 mb-1">3–5</div>
-              <div className="text-xs font-mono mb-3" style={t3}>
-                Days for a landing page
-              </div>
-              <h3 className="text-base font-display font-semibold group-hover:text-emerald-300 transition-colors mb-2" style={t1}>
-                Lightning Fast
-              </h3>
-              <p className="text-xs font-mono leading-relaxed" style={t3}>
-                Business websites in 1–3 weeks. A streamlined process gets you live quickly without cutting corners.
-              </p>
-            </div>
-
-            <div className="bsh-card bsh-reveal border rounded-2xl p-6 group">
-              <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-5">
-                <Icon d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" className="w-6 h-6 text-emerald-400" />
-              </div>
-              <h3 className="text-base font-display font-semibold group-hover:text-emerald-300 transition-colors mb-2" style={t1}>
-                Quick, Real Replies
-              </h3>
-              <p className="text-xs font-mono leading-relaxed" style={t3}>
-                We reply {contact.responseTime} on WhatsApp, email or phone ({contact.hours}), and adjust meetings to your timezone.
-              </p>
-            </div>
-
-            <div className="bsh-card bsh-reveal border rounded-2xl p-6 group">
-              <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-5">
-                <Icon d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" className="w-6 h-6 text-emerald-400" />
-              </div>
-              <h3 className="text-base font-display font-semibold group-hover:text-emerald-300 transition-colors mb-2" style={t1}>
-                SEO-First
-              </h3>
-              <p className="text-xs font-mono leading-relaxed" style={t3}>
-                Schema, Core Web Vitals, semantic HTML, fast load times baked in.
-              </p>
-            </div>
-
-            <div className="bsh-card bsh-reveal border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[.08] to-transparent rounded-2xl p-6 group">
-              <div className="w-12 h-12 bg-emerald-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center mb-5">
-                <Icon d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" className="w-6 h-6 text-emerald-400" />
-              </div>
-              <div className="text-xs font-mono text-emerald-600 mb-3 uppercase tracking-wider">Our Promise</div>
-              <h3 className="text-base font-display font-semibold mb-2" style={t1}>
-                Revisions Included
-              </h3>
-              <p className="text-xs font-mono leading-relaxed" style={t3}>
-                Every package includes revision rounds, so what we ship matches what you pictured.
-              </p>
-            </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {work.map((p, i) => (
+              <BlurFade key={p.id} delay={i * 0.08}>
+                <Link href={`/portfolio/${p.slug}`} className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <DirectionAwareHover
+                    className="aspect-[4/3] rounded-2xl border"
+                    overlay={
+                      <span className="flex items-center gap-1.5 text-sm font-medium">
+                        View project <ArrowUpRight className="size-4" aria-hidden="true" />
+                      </span>
+                    }
+                  >
+                    {p.image && <Image src={mediaUrl("portfolio", p.image)} alt={p.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />}
+                  </DirectionAwareHover>
+                  <h3 className="mt-4 font-medium">{p.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{categoryLabel(p.category)}</p>
+                </Link>
+              </BlurFade>
+            ))}
           </div>
-        </div>
-      </section>
-
-      <FeaturedWork projects={featuredWork} />
-      <IndustriesGrid />
+        </Section>
+      )}
 
       {/* ═══ PROCESS ═══ */}
-      <section id="process" className="py-24 lg:py-32 relative bsh-lazy overflow-hidden" aria-label="Our process">
-        <div className="bsh-dots-md absolute inset-0" aria-hidden="true" />
-        <div className="bsh-fade-b absolute inset-0" aria-hidden="true" />
-
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16 bsh-reveal">
-            <SectionBadge>How It Works</SectionBadge>
-            <h2 className="text-4xl lg:text-5xl font-display font-bold mb-4" style={t1}>
-              Our <span className="bsh-grad">4-Step Process</span>
-            </h2>
-            <p className="font-mono text-sm leading-relaxed" style={t2}>
-              Clear steps, with your sign-off at each stage, so you always know where the project stands.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-            <div className="hidden lg:block absolute top-[2.6rem] left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-emerald-500/25 to-transparent pointer-events-none" aria-hidden="true" />
-            {STEPS.map(([n, title, desc], idx) => (
-              <div key={n} className={`bsh-card bsh-reveal bsh-reveal-stagger-${idx + 1} group relative border rounded-2xl p-6 h-full`} role="article">
-                <div className="bsh-step-num relative w-12 h-12 border-2 rounded-2xl flex items-center justify-center mb-5 z-10 transition-colors">
-                  <span className="text-lg font-display font-bold text-emerald-400">{n}</span>
-                </div>
-                <h3 className="text-base font-display font-bold group-hover:text-emerald-300 transition-colors mb-3" style={t1}>
-                  {title}
-                </h3>
-                <p className="text-xs font-mono leading-relaxed" style={t3}>
-                  {desc}
-                </p>
+      <Section muted id="process" label="How we work">
+        <SectionHeading eyebrow="How it works" title="Four clear steps, with your sign-off at each">
+          You always know what happens next, and nothing moves forward without your approval.
+        </SectionHeading>
+        <Timeline
+          className="mt-10"
+          items={STEPS.map(([title, desc, tag], i) => ({
+            title: `${i + 1}. ${title}`,
+            content: (
+              <div className="max-w-xl">
+                <p className="text-muted-foreground">{desc}</p>
+                <p className="mt-3 inline-flex rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">{tag}</p>
               </div>
-            ))}
-          </div>
+            ),
+          }))}
+        />
+      </Section>
+
+      {/* ═══ INDUSTRIES ═══ */}
+      <Section label="Industries">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <SectionHeading eyebrow="Industries" title="Built around how your market buys">
+            A hospital website and an industrial catalogue have very different jobs. We start from yours.
+          </SectionHeading>
+          <CtaLink href="/industries" variant="outline">
+            All industries
+          </CtaLink>
         </div>
-      </section>
-
-      {/* ═══ HOW WE WORK ═══ */}
-      <section className="py-24 lg:py-32 relative bsh-lazy overflow-hidden" style={{ backgroundColor: "var(--bsh-bg-alt)" }} aria-label="What working with us looks like">
-        <div className="bsh-dots-md absolute inset-0" aria-hidden="true" />
-        <div className="bsh-fade-b absolute inset-0" aria-hidden="true" />
-
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-14 bsh-reveal">
-            <SectionBadge>How We Work</SectionBadge>
-            <h2 className="text-4xl lg:text-5xl font-display font-bold mb-4" style={t1}>
-              Straightforward,
-              <br />
-              <span className="bsh-grad">By Design</span>
-            </h2>
-            <p className="font-mono text-sm leading-relaxed" style={t2}>
-              No jargon, no surprise invoices, no disappearing after launch. Here&apos;s what to expect.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {COMMITMENTS.map(([icon, title, desc], idx) => (
-              <div key={title} className={`bsh-card bsh-reveal bsh-reveal-stagger-${(idx % 3) + 1} border rounded-2xl p-6 h-full flex flex-col`}>
-                <div className="w-11 h-11 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center mb-5">
-                  <Icon d={icon} className="w-5 h-5 text-emerald-400" />
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {INDUSTRIES.map((ind, i) => (
+            <BlurFade key={ind.title} delay={(i % 3) * 0.06} className="h-full">
+              <SpotlightCard className="h-full rounded-2xl border bg-card p-5">
+                <div className="relative flex gap-4">
+                  <IconChip>
+                    <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                      {ind.icon.map((d) => (
+                        <path key={d} d={d} />
+                      ))}
+                    </svg>
+                  </IconChip>
+                  <div className="min-w-0">
+                    <h3 className="font-medium">{ind.title}</h3>
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{ind.desc}</p>
+                  </div>
                 </div>
-                <h3 className="text-base font-display font-semibold mb-2" style={t1}>
-                  {title}
-                </h3>
-                <p className="text-xs font-mono leading-relaxed" style={t3}>
-                  {desc}
-                </p>
-              </div>
+              </SpotlightCard>
+            </BlurFade>
+          ))}
+        </div>
+      </Section>
+
+      {/* ═══ FREE TOOLS ═══ */}
+      <Section muted label="Free tools">
+        <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
+          <div>
+            <SectionHeading eyebrow="Free tools" title="Free tools. No sign-up, no uploads.">
+              {PDF_TOOL_COUNT} PDF tools and an AI background remover that run right in your browser. Your files never leave your device.
+            </SectionHeading>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <CtaLink href="/pdf-tools">All {PDF_TOOL_COUNT} PDF tools</CtaLink>
+              <CtaLink href="/bg-remover" variant="outline" arrow={false}>
+                <Eraser className="size-4" aria-hidden="true" /> Background remover
+              </CtaLink>
+            </div>
+            <EvervaultCard
+              className="mt-8 hidden h-40 rounded-2xl border lg:flex"
+              label={
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  <ShieldCheck className="size-4 text-primary" aria-hidden="true" /> Processed on your device
+                </span>
+              }
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {PDF_TOOLS.map((tool, i) => (
+              <BlurFade key={tool.slug} delay={(i % 2) * 0.06}>
+                <Link href={`/pdf-tools?tool=${tool.slug}`} className="group flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-primary/40">
+                  <IconChip className="size-9">
+                    <FileText className="size-4" aria-hidden="true" />
+                  </IconChip>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium group-hover:text-primary">{tool.name}</span>
+                    <span className="block truncate text-xs text-muted-foreground">{tool.desc}</span>
+                  </span>
+                </Link>
+              </BlurFade>
             ))}
           </div>
         </div>
-      </section>
+      </Section>
 
-      <FreeTools />
-      <LatestInsights posts={posts} />
+      {/* ═══ BLOG ═══ */}
+      {posts.length > 0 && (
+        <Section label="From the blog">
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <SectionHeading eyebrow="From the blog" title="Practical guides for business owners">
+              Websites, e-commerce, SEO and AI tools, explained without the jargon.
+            </SectionHeading>
+            <CtaLink href="/blog" variant="outline">
+              All articles
+            </CtaLink>
+          </div>
+          <CardsCarousel label="Latest articles" className="mt-10">
+            {posts
+              .filter((post) => post.featured_image)
+              .map((post) => (
+                <CarouselCard key={post.id} src={mediaUrl("blog", post.featured_image!)} category={categoryLabel(post.category)} title={post.title}>
+                  {post.excerpt && <p className="text-muted-foreground">{post.excerpt}</p>}
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    {formatDate(post.published_at)}
+                    {post.read_time ? ` · ${post.read_time} min read` : ""}
+                  </p>
+                  <CtaLink href={`/blog/${post.slug}`} className="mt-6">
+                    Read article
+                  </CtaLink>
+                </CarouselCard>
+              ))}
+          </CardsCarousel>
+        </Section>
+      )}
 
-      {/* ═══ TECH STACK ═══ */}
-      <section className="bsh-tech-section py-20 border-y bsh-lazy" aria-label="Technologies we use">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <p className="bsh-tech-label text-center text-[10px] font-mono uppercase tracking-[.2em] mb-10">Technologies &amp; Platforms We Master</p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {TECHS.map(([name, cls], i) => (
-              <span key={name} className={`bsh-reveal bsh-reveal-stagger-${(i % 6) + 1} inline-flex items-center gap-2 px-4 py-2 ${cls} border rounded-lg text-xs font-mono font-medium`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" aria-hidden="true" />
-                {name}
-              </span>
+      {/* ═══ TECH ═══ */}
+      <div className="border-y py-8" aria-label="Technologies we use">
+        <Marquee pauseOnHover fade className="[--duration:30s] [--gap:3rem]">
+          {techs.map((t) => (
+            <span key={t} className="text-sm font-medium whitespace-nowrap text-muted-foreground">
+              {t}
+            </span>
+          ))}
+        </Marquee>
+      </div>
+
+      {/* ═══ WHERE WE WORK ═══ */}
+      {cities.length > 0 && (
+        <Section label="Where we work">
+          <SectionHeading center eyebrow="Where we work" title="Based in Ghaziabad, working remotely across India">
+            Your city is never a barrier. Pick yours to see how we can help businesses there.
+          </SectionHeading>
+          <BlurFade delay={0.1}>
+            <WorldMap
+              className="mx-auto mt-8 max-w-4xl"
+              label="Map with Ghaziabad connected to major Indian cities"
+              markers={[{ lat: GHAZIABAD[0], lng: GHAZIABAD[1], label: "Ghaziabad" }]}
+              arcs={HUBS.map((h) => ({ from: GHAZIABAD, to: [h.lat, h.lng] as [number, number] }))}
+            />
+          </BlurFade>
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {cities.map((c) => (
+              <Link key={c.slug} href={`/${c.slug}`} className="rounded-full border bg-background px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground">
+                {c.name}
+              </Link>
             ))}
           </div>
-        </div>
-      </section>
+        </Section>
+      )}
 
-      <CitiesServed cities={cities} />
-      <AboutAndCareers jobs={jobs} />
+      {/* ═══ ABOUT + CAREERS ═══ */}
+      <Section muted label="About and careers">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <WobbleCard className="rounded-3xl bg-zinc-950 text-white" contentClassName="p-8 sm:p-10">
+            <Handshake className="size-7 text-emerald-400" aria-hidden="true" />
+            <h2 className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl">A studio, not a factory</h2>
+            <p className="mt-3 max-w-md text-zinc-300">A small team of designers and developers. You talk directly to the people building your product, with no account managers in between.</p>
+            <CtaLink href="/about" className="mt-6 bg-white text-zinc-950 hover:bg-zinc-200">
+              About us
+            </CtaLink>
+          </WobbleCard>
+          <div className="relative rounded-3xl border bg-card p-8 sm:p-10">
+            <GlowingEffect />
+            <Gauge className="size-7 text-primary" aria-hidden="true" />
+            <h2 className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl">Want to build with us?</h2>
+            {jobs.length ? (
+              <ul className="mt-4 divide-y rounded-xl border">
+                {jobs.slice(0, 3).map((j) => (
+                  <li key={j.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                    <span className="truncate font-medium">{j.title}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{j.type}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 max-w-md text-muted-foreground">No open roles right now, but we&apos;re always glad to hear from talented designers and developers.</p>
+            )}
+            <CtaLink href="/careers" variant="outline" className="mt-6">
+              {jobs.length ? "See open roles" : "Send your CV"}
+            </CtaLink>
+          </div>
+        </div>
+      </Section>
 
       {/* ═══ FAQ ═══ */}
-      <section className="py-24 lg:py-32 relative bsh-lazy" aria-label="Frequently asked questions">
-        <div className="bsh-grid-md absolute inset-0" style={{ backgroundSize: "40px 40px" }} aria-hidden="true" />
-        <div className="bsh-fade-b absolute inset-0" aria-hidden="true" />
-
-        <div className="relative max-w-3xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-14 bsh-reveal">
-            <SectionBadge>FAQ</SectionBadge>
-            <h2 className="text-4xl font-display font-bold" style={t1}>
-              Common <span className="bsh-grad">Questions</span>
-            </h2>
-          </div>
-          <FaqList faqs={FAQS} />
+      <Section label="Frequently asked questions">
+        <div className="mx-auto max-w-3xl">
+          <SectionHeading center eyebrow="FAQ" title="Questions we get asked most" />
+          <Accordion type="single" collapsible className="mt-10">
+            {FAQS.map(([q, a]) => (
+              <AccordionItem key={q} value={q}>
+                <AccordionTrigger className="text-left text-base">{q}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">{a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
-      </section>
-
-      {/* ═══ FINAL CTA ═══ */}
-      <section className="py-24 lg:py-32 relative overflow-hidden" aria-label="Get started">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[260px] bg-emerald-500/[.07] rounded-full blur-[80px] pointer-events-none" aria-hidden="true" />
-
-        <div className="relative max-w-4xl mx-auto px-6 lg:px-8 text-center bsh-reveal">
-          <div className="inline-flex items-center gap-2.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-8">
-            <span className="text-xs font-mono text-emerald-400">Currently accepting new projects</span>
-          </div>
-
-          <h2 className="text-4xl sm:text-5xl lg:text-7xl font-display font-bold mb-6 leading-tight" style={t1}>
-            Ready to Build
-            <br />
-            <span className="bsh-grad">Something Great?</span>
-          </h2>
-          <p className="text-lg font-mono mb-10 max-w-2xl mx-auto leading-relaxed" style={t2}>
-            Tell us about your project. We&apos;ll reply {contact.responseTime} with a tailored proposal, timeline, and transparent pricing.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Link
-              href="/contact"
-              className="bsh-btn-primary group inline-flex items-center gap-2.5 px-10 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-sm rounded-xl shadow-[0_0_60px_rgba(16,185,129,.3)]"
-            >
-              Start Your Project
-              <Icon d={ARROW} className="w-4 h-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
-            </Link>
-            <Link href="/pdf-tools" className="bsh-btn-outline inline-flex items-center gap-2 px-8 py-4 border font-mono text-sm rounded-xl backdrop-blur-sm">
-              Try Free PDF Tools
-            </Link>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 text-xs font-mono" style={t3}>
-            <a href={`mailto:${contact.email}`} className="flex items-center gap-2 hover:text-emerald-400 transition-colors">
-              <Icon d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" className="w-3.5 h-3.5" strokeWidth={2} />
-              {contact.email}
-            </a>
-            <span className="hidden sm:inline" aria-hidden="true" style={{ color: "var(--bsh-border)" }}>
-              ·
-            </span>
-            <span className="flex items-center gap-2">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {contact.address || "India"}
-            </span>
-            <span className="hidden sm:inline" aria-hidden="true" style={{ color: "var(--bsh-border)" }}>
-              ·
-            </span>
-            <span className="flex items-center gap-2 text-emerald-600">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
-              Reply {contact.responseTime}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <StickyCta />
+      </Section>
     </>
   );
 }

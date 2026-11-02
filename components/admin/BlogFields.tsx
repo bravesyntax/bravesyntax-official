@@ -145,7 +145,7 @@ export function CategoryPicker({
           type="button"
           onClick={add}
           title="Add category"
-          className="px-3 py-2 bg-accent hover:bg-accent-light text-black font-mono font-bold text-sm rounded-xl transition-all flex-shrink-0"
+          className="px-3 py-2 bg-brand hover:bg-brand-light text-black font-mono font-bold text-sm rounded-xl transition-all flex-shrink-0"
         >
           ＋
         </button>

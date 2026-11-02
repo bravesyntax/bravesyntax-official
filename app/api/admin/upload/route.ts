@@ -17,7 +17,8 @@ export async function POST(request: Request) {
   if (!(await getAdmin()))
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
 
-  const body = (await request.json()) as HandleUploadBody;
+  const body = (await request.json().catch(() => null)) as HandleUploadBody | null;
+  if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   try {
     const result = await handleUpload({
       body,

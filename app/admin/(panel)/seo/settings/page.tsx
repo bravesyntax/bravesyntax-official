@@ -28,7 +28,7 @@ function Section({ icon: Icon, title, description, children }: { icon: LucideIco
     <section className="grid gap-6 border-b border-zinc-800 py-8 first:pt-0 last:border-0 lg:grid-cols-[260px_1fr]">
       <div>
         <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Icon className="h-4 w-4 text-accent" aria-hidden="true" />
+          <Icon className="h-4 w-4 text-brand" aria-hidden="true" />
           {title}
         </h3>
         <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">{description}</p>
@@ -98,7 +98,7 @@ export default async function SeoSettingsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-800 pt-6">
           <p className="text-[11px] text-zinc-500">
             Location page templates are on the{" "}
-            <Link href="/admin/seo/locations" className="text-accent hover:underline">
+            <Link href="/admin/seo/locations" className="text-brand hover:underline">
               Location pages
             </Link>{" "}
             tab. Google Analytics lives in Settings.

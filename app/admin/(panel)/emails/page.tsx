@@ -24,7 +24,7 @@ export default async function EmailTemplatesPage({ searchParams }: Props) {
     <AdminPage title="Email Templates">
       <p className="mb-6 max-w-3xl text-sm text-zinc-400">
         Every email the website sends, previewed with sample data. Business name, contact details and social links come from{" "}
-        <Link href="/admin/settings" className="text-accent hover:underline">
+        <Link href="/admin/settings" className="text-brand hover:underline">
           Settings
         </Link>
         .{" "}
@@ -34,8 +34,8 @@ export default async function EmailTemplatesPage({ searchParams }: Props) {
         <Card className="self-start">
           <nav className="divide-y divide-zinc-800">
             {TEMPLATES.map(([slug, name, when]) => (
-              <Link key={slug} href={`/admin/emails?t=${slug}`} className={`flex gap-3 px-4 py-3.5 transition-colors ${slug === active[0] ? "bg-accent/10" : "hover:bg-zinc-800/40"}`}>
-                <Mail className={`mt-0.5 h-4 w-4 flex-shrink-0 ${slug === active[0] ? "text-accent" : "text-zinc-500"}`} aria-hidden="true" />
+              <Link key={slug} href={`/admin/emails?t=${slug}`} className={`flex gap-3 px-4 py-3.5 transition-colors ${slug === active[0] ? "bg-brand/10" : "hover:bg-zinc-800/40"}`}>
+                <Mail className={`mt-0.5 h-4 w-4 flex-shrink-0 ${slug === active[0] ? "text-brand" : "text-zinc-500"}`} aria-hidden="true" />
                 <span>
                   <span className={`block text-sm font-medium ${slug === active[0] ? "text-white" : "text-zinc-300"}`}>{name}</span>
                   <span className="mt-0.5 block text-xs text-zinc-500">{when}</span>
@@ -47,7 +47,7 @@ export default async function EmailTemplatesPage({ searchParams }: Props) {
         <Card>
           <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3">
             <span className="text-sm font-medium text-white">{active[1]}</span>
-            <a href={`/api/admin/email-preview/${active[0]}`} target="_blank" rel="noopener noreferrer" className="text-xs text-accent hover:underline">
+            <a href={`/api/admin/email-preview/${active[0]}`} target="_blank" rel="noopener noreferrer" className="text-xs text-brand hover:underline">
               Open full size <ExternalLink className="inline h-3 w-3" aria-hidden="true" />
             </a>
           </div>

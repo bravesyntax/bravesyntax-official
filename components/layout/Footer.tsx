@@ -1,8 +1,14 @@
-import { ArrowRight, Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import { CtaLink } from "@/components/site/ui";
+import { Button } from "@/components/ui/button";
+import { GlowingEffect } from "@/components/velora/glowing-effect";
+import { Meteors } from "@/components/velora/meteors";
+import { TextHoverEffect } from "@/components/velora/text-hover-effect";
+import { WordRotate } from "@/components/velora/word-rotate";
 import { getContactInfo } from "@/lib/contact";
-import { contactServiceHref } from "@/lib/navigation";
+import { serviceHref } from "@/lib/navigation";
 import { getActiveServices } from "@/lib/services";
 
 // Site footer. Services, contact details and social profiles all come from the admin (Services / Settings).
@@ -17,7 +23,7 @@ const SOCIAL_ICONS: Record<string, string> = Object.fromEntries([
 
 const COMPANY: [string, string][] = [
   ["About us", "/about"],
-  ["Portfolio", "/portfolio"],
+  ["Work", "/portfolio"],
   ["Industries", "/industries"],
   ["Blog", "/blog"],
   ["Careers", "/careers"],
@@ -32,20 +38,27 @@ const TOOLS: [string, string][] = [
   ["AI background remover", "/bg-remover"],
 ];
 
-const linkCls = "text-[13.5px] leading-snug text-zinc-400 transition-colors hover:text-emerald-400";
+const linkCls = "text-sm text-muted-foreground transition-colors hover:text-foreground";
 
-function Column({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
+function Column({ title, links }: { title: string; links: [string, string][] }) {
   return (
-    <div className={className}>
-      <h3 className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{title}</h3>
-      {children}
+    <div>
+      <h3 className="text-sm font-medium">{title}</h3>
+      <ul className="mt-4 space-y-2.5">
+        {links.map(([label, href]) => (
+          <li key={href}>
+            <Link href={href} className={linkCls}>
+              {label}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
 export default async function Footer() {
   const [services, contact] = await Promise.all([getActiveServices(), getContactInfo()]);
-  const featured = services.slice(0, 8);
 
   const contactRows = [
     contact.email && { icon: Mail, label: contact.email, href: `mailto:${contact.email}` },
@@ -55,151 +68,110 @@ export default async function Footer() {
   ].filter(Boolean) as { icon: typeof Mail; label: string; href: string }[];
 
   return (
-    <footer className="w-full overflow-hidden border-t border-zinc-800 bg-black text-white" style={{ maxWidth: "100vw" }}>
-      {/* 1. CTA band */}
-      <div className="border-b border-zinc-800">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-10 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 lg:py-12">
-          <div className="min-w-0">
-            <p className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-emerald-500">
-              <span className="ft-ping inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-emerald-500" />
-              Available for new projects
-            </p>
-            <h2 className="font-display text-2xl font-extrabold leading-tight text-white sm:text-3xl">Have a project in mind?</h2>
-            <p className="mt-2 text-sm text-zinc-400">
-              Tell us what you&apos;re building — we reply {contact.responseTime} with a clear plan and quote.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row md:flex-shrink-0">
-            <Link
-              href="/contact"
-              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 font-mono text-sm font-bold text-black shadow-[0_0_24px_rgba(16,185,129,.25)] transition-all hover:bg-emerald-400"
-            >
-              Start a conversation
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-            </Link>
-            {contact.whatsappHref && (
-              <a
-                href={contact.whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-700 px-6 py-3.5 font-mono text-sm text-white transition-colors hover:border-emerald-500/50 hover:text-white"
-              >
-                <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                WhatsApp us
-              </a>
-            )}
+    <footer className="border-t bg-background">
+      <div className="mx-auto max-w-7xl px-5 pt-12 sm:px-6 lg:px-8">
+        <div className="relative isolate overflow-hidden rounded-3xl border bg-zinc-950 px-6 py-12 text-white sm:px-12">
+          <Meteors number={12} className="-z-10" />
+          <GlowingEffect />
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-xl">
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Let&apos;s build your <WordRotate words={["website", "web app", "online store", "brand"]} className="text-emerald-300" />
+              </h2>
+              <p className="mt-2 text-sm text-zinc-300">Tell us what you&apos;re building. We reply {contact.responseTime} with a clear plan and a fixed quote.</p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <CtaLink href="/contact" className="bg-white text-zinc-950 hover:bg-zinc-200">
+                Start a project
+              </CtaLink>
+              {contact.whatsappHref && (
+                <Button asChild variant="ghost" className="h-11 rounded-full border border-white/20 px-5 text-white hover:bg-white/10 hover:text-white">
+                  <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle aria-hidden="true" /> WhatsApp us
+                  </a>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 2. Main grid */}
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-10 px-5 py-12 sm:px-6 lg:grid-cols-12 lg:gap-x-10 lg:px-8 lg:py-16">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-10 px-5 py-14 sm:px-6 lg:grid-cols-12 lg:gap-x-10 lg:px-8">
         <div className="col-span-2 lg:col-span-4">
-          <Link href="/" className="inline-block" aria-label={`${contact.siteName} — Home`}>
+          <Link href="/" className="inline-block" aria-label={`${contact.siteName} home`}>
             <Logo className="h-8" />
           </Link>
-          <p className="mt-3 max-w-sm text-sm leading-relaxed text-zinc-400">
-            A design and development studio building fast, conversion-focused websites, web apps and brands for growing businesses.
-          </p>
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">A design and development studio building fast, conversion-focused websites, web apps and brands for growing businesses.</p>
           <ul className="mt-6 space-y-3">
-            {contactRows.map(({ icon: Icon, label, href }) => (
-              <li key={label} className="flex items-start gap-3 text-sm text-zinc-400">
-                <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500/80" aria-hidden="true" />
-                {href ? (
-                  <a href={href} className="break-all transition-colors hover:text-emerald-400">
-                    {label}
-                  </a>
-                ) : (
-                  <span>{label}</span>
-                )}
-              </li>
-            ))}
+            {contactRows.map((row) => {
+              const inner = (
+                <>
+                  <row.icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                  <span>{row.label}</span>
+                </>
+              );
+              return (
+                <li key={row.label}>
+                  {row.href ? (
+                    <a href={row.href} className={`flex items-start gap-2.5 ${linkCls}`}>
+                      {inner}
+                    </a>
+                  ) : (
+                    <span className="flex items-start gap-2.5 text-sm text-muted-foreground">{inner}</span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
           {contact.socials.length > 0 && (
-            <div className="mt-6 flex flex-wrap gap-2">
-              {contact.socials.map(({ name, url }) => (
-                <a
-                  key={name}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${contact.siteName} on ${name}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-400"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d={SOCIAL_ICONS[name]} />
+            <div className="mt-6 flex gap-2">
+              {contact.socials.map((s) => (
+                <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.name} className="grid size-9 place-items-center rounded-lg border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                  <svg viewBox="0 0 24 24" className="size-4 fill-current" aria-hidden="true">
+                    <path d={SOCIAL_ICONS[s.name]} />
                   </svg>
                 </a>
               ))}
             </div>
           )}
         </div>
-
-        <Column title="Services" className="col-span-2 lg:col-span-4">
-          <ul className="grid grid-cols-1 gap-x-6 gap-y-2.5 sm:grid-cols-2">
-            {featured.map((s) => (
-              <li key={s.id}>
-                <Link href={contactServiceHref(s.title)} className={linkCls}>
+        <div className="col-span-2 lg:col-span-4">
+          <h3 className="text-sm font-medium">Services</h3>
+          <ul className="mt-4 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+            {services.map((s) => (
+              <li key={s.title}>
+                <Link href={serviceHref(s)} className={linkCls}>
                   {s.title}
                 </Link>
               </li>
             ))}
-            <li>
-              <Link href="/services" className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-emerald-400 hover:text-emerald-300">
-                All services <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-              </Link>
-            </li>
           </ul>
-        </Column>
-
-        <Column title="Company" className="lg:col-span-2">
-          <ul className="space-y-2.5">
-            {COMPANY.map(([label, href]) => (
-              <li key={href}>
-                <Link href={href} className={linkCls}>
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Column>
-
-        <Column title="Free tools" className="lg:col-span-2">
-          <ul className="space-y-2.5">
-            {TOOLS.map(([label, href]) => (
-              <li key={href}>
-                <Link href={href} className={linkCls}>
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Column>
+        </div>
+        <div className="lg:col-span-2">
+          <Column title="Company" links={COMPANY} />
+        </div>
+        <div className="lg:col-span-2">
+          <Column title="Free tools" links={TOOLS} />
+        </div>
       </div>
 
-      {/* 3. Bottom strip */}
-      <div className="border-t border-zinc-800">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-5 text-center sm:flex-row sm:px-6 sm:text-left lg:px-8">
-          <p className="font-mono text-xs text-zinc-500">
+      <div className="border-t">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-6 sm:flex-row sm:px-6 lg:px-8">
+          <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} {contact.siteName}. All rights reserved.
           </p>
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2" aria-label="Legal">
-            <Link href="/privacy-policy" className="font-mono text-xs text-zinc-500 transition-colors hover:text-emerald-400">
+          <nav className="flex gap-5" aria-label="Legal">
+            <Link href="/privacy-policy" className={linkCls}>
               Privacy Policy
             </Link>
-            <Link href="/terms" className="font-mono text-xs text-zinc-500 transition-colors hover:text-emerald-400">
+            <Link href="/terms" className={linkCls}>
               Terms of Service
-            </Link>
-            <Link href="/contact" className="font-mono text-xs text-zinc-500 transition-colors hover:text-emerald-400">
-              Contact
             </Link>
           </nav>
         </div>
       </div>
-
-      {/* 4. Wordmark */}
-      <div className="ft-wordmark-wrap w-full select-none overflow-hidden pb-0.5" aria-hidden="true">
-        <Logo className="ft-wordmark mx-auto h-auto w-full max-w-6xl px-5" sizes="(min-width: 1152px) 1152px, 100vw" />
+      <div className="mx-auto max-w-7xl px-5 pb-6 sm:px-6 lg:px-8" aria-hidden="true">
+        <TextHoverEffect text="BRAVE</SYNTAX>" />
       </div>
     </footer>
   );

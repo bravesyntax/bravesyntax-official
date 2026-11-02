@@ -94,30 +94,29 @@ function ToolGrid() {
   const [cat, setCat] = useState<Category | "all">("all");
 
   return (
-    <div className="max-w-7xl mx-auto px-6 lg:px-8">
-      <div className="flex flex-wrap gap-2 mb-8" style={{ animation: "slide-up .5s ease-out .15s forwards", opacity: 0 }}>
+    <div className="mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8">
+      <div className="mb-8 flex flex-wrap gap-2">
         {FILTERS.map(([k, label]) => (
-          <button key={k} onClick={() => setCat(k)} className={`cat-btn${cat === k ? " active" : ""} px-4 py-2 text-xs font-mono border border-zinc-800 rounded-full`}>
+          <button key={k} onClick={() => setCat(k)} className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${cat === k ? "border-transparent bg-primary font-medium text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
             {label}
           </button>
         ))}
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="toolsList">
-        {TOOLS.filter((t) => cat === "all" || t[3] === cat).map(([id, name, desc, category, icon], i) => (
+        {TOOLS.filter((t) => cat === "all" || t[3] === cat).map(([id, name, desc, category, icon]) => (
           <button
             key={`${cat}-${id}`}
             onClick={() => engine().openTool?.(id)}
             data-cat={category}
-            className="tool-card group text-left bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5"
-            style={{ animation: cat === "all" ? `slide-up .5s ease-out ${0.15 + i * 0.03}s forwards` : "slide-up .3s ease-out forwards", opacity: 0 }}
+            className="tool-card group rounded-2xl border bg-card p-5 text-left transition-colors hover:border-primary/40"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-11 h-11 bg-accent/10 rounded-xl flex items-center justify-center text-accent group-hover:bg-accent/20 transition-colors">
+              <div className="w-11 h-11 bg-brand/10 rounded-xl flex items-center justify-center text-brand group-hover:bg-brand/20 transition-colors">
                 <Icon d={icon} className="w-5 h-5" strokeWidth={2} />
               </div>
               <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">{category}</span>
             </div>
-            <h3 className="font-display font-semibold text-white group-hover:text-accent transition-colors text-sm">{name}</h3>
+            <h3 className="font-display font-semibold text-white group-hover:text-brand transition-colors text-sm">{name}</h3>
             <p className="text-xs text-zinc-500 font-mono mt-1.5 leading-relaxed">{desc}</p>
           </button>
         ))}
@@ -158,9 +157,9 @@ export default function PdfToolkit() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {PRIVACY.map(([PIcon, title, desc]) => (
-              <div key={title} className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5 text-center hover:border-accent/20 transition-colors">
-                <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-accent/20 bg-accent/10">
-                  <PIcon className="h-5 w-5 text-accent" aria-hidden="true" />
+              <div key={title} className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5 text-center hover:border-brand/20 transition-colors">
+                <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-brand/20 bg-brand/10">
+                  <PIcon className="h-5 w-5 text-brand" aria-hidden="true" />
                 </span>
                 <div className="font-display font-semibold text-white text-sm mb-1">{title}</div>
                 <p className="text-xs text-zinc-500 font-mono leading-relaxed">{desc}</p>

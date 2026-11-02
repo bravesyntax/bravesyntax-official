@@ -1,4 +1,4 @@
-// Redirect rules from Admin → SEO → Redirects. Dependency-free so middleware.ts (edge runtime) can import it.
+// Redirect rules from Admin → SEO → Redirects. Dependency-free so proxy.ts can import it.
 //   source "/old-page"     matches exactly that path (trailing slash ignored, query string ignored)
 //   source "/old-blog/*"   matches everything under /old-blog/; a "*" in the destination receives the rest
 //                          ("/old-blog/*" → "/blog/*" sends /old-blog/seo-tips to /blog/seo-tips)

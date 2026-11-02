@@ -1,6 +1,9 @@
 import Script from "next/script";
 import Footer from "@/components/layout/Footer";
+import SiteBanner from "@/components/layout/SiteBanner";
 import SiteHeader from "@/components/layout/SiteHeader";
+import { ScrollProgress } from "@/components/velora/scroll-progress";
+import { PDF_TOOL_COUNT } from "@/lib/navigation";
 import { getSiteSettings } from "@/lib/settings";
 
 // Public site chrome. DB-backed content (settings, services) is cached and refreshed in the background
@@ -13,6 +16,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <>
+      <ScrollProgress className="z-60" />
+      <SiteBanner count={PDF_TOOL_COUNT} />
       <SiteHeader />
       <main>{children}</main>
       <Footer />

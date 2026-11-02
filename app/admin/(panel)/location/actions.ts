@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/admin/auth";
 import { checkbox, finish, intField, refreshPublicSite } from "@/lib/admin/common";
+import { pairsToJson, sectorsToJson } from "@/lib/admin/lines";
 import { rows, sql } from "@/lib/db";
 import { CITY_SLUG_RE } from "@/lib/locations";
 import { NOT_CITIES } from "@/lib/reserved";
@@ -11,7 +12,7 @@ const tabUrl = (tab: string, extra = "") => `/admin/location?tab=${tab}${extra}`
 const cleanSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 const isDuplicate = (err: unknown) => err instanceof Error && /duplicate key/i.test(err.message);
 
-// Note: deactivating a city turns its pages into 410 Gone; the middleware caches that list for up to 10 minutes.
+// Note: deactivating a city turns its pages into 410 Gone; the proxy caches that list for up to 10 minutes.
 
 export async function saveCity(fd: FormData) {
   await requireAdmin();
@@ -25,6 +26,8 @@ export async function saveCity(fd: FormData) {
   const state = field(fd, "state");
   const lat = field(fd, "latitude") || null;
   const lng = field(fd, "longitude") || null;
+  const about = String(fd.get("about") ?? "").trim() || null;
+  const sectors = sectorsToJson(String(fd.get("sectors") ?? ""));
   const sortOrder = intField(fd, "sort_order");
 
   try {
@@ -32,12 +35,12 @@ export async function saveCity(fd: FormData) {
       const [old] = await rows<{ slug: string }>(sql`SELECT slug FROM location_cities WHERE id = ${id}`);
       await sql`
         UPDATE location_cities SET name = ${name}, slug = ${slug}, state = ${state}, latitude = ${lat}, longitude = ${lng},
-          sort_order = ${sortOrder}, is_active = ${checkbox(fd, "is_active")}
+          sort_order = ${sortOrder}, is_active = ${checkbox(fd, "is_active")}, about = ${about}, sectors_json = ${sectors}
         WHERE id = ${id}
       `;
       if (old && old.slug !== slug) await sql`UPDATE location_page_overrides SET city_slug = ${slug} WHERE city_slug = ${old.slug}`;
     } else {
-      await sql`INSERT INTO location_cities (name, slug, state, latitude, longitude, sort_order) VALUES (${name}, ${slug}, ${state}, ${lat}, ${lng}, ${sortOrder})`;
+      await sql`INSERT INTO location_cities (name, slug, state, latitude, longitude, sort_order, about, sectors_json) VALUES (${name}, ${slug}, ${state}, ${lat}, ${lng}, ${sortOrder}, ${about}, ${sectors})`;
     }
   } catch (err) {
     console.error("[saveCity]", err);
@@ -81,20 +84,22 @@ export async function saveLocationService(fd: FormData) {
     if (!Array.isArray(parsed)) await finish("error", "Features JSON is invalid (expected an array of {icon, title, desc}).", back);
   }
   const sortOrder = intField(fd, "sort_order");
+  const about = String(fd.get("about") ?? "").trim() || null;
+  const faqs = pairsToJson(String(fd.get("faqs") ?? ""));
 
   try {
     if (id) {
       const [old] = await rows<{ slug: string }>(sql`SELECT slug FROM location_services WHERE id = ${id}`);
       await sql`
         UPDATE location_services SET slug = ${slug}, label = ${label}, keyword = ${keyword}, contact_param = ${contactParam},
-          features_json = ${features}, sort_order = ${sortOrder}, is_active = ${checkbox(fd, "is_active")}
+          features_json = ${features}, sort_order = ${sortOrder}, is_active = ${checkbox(fd, "is_active")}, about = ${about}, faq_json = ${faqs}
         WHERE id = ${id}
       `;
       if (old && old.slug !== slug) await sql`UPDATE location_page_overrides SET service_slug = ${slug} WHERE service_slug = ${old.slug}`;
     } else {
       await sql`
-        INSERT INTO location_services (slug, label, keyword, contact_param, features_json, sort_order)
-        VALUES (${slug}, ${label}, ${keyword}, ${contactParam}, ${features}, ${sortOrder})
+        INSERT INTO location_services (slug, label, keyword, contact_param, features_json, sort_order, about, faq_json)
+        VALUES (${slug}, ${label}, ${keyword}, ${contactParam}, ${features}, ${sortOrder}, ${about}, ${faqs})
       `;
     }
   } catch (err) {

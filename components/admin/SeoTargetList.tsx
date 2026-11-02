@@ -75,11 +75,11 @@ export default function SeoTargetList({
                         {ISSUES[c].label}
                       </Pill>
                     ))}
-                  <a href={t.path} target="_blank" rel="noopener noreferrer" className="ml-1 text-zinc-500 hover:text-accent" title="Open page" aria-label={`Open ${t.label}`}>
+                  <a href={t.path} target="_blank" rel="noopener noreferrer" className="ml-1 text-zinc-500 hover:text-brand" title="Open page" aria-label={`Open ${t.label}`}>
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>
                 </div>
-                <ChevronRight className="hidden h-4 w-4 text-zinc-600 transition-colors group-hover:text-accent lg:block" aria-hidden="true" />
+                <ChevronRight className="hidden h-4 w-4 text-zinc-600 transition-colors group-hover:text-brand lg:block" aria-hidden="true" />
               </div>
             );
           })}

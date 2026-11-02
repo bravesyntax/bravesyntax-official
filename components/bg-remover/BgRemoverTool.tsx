@@ -1,5 +1,6 @@
 "use client";
 
+import { CompareSlider } from "@/components/velora/compare-slider";
 import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 import Icon from "@/components/ui/Icon";
 
@@ -246,20 +247,19 @@ export default function BgRemoverTool() {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="relative bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden">
-                <div className="absolute top-2 left-2 z-10 bg-black/60 text-white text-[10px] font-mono font-semibold px-2 py-0.5 rounded uppercase">Original</div>
-                {/* eslint-disable-next-line @next/next/no-img-element -- local object URL preview, nothing to optimise */}
-                <img src={originalUrl} alt="Original uploaded image" className="w-full h-64 object-contain" />
-              </div>
-              <div
-                className="relative result-canvas-wrap border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden"
-                style={bg !== "transparent" ? { background: bg } : undefined}
-              >
-                <div className="absolute top-2 left-2 z-10 bg-black/60 text-white text-[10px] font-mono font-semibold px-2 py-0.5 rounded uppercase">Background Removed</div>
-                <canvas ref={canvasRef} className="w-full h-64 object-contain" />
-              </div>
-            </div>
+            <CompareSlider
+              className="h-80 rounded-xl border"
+              label="Compare the original image with the result"
+              before={
+                // eslint-disable-next-line @next/next/no-img-element -- local object URL preview, nothing to optimise
+                <img src={originalUrl} alt="Original uploaded image" className="size-full bg-muted object-contain" />
+              }
+              after={
+                <div className="result-canvas-wrap size-full" style={bg !== "transparent" ? { background: bg } : undefined}>
+                  <canvas ref={canvasRef} className="size-full object-contain" />
+                </div>
+              }
+            />
 
             <div className="flex flex-wrap items-center gap-3 pt-4 mt-4 border-t border-zinc-200 dark:border-zinc-700">
               <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Background:</span>

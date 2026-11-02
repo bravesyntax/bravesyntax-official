@@ -35,7 +35,7 @@ The original PHP site in the parent folder stays untouched as the reference unti
   fetch it from the live server into `public/uploads/blog/`.
 - Rate limits are counted from the table the form writes to (e.g. `career_applications.ip_address`), replacing
   the PHP `secure_storage/ratelimit/*.json` files.
-- Old `/pages/blog.php?post=` URLs are redirected in `middleware.ts`.
+- Old `/pages/blog.php?post=` URLs are redirected in `proxy.ts`.
 - Environment variables are documented in `.env.example` (SMTP, Turnstile, Blob are optional; features switch on when set).
 - `career_applications.resume_file`: old rows hold a filename from `uploads/resumes/`; new rows hold a private Blob URL
   (the admin downloads it through `/api/admin/resume/<id>`). Old filenames are shown as "stored on the old server";
@@ -46,7 +46,7 @@ The original PHP site in the parent folder stays untouched as the reference unti
 - Header "Tools" menu links `?tool=pdf-to-word`, `pdf-to-excel` and `word-to-pdf`, which don't exist (same on the
   PHP site); those links open the toolkit without a tool selected.
 - Location pages: unknown city → 404; deactivated city, or a slug in `location_cities_removed_backup` that isn't
-  active again → 410 (middleware.ts, gone-list cached 10 min). PHP returned 404 for the 382 removed slugs because it
+  active again → 410 (proxy.ts, gone-list cached 10 min). PHP returned 404 for the 382 removed slugs because it
   only checked `location_cities`; 410 is what its own comments intended. Only the top `LOCATION_INDEXABLE_CITY_LIMIT`
   (default 20) cities are indexable and in the sitemap. New top-level routes must be added to `NOT_CITIES` in
   `lib/reserved.ts` (the location admin also refuses those as city slugs).
@@ -58,13 +58,13 @@ The original PHP site in the parent folder stays untouched as the reference unti
 - Resumes and quote logos are intentionally **not** in `public/` (private).
 - Admin passwords are PHP bcrypt (`$2y$`); `bcryptjs` verifies these once the prefix is normalized to `$2a$`/`$2b$`.
 - Admin panel (step 7): sessions are a signed `bs_admin` cookie (`ADMIN_SESSION_SECRET`, 1 h sliding), checked in
-  middleware and again against `admin_users` in every page and action; 5 failed logins lock for 15 min. Old
+  proxy and again against `admin_users` in every page and action; 5 failed logins lock for 15 min. Old
   `/admin/*.php` URLs redirect to the new pages. Edits revalidate the public pages immediately.
 - Vercel Blob needs **two** stores (a store is either public or private): a public one (default `BLOB_` prefix) for
   admin blog/portfolio images, and a private one connected with env prefix `RESUME_BLOB` for resumes. Images that
   are replaced or removed are deleted from Blob; legacy files in `public/uploads` are left alone.
 - The `categories` table is managed in the admin (as on the PHP site) but nothing on the public site reads it.
-- Deactivating or deleting a city takes up to 10 minutes to start answering 410 (middleware gone-list cache).
+- Deactivating or deleting a city takes up to 10 minutes to start answering 410 (proxy gone-list cache).
 
 ## Audit & hardening (2026-10-27)
 
@@ -88,7 +88,7 @@ The original PHP site in the parent folder stays untouched as the reference unti
   (`lib/seo.ts`). Location titles/descriptions come from 4 templates (`{city}`, `{state}`, `{service}`, `{keyword}`,
   `{site}`, `{suffix}`). Admin → SEO has: Overview (health score + issues: duplicates, lengths, noindex, missing
   image/keyword), per-type lists, a per-URL editor with Google/social previews and live checks, Redirects
-  (301/302/410, `/old/*` wildcards, hit counts; served by middleware with a 60 s cache) and Settings (title suffix,
+  (301/302/410, `/old/*` wildcards, hit counts; served by the proxy with a 60 s cache) and Settings (title suffix,
   fallback description, share image, Google/Bing verification, organisation schema). The sitemap skips noindex and
   canonicalised URLs. Migration: `db/migrations/2026-10-27-seo-v2.sql`. The old `seo_pages`, `seo_keywords` and
   `categories` tables are no longer used (left in place; drop when convenient). The fake aggregateRating in the

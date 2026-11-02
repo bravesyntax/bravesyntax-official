@@ -90,7 +90,7 @@ export default async function DashboardPage() {
         <Card className="xl:col-span-2">
           <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
             <h2 className="font-display font-semibold text-white">Latest enquiries</h2>
-            <Link href="/admin/messages" className="inline-flex items-center gap-1 text-xs text-accent hover:underline">
+            <Link href="/admin/messages" className="inline-flex items-center gap-1 text-xs text-brand hover:underline">
               View all <ArrowRight className="h-3 w-3" aria-hidden="true" />
             </Link>
           </div>
@@ -102,11 +102,11 @@ export default async function DashboardPage() {
                 const name = decodeEntities(m.name);
                 return (
                   <Link key={m.id} href={`/admin/messages?view=${m.id}`} className="flex items-center gap-4 px-6 py-3.5 transition-colors hover:bg-zinc-800/30">
-                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-accent/10 font-display text-sm font-bold text-accent">{name.charAt(0).toUpperCase()}</span>
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand/10 font-display text-sm font-bold text-brand">{name.charAt(0).toUpperCase()}</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate text-sm font-semibold text-white">{name}</span>
-                        {!m.is_read && <span className="h-2 w-2 flex-shrink-0 rounded-full bg-accent" aria-label="Unread" />}
+                        {!m.is_read && <span className="h-2 w-2 flex-shrink-0 rounded-full bg-brand" aria-label="Unread" />}
                         {m.service && <span className="hidden truncate rounded-md bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400 sm:inline">{decodeEntities(m.service).replace(/ \[Budget:.*$/, "")}</span>}
                       </div>
                       <p className="truncate text-xs text-zinc-500">{decodeEntities(m.message).slice(0, 90)}</p>
@@ -124,8 +124,8 @@ export default async function DashboardPage() {
             <h2 className="mb-4 font-display font-semibold text-white">Quick actions</h2>
             <div className="grid grid-cols-2 gap-2.5">
               {quick.map(([label, href, Icon]) => (
-                <Link key={label} href={href} className="flex flex-col gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-3.5 text-sm text-zinc-300 transition-colors hover:border-accent/40 hover:text-white">
-                  <span className="flex items-center gap-1.5 text-accent">
+                <Link key={label} href={href} className="flex flex-col gap-2 rounded-xl border border-zinc-800 bg-zinc-900 p-3.5 text-sm text-zinc-300 transition-colors hover:border-brand/40 hover:text-white">
+                  <span className="flex items-center gap-1.5 text-brand">
                     <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
@@ -146,7 +146,7 @@ export default async function DashboardPage() {
               </span>
             </div>
             <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-zinc-800">
-              <div className="h-full rounded-full bg-accent" style={{ width: `${(done / checklist.length) * 100}%` }} />
+              <div className="h-full rounded-full bg-brand" style={{ width: `${(done / checklist.length) * 100}%` }} />
             </div>
             <ul className="space-y-3">
               {checklist.map(([ok, label, hint, href]) => (
@@ -167,7 +167,7 @@ export default async function DashboardPage() {
         <Card className="xl:col-span-3">
           <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
             <h2 className="font-display font-semibold text-white">Latest applications</h2>
-            <Link href="/admin/careers?tab=applications" className="inline-flex items-center gap-1 text-xs text-accent hover:underline">
+            <Link href="/admin/careers?tab=applications" className="inline-flex items-center gap-1 text-xs text-brand hover:underline">
               View all <ArrowRight className="h-3 w-3" aria-hidden="true" />
             </Link>
           </div>
@@ -179,7 +179,7 @@ export default async function DashboardPage() {
                 <Link key={a.id} href={`/admin/careers?view=${a.id}`} className="px-6 py-4 transition-colors hover:bg-zinc-800/30">
                   <div className="flex items-center gap-2">
                     <span className="truncate text-sm font-semibold text-white">{decodeEntities(a.name)}</span>
-                    {!a.is_read && <span className="h-2 w-2 flex-shrink-0 rounded-full bg-accent" aria-label="New" />}
+                    {!a.is_read && <span className="h-2 w-2 flex-shrink-0 rounded-full bg-brand" aria-label="New" />}
                   </div>
                   <div className="mt-0.5 truncate text-xs text-zinc-500">{a.job_title ?? "General application"}</div>
                   <div className="mt-2 flex items-center justify-between text-[11px] text-zinc-600">

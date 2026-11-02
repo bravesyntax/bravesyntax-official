@@ -1,14 +1,20 @@
+import { ArrowLeft, Check, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import JsonLd from "@/components/JsonLd";
-import Icon from "@/components/ui/Icon";
+import { container, CtaLink, Section, SectionHeading, ShimmerLink } from "@/components/site/ui";
+import { AuroraBackground } from "@/components/velora/aurora-background";
+import { BlurFade } from "@/components/velora/blur-fade";
+import { BrowserMockup } from "@/components/velora/browser-mockup";
+import { ContainerScroll } from "@/components/velora/container-scroll";
+import { FocusCards } from "@/components/velora/focus-cards";
+import { Lens } from "@/components/velora/lens";
 import { SITE_URL } from "@/lib/config";
-import { capitalize, getPortfolioBySlug, getPortfolioSlugs, splitList } from "@/lib/content";
-import { buildMetadata, customSchema, projectSeoDefaults, resolveSeo } from "@/lib/seo";
-import "../portfolio.css";
+import { capitalize, getPortfolioBySlug, getPortfolios, getPortfolioSlugs, splitList } from "@/lib/content";
 import { absoluteMediaUrl, mediaUrl } from "@/lib/media";
+import { buildMetadata, customSchema, projectSeoDefaults, resolveSeo } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -16,16 +22,12 @@ export async function generateStaticParams() {
   return (await getPortfolioSlugs()).map((slug) => ({ slug }));
 }
 
-/** Built-in SEO for a case study; anything saved in Admin → SEO → Portfolio overrides it. */
+/** Built-in SEO for a project; anything saved in Admin → SEO → Case studies overrides it. */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const project = await getPortfolioBySlug((await params).slug);
   if (!project) return {};
   return buildMetadata("project", String(project.id), projectSeoDefaults(project));
 }
-
-const BodyHeading = ({ children, mb = "mb-3" }: { children: React.ReactNode; mb?: string }) => (
-  <div className={`text-xs font-mono text-emerald-400 uppercase tracking-wider ${mb}`}>{children}</div>
-);
 
 export default async function CaseStudyPage({ params }: Props) {
   const project = await getPortfolioBySlug((await params).slug);
@@ -34,8 +36,17 @@ export default async function CaseStudyPage({ params }: Props) {
   const tags = splitList(project.tags);
   const stack = splitList(project.tech_stack);
   const metrics = [project.metric_1, project.metric_2, project.metric_3].filter((m): m is string => !!m);
-  const [seo, extraSchema] = await Promise.all([resolveSeo("project", String(project.id), projectSeoDefaults(project)), customSchema("project", String(project.id))]);
+  const [seo, extraSchema, all] = await Promise.all([resolveSeo("project", String(project.id), projectSeoDefaults(project)), customSchema("project", String(project.id)), getPortfolios()]);
   const url = seo.canonical;
+  const next = all.filter((p) => p.slug && p.id !== project.id);
+  const nextProject = next[(next.findIndex((p) => p.id > project.id) + next.length) % next.length] ?? null;
+  const more = next.filter((p) => p.image).slice(0, 3);
+  const host = project.live_url ? project.live_url.replace(/^https?:\/\//, "").replace(/\/$/, "") : url.replace(/^https?:\/\//, "");
+  const sections: [string, string | null][] = [
+    ["The challenge", project.challenge],
+    ["Our approach", project.approach],
+    ["The outcome", project.results_detail],
+  ];
 
   const schema = {
     "@context": "https://schema.org",
@@ -49,135 +60,125 @@ export default async function CaseStudyPage({ params }: Props) {
     ...(project.live_url && { mainEntityOfPage: project.live_url }),
   };
 
+  const breadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Portfolio", item: `${SITE_URL}/portfolio` },
+      { "@type": "ListItem", position: 3, name: project.title, item: url },
+    ],
+  };
+
   return (
-    <div className="pg-case-study">
-      <JsonLd data={[schema, ...extraSchema]} />
+    <>
+      <JsonLd data={[schema, breadcrumbs, ...extraSchema]} />
 
-      {/* ═══ HERO ═══ */}
-      <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-black">
-        <div className="absolute top-0 right-0 w-[480px] h-[480px] bg-emerald-500/[.07] rounded-full blur-[120px] pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto px-6 lg:px-8">
-          <Link href="/portfolio" className="inline-flex items-center gap-2 text-xs font-mono text-zinc-500 hover:text-emerald-400 transition-colors mb-8">
-            <Icon d="M15 19l-7-7 7-7" className="w-3.5 h-3.5" strokeWidth={2} />
-            All Work
-          </Link>
-
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <span className="px-3 py-1 text-[11px] font-mono uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full">
-              {capitalize(project.category)}
-            </span>
-            {project.year ? <span className="text-xs font-mono text-zinc-500">{project.year}</span> : null}
-            {project.client_name && <span className="text-xs font-mono text-zinc-500">&middot; {project.client_name}</span>}
+      <section className="relative isolate overflow-hidden">
+        <AuroraBackground intensity="subtle" />
+        {project.image ? (
+          <ContainerScroll
+            header={
+              <div className="mx-auto max-w-3xl px-5 text-center">
+                <Link href="/portfolio" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+                  <ArrowLeft className="size-4" aria-hidden="true" /> All projects
+                </Link>
+                <p className="mt-5 text-sm font-medium text-primary">
+                  {capitalize(project.category)}
+                  {project.year ? ` · ${project.year}` : ""}
+                </p>
+                <h1 className="mt-2 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{project.title}</h1>
+              </div>
+            }
+          >
+            <BrowserMockup url={host} className="size-full">
+              <Lens zoomFactor={1.6} className="relative aspect-[16/10] w-full bg-muted">
+                <Image src={mediaUrl("portfolio", project.image)} alt={`${project.title} website`} fill priority sizes="(min-width: 1024px) 1000px, 100vw" className="object-cover object-top" />
+              </Lens>
+            </BrowserMockup>
+          </ContainerScroll>
+        ) : (
+          <div className={`${container} py-20 text-center`}>
+            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{project.title}</h1>
           </div>
-
-          <h1 className="cs-t-p text-4xl lg:text-6xl font-display font-bold text-white leading-tight mb-6">{project.title}</h1>
-
-          {project.description && <p className="cs-t-s text-lg text-zinc-400 font-mono leading-relaxed max-w-2xl">{project.description}</p>}
-
-          {project.live_url && (
-            <a
-              href={project.live_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-sm rounded-xl transition-all"
-            >
-              View Live Site
-              <Icon d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" className="w-4 h-4" strokeWidth={2} />
-            </a>
-          )}
-        </div>
+        )}
       </section>
 
-      {project.image && (
-        <section className="relative bg-black pb-16 lg:pb-20">
-          <div className="max-w-5xl mx-auto px-6 lg:px-8">
-            <div className="rounded-2xl overflow-hidden border border-zinc-800">
-              <Image
-                src={mediaUrl("portfolio", project.image)}
-                alt={project.title}
-                width={1600}
-                height={1000}
-                priority
-                sizes="(min-width: 1024px) 1024px, 100vw"
-                className="w-full h-auto"
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ═══ BODY ═══ */}
-      <section className="relative pb-20 lg:pb-28" style={{ backgroundColor: "var(--sb)" }}>
-        <div className="max-w-3xl mx-auto px-6 lg:px-8 space-y-14">
-          {project.challenge && (
-            <div>
-              <BodyHeading>The Challenge</BodyHeading>
-              <p className="cs-t-s text-base text-zinc-300 font-mono leading-relaxed whitespace-pre-line">{project.challenge}</p>
-            </div>
-          )}
-
-          {project.approach && (
-            <div>
-              <BodyHeading>Our Approach</BodyHeading>
-              <p className="cs-t-s text-base text-zinc-300 font-mono leading-relaxed whitespace-pre-line">{project.approach}</p>
-            </div>
-          )}
-
-          {(metrics.length > 0 || project.results_detail) && (
-            <div>
-              <BodyHeading mb="mb-4">Results</BodyHeading>
-              {metrics.length > 0 && (
-                <div className="grid sm:grid-cols-3 gap-4 mb-6">
-                  {metrics.map((m) => (
-                    <div key={m} className="cs-card border rounded-xl p-4 text-center" style={{ borderColor: "#27272a" }}>
-                      <div className="text-sm font-mono font-bold text-emerald-400">{m}</div>
-                    </div>
-                  ))}
+      <Section label="About the project" className="!pt-8">
+        <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr]">
+          <BlurFade className="space-y-8">
+            {project.description && <p className="text-lg leading-relaxed text-muted-foreground">{project.description}</p>}
+            {sections
+              .filter(([, text]) => text)
+              .map(([title, text]) => (
+                <div key={title}>
+                  <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+                  <p className="mt-3 leading-relaxed whitespace-pre-line text-muted-foreground">{text}</p>
+                </div>
+              ))}
+          </BlurFade>
+          <BlurFade delay={0.1}>
+            <aside className="space-y-6 rounded-2xl border bg-card p-6 lg:sticky lg:top-24">
+              {project.client_name && (
+                <div>
+                  <h2 className="text-sm font-medium">Client</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">{project.client_name}</p>
                 </div>
               )}
-              {project.results_detail && (
-                <p className="cs-t-s text-base text-zinc-300 font-mono leading-relaxed whitespace-pre-line">{project.results_detail}</p>
+              {metrics.length > 0 && (
+                <div>
+                  <h2 className="text-sm font-medium">Highlights</h2>
+                  <ul className="mt-2 space-y-2">
+                    {metrics.map((m) => (
+                      <li key={m} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" /> {m}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
-            </div>
-          )}
-
-          {(stack.length > 0 || tags.length > 0) && (
-            <div>
-              <BodyHeading>Tech &amp; Tags</BodyHeading>
-              <div className="flex flex-wrap gap-2">
-                {[...stack, ...tags].map((t, i) => (
-                  <span key={`${t}-${i}`} className="px-3 py-1 text-xs font-mono bg-zinc-800/60 text-zinc-400 rounded-full border border-zinc-700/60">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+              {(stack.length > 0 || tags.length > 0) && (
+                <div>
+                  <h2 className="text-sm font-medium">{stack.length ? "Built with" : "Tags"}</h2>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {(stack.length ? stack : tags).map((t) => (
+                      <span key={t} className="rounded-full border px-2.5 py-0.5 text-xs text-muted-foreground">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {project.live_url && (
+                <CtaLink href={project.live_url} variant="outline" arrow={false} className="w-full">
+                  Visit live site <ExternalLink className="size-4" aria-hidden="true" />
+                </CtaLink>
+              )}
+            </aside>
+          </BlurFade>
         </div>
-      </section>
+      </Section>
 
-      {/* ═══ CTA ═══ */}
-      <section className="py-20 lg:py-28 relative overflow-hidden border-t border-zinc-900">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-emerald-500/8 rounded-full blur-[80px] pointer-events-none" />
-        <div className="relative max-w-2xl mx-auto px-6 lg:px-8 text-center">
-          <h2 className="cs-t-p text-3xl lg:text-4xl font-display font-bold text-white mb-5">Want Something Like This?</h2>
-          <p className="cs-t-s text-zinc-400 font-mono mb-8 leading-relaxed">Tell us about your project — we&apos;ll send a scoped, fixed quote.</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href={`/contact?ref=case-study&project=${encodeURIComponent(project.slug ?? "")}`}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-sm rounded-xl transition-all"
-            >
-              Start Your Project
-            </Link>
-            <Link
-              href="/portfolio"
-              className="inline-flex items-center gap-2 px-8 py-4 border border-zinc-700 text-zinc-400 font-mono text-sm rounded-xl transition-all hover:border-zinc-500 hover:text-white"
-            >
-              See More Work
-            </Link>
+      {more.length > 0 && (
+        <Section label="More projects">
+          <SectionHeading eyebrow="More work" title="Other projects" />
+          <FocusCards className="mt-8" cards={more.map((p) => ({ title: p.title, src: mediaUrl("portfolio", p.image!), href: `/portfolio/${p.slug}` }))} />
+        </Section>
+      )}
+
+      <Section muted label="Next steps">
+        <div className="grid items-center gap-8 md:grid-cols-[1.5fr_1fr]">
+          <SectionHeading title="Want something like this?">Tell us about your project and we&apos;ll send a fixed quote.</SectionHeading>
+          <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
+            <ShimmerLink href="/contact">Start a project</ShimmerLink>
+            {nextProject?.slug && (
+              <CtaLink href={`/portfolio/${nextProject.slug}`} variant="outline">
+                Next project
+              </CtaLink>
+            )}
           </div>
         </div>
-      </section>
-    </div>
+      </Section>
+    </>
   );
 }

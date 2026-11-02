@@ -1,72 +1,25 @@
-/* Admin panel light-mode overrides (from admin/includes/header.php and admin/login.php). Scoped under .admin-shell. */
-html:not(.dark) .admin-shell { background:#f1f5f9; color:#1e293b; }
-html:not(.dark) .admin-shell aside { background:#fff!important; border-color:#e2e8f0!important; }
-html:not(.dark) .admin-shell header { background:rgba(241,245,249,.9)!important; border-color:#e2e8f0!important; }
-html:not(.dark) .admin-shell .bg-zinc-900\/50 { background:rgba(255,255,255,.8)!important; }
-html:not(.dark) .admin-shell .bg-zinc-800\/50 { background:#f1f5f9!important; }
-html:not(.dark) .admin-shell .border-zinc-800 { border-color:#e2e8f0!important; }
-html:not(.dark) .admin-shell .text-white { color:#1e293b!important; }
-html:not(.dark) .admin-shell .text-zinc-400,
-html:not(.dark) .admin-shell .text-zinc-500 { color:#64748b!important; }
-html:not(.dark) .admin-shell input,
-html:not(.dark) .admin-shell textarea,
-html:not(.dark) .admin-shell select { background:#f8fafc!important; color:#1e293b!important; border-color:#cbd5e1!important; }
-html:not(.dark) .admin-shell table thead { background:#f1f5f9!important; }
-/* Wider light-mode palette mapping for the redesigned screens */
-html:not(.dark) .admin-shell .bg-black,
-html:not(.dark) .admin-shell .bg-zinc-950,
-html:not(.dark) .admin-shell .bg-zinc-900 { background:#fff!important; }
-html:not(.dark) .admin-shell .bg-zinc-800,
-html:not(.dark) .admin-shell .bg-zinc-800\/30,
-html:not(.dark) .admin-shell .bg-zinc-800\/40,
-html:not(.dark) .admin-shell .bg-zinc-800\/70,
-html:not(.dark) .admin-shell .bg-zinc-900\/60 { background:#f1f5f9!important; }
-html:not(.dark) .admin-shell .hover\:bg-zinc-900:hover,
-html:not(.dark) .admin-shell .hover\:bg-zinc-800:hover,
-html:not(.dark) .admin-shell .hover\:bg-zinc-800\/30:hover,
-html:not(.dark) .admin-shell .hover\:bg-zinc-800\/40:hover { background:#f1f5f9!important; }
-html:not(.dark) .admin-shell .border-zinc-700,
-html:not(.dark) .admin-shell .border-zinc-600 { border-color:#cbd5e1!important; }
-html:not(.dark) .admin-shell .border-zinc-800\/70,
-html:not(.dark) .admin-shell .divide-zinc-800 > * + *,
-html:not(.dark) .admin-shell .divide-zinc-800\/50 > * + *,
-html:not(.dark) .admin-shell .divide-zinc-800\/70 > * + * { border-color:#e2e8f0!important; }
-html:not(.dark) .admin-shell .text-zinc-100,
-html:not(.dark) .admin-shell .text-zinc-200,
-html:not(.dark) .admin-shell .text-zinc-300 { color:#334155!important; }
-html:not(.dark) .admin-shell .text-zinc-600,
-html:not(.dark) .admin-shell .text-zinc-700 { color:#94a3b8!important; }
-html:not(.dark) .admin-shell .hover\:text-white:hover { color:#0f172a!important; }
-html:not(.dark) .admin-shell .text-red-300,
-html:not(.dark) .admin-shell .text-red-400 { color:#b91c1c!important; }
-html:not(.dark) .admin-shell .text-emerald-300,
-html:not(.dark) .admin-shell .text-emerald-400 { color:#047857!important; }
-html:not(.dark) .admin-shell .text-amber-400 { color:#b45309!important; }
-html:not(.dark) .admin-shell .text-blue-300,
-html:not(.dark) .admin-shell .text-blue-400 { color:#1d4ed8!important; }
-html:not(.dark) .admin-shell .text-purple-400 { color:#7e22ce!important; }
-html:not(.dark) .admin-shell .text-accent { color:#047857!important; }
+/* Admin screen specifics. Colours come from app/token-map.css. */
 
 /* SEO manager keyword chips and rank badges (admin/seo.php) */
-.admin-shell .kw-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:999px;font-size:12px;font-family:var(--font-jetbrains-mono),monospace;color:#34d399}
+.admin-shell .kw-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:999px;font-size:12px;font-family:var(--font-geist-mono),monospace;color:#34d399}
 .admin-shell .kw-tag button{background:none;border:none;color:#6b7280;cursor:pointer;padding:0;line-height:1;font-size:13px}
 .admin-shell .kw-tag button:hover{color:#ef4444}
 .admin-shell .kw-wrap{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:10px;background:rgba(39,39,42,.5);border:1px solid #3f3f46;border-radius:8px;min-height:50px;cursor:text}
 .admin-shell .kw-wrap:focus-within{border-color:#10b981}
-.admin-shell .kw-raw{background:none;border:none;outline:none;color:inherit;font-family:var(--font-jetbrains-mono),monospace;font-size:13px;min-width:140px;flex:1}
-.admin-shell .rb{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-family:var(--font-jetbrains-mono),monospace;font-weight:600}
+.admin-shell .kw-raw{background:none;border:none;outline:none;color:inherit;font-family:var(--font-geist-mono),monospace;font-size:13px;min-width:140px;flex:1}
+.admin-shell .rb{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-family:var(--font-geist-mono),monospace;font-weight:600}
 .admin-shell .rh{background:rgba(16,185,129,.2);color:#34d399;border:1px solid rgba(16,185,129,.3)}
 .admin-shell .rm{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
 .admin-shell .rl{background:rgba(113,113,122,.12);color:#a1a1aa;border:1px solid rgba(113,113,122,.2)}
 
 /* Location SEO tabs and tables (admin/location.php) */
-.admin-shell .tab-btn{padding:8px 18px;border-radius:8px;font-family:var(--font-jetbrains-mono),monospace;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.admin-shell .tab-btn{padding:8px 18px;border-radius:8px;font-family:var(--font-geist-mono),monospace;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .admin-shell .tab-btn.active{background:rgba(16,185,129,.15);color:#10b981;border-color:rgba(16,185,129,.3)}
 .admin-shell .tab-btn:not(.active){color:#71717a;border-color:#3f3f46}
 .admin-shell .tab-btn:not(.active):hover{color:#fff;border-color:#52525b}
 .admin-shell .l-table{width:100%;border-collapse:collapse}
-.admin-shell .l-table th{font-family:var(--font-jetbrains-mono),monospace;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;background:rgba(24,24,27,.5);border-bottom:1px solid #27272a;text-align:left}
-.admin-shell .l-table td{font-family:var(--font-jetbrains-mono),monospace;font-size:12px;color:#d4d4d8;padding:11px 14px;border-bottom:1px solid rgba(39,39,42,.5);vertical-align:middle}
+.admin-shell .l-table th{font-family:var(--font-geist-mono),monospace;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;background:rgba(24,24,27,.5);border-bottom:1px solid #27272a;text-align:left}
+.admin-shell .l-table td{font-family:var(--font-geist-mono),monospace;font-size:12px;color:#d4d4d8;padding:11px 14px;border-bottom:1px solid rgba(39,39,42,.5);vertical-align:middle}
 .admin-shell .l-table tr:last-child td{border-bottom:none}
 .admin-shell .l-table tr:hover td{background:rgba(39,39,42,.3)}
 html:not(.dark) .admin-shell .l-table td{color:#334155}

@@ -66,13 +66,14 @@ export async function submitContact(_prev: ContactState, fd: FormData): Promise<
 
   const email = sanitizeEmail(values.email);
   const phone = sanitizePhone(values.phone).slice(0, 30);
-  const serviceField = (values.service + (values.budget ? ` [Budget: ${values.budget}]` : "")).slice(0, 100);
+  const serviceField = values.service.slice(0, 100);
+  const budget = values.budget.slice(0, 40) || null;
   const userAgent = ((await headers()).get("user-agent") ?? "").slice(0, 500);
 
   try {
     await sql`
-      INSERT INTO contact_messages (name, email, phone, service, message, ip_address, user_agent)
-      VALUES (${values.name}, ${email}, ${phone}, ${serviceField}, ${values.message}, ${ip}, ${userAgent})
+      INSERT INTO contact_messages (name, email, phone, service, budget, message, ip_address, user_agent)
+      VALUES (${values.name}, ${email}, ${phone}, ${serviceField}, ${budget}, ${values.message}, ${ip}, ${userAgent})
     `;
   } catch (err) {
     console.error("[submitContact]", err);

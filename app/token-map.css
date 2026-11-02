@@ -1,0 +1,39 @@
+/* Maps the admin panel's and the PDF/background tools' palette classes onto the Velora design tokens, so these
+   screens follow the same look in both themes without rewriting them or the tool engine's generated markup.
+   Scoped to .admin-shell and .tool-scope. Plain (unlayered) CSS, so it wins over Tailwind's utilities. */
+
+:is(.admin-shell, .tool-scope) { background: var(--background); color: var(--foreground); }
+
+:is(.admin-shell, .tool-scope) :is(.bg-black, .bg-zinc-950, .bg-zinc-950\/80, .bg-zinc-950\/50, .bg-zinc-900) { background: var(--background); }
+:is(.admin-shell, .tool-scope) :is(.bg-zinc-900\/50, .bg-zinc-900\/60, .bg-zinc-900\/40, .bg-zinc-900\/80) { background: var(--card); }
+:is(.admin-shell, .tool-scope) :is(.bg-zinc-800, .bg-zinc-800\/30, .bg-zinc-800\/40, .bg-zinc-800\/50, .bg-zinc-800\/60, .bg-zinc-800\/70, .bg-zinc-800\/80, .bg-zinc-700, .bg-zinc-700\/50) { background: var(--muted); }
+:is(.admin-shell, .tool-scope) :is(.hover\:bg-zinc-900:hover, .hover\:bg-zinc-800:hover, .hover\:bg-zinc-800\/30:hover, .hover\:bg-zinc-800\/40:hover, .hover\:bg-zinc-800\/50:hover, .hover\:bg-zinc-700:hover) { background: var(--muted); }
+
+:is(.admin-shell, .tool-scope) :is(.border-zinc-600, .border-zinc-700, .border-zinc-700\/50, .border-zinc-700\/60, .border-zinc-800, .border-zinc-800\/40, .border-zinc-800\/50, .border-zinc-800\/60, .border-zinc-800\/70, .border-zinc-800\/80) { border-color: var(--border); }
+:is(.admin-shell, .tool-scope) :is(.divide-zinc-800, .divide-zinc-800\/50, .divide-zinc-800\/70) > * + * { border-color: var(--border); }
+
+:is(.admin-shell, .tool-scope) :is(.text-white, .text-zinc-100, .text-zinc-200, .hover\:text-white:hover) { color: var(--foreground); }
+:is(.admin-shell, .tool-scope) :is(.text-zinc-300, .text-zinc-400, .text-zinc-500) { color: var(--muted-foreground); }
+:is(.admin-shell, .tool-scope) :is(.text-zinc-600, .text-zinc-700) { color: color-mix(in oklch, var(--muted-foreground) 75%, transparent); }
+:is(.admin-shell, .tool-scope) :is(.placeholder-zinc-600, .placeholder-zinc-500)::placeholder { color: var(--muted-foreground); }
+
+/* Coloured status text stays readable on both themes. */
+html:not(.dark) :is(.admin-shell, .tool-scope) :is(.text-emerald-300, .text-emerald-400) { color: oklch(0.508 0.118 165.6); }
+html:not(.dark) :is(.admin-shell, .tool-scope) :is(.text-red-300, .text-red-400) { color: oklch(0.505 0.213 27.5); }
+html:not(.dark) :is(.admin-shell, .tool-scope) :is(.text-amber-300, .text-amber-400) { color: oklch(0.555 0.163 48.998); }
+html:not(.dark) :is(.admin-shell, .tool-scope) :is(.text-blue-300, .text-blue-400, .text-sky-300, .text-sky-400) { color: oklch(0.488 0.243 264.376); }
+html:not(.dark) :is(.admin-shell, .tool-scope) .text-purple-400 { color: oklch(0.496 0.265 301.924); }
+html:not(.dark) :is(.admin-shell, .tool-scope) .text-cyan-400 { color: oklch(0.52 0.105 223.128); }
+html:not(.dark) :is(.admin-shell, .tool-scope) .text-orange-400 { color: oklch(0.553 0.195 38.402); }
+
+/* Solid brand buttons: text must contrast with the brand colour in each theme. */
+:is(.admin-shell, .tool-scope) :is(.bg-brand, .bg-emerald-500).text-black { color: var(--primary-foreground); background: var(--primary); }
+:is(.admin-shell, .tool-scope) :is(.hover\:bg-brand-light:hover, .hover\:bg-emerald-400:hover).text-black { background: color-mix(in oklch, var(--primary) 85%, var(--foreground)); }
+
+/* Velora uses one typeface; monospace stays only for real code and tokens. */
+.admin-shell .font-mono:not(code, kbd, pre) { font-family: var(--font-sans); }
+.tool-scope .font-mono:not(code, kbd, pre) { font-family: var(--font-sans); }
+
+.admin-shell input, .admin-shell textarea, .admin-shell select { color: var(--foreground); }
+.admin-shell select option { background: var(--popover); color: var(--popover-foreground); }
+.admin-shell :is(input, textarea, select):focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 20%, transparent); }

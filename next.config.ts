@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 // Clean-URL pages that used to live at /pages/<name>.php (see the old .htaccess).
-// /pages/blog.php is handled in middleware.ts because of its ?post= parameter.
+// /pages/blog.php is handled in proxy.ts because of its ?post= parameter.
 const LEGACY_PAGES = ["services", "about", "contact", "portfolio", "pdf-tools", "careers", "industries", "bg-remover"];
 
 // Baseline security headers for every response. A strict script-src would need per-request nonces (which turns

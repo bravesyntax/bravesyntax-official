@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import JsonLd from "@/components/JsonLd";
 import { SITE_URL } from "@/lib/config";
 import { getContactInfo } from "@/lib/contact";
 import {
@@ -12,14 +11,22 @@ import {
   getNearbyCities,
   getOverride,
   isIndexableCity,
+  SERVICE_PAGE_CITIES,
   parseFeatures,
   type City,
   type LocationService,
 } from "@/lib/locations";
 import { getSiteFacts } from "@/lib/content";
 import { buildMetadata, customSchema, locationSeoDefaults, resolveSeo, type SeoDefaults } from "@/lib/seo";
+import JsonLd from "@/components/JsonLd";
+import { CtaLink, IconChip, PageHero, Section, SectionHeading, ShimmerLink } from "@/components/site/ui";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import FeatureIcon from "@/components/ui/FeatureIcon";
-import LocationFaq from "./LocationFaq";
+import { BlurFade } from "@/components/velora/blur-fade";
+import { DottedGlowBackground } from "@/components/velora/dotted-glow-background";
+import { GlowingEffect } from "@/components/velora/glowing-effect";
+import { SpotlightCard } from "@/components/velora/spotlight-card";
+import { cn } from "@/lib/utils";
 
 // Shared by app/[city]/page.tsx and app/[city]/[service]/page.tsx (pages/location.php).
 
@@ -79,16 +86,10 @@ async function content(r: Resolved) {
 
 export async function locationMetadata(citySlug: string, serviceSlug = ""): Promise<Metadata> {
   const r = await resolve(citySlug, serviceSlug);
-  // Only the top-tier cities are indexable; the rest stay noindex,follow whatever the admin sets.
-  return buildMetadata("location", seoKey(r), await seoDefaults(r), { forceNoindex: !(await isIndexableCity(r.city)) });
+  // Only the top-tier cities are indexable, and service pages only in SERVICE_PAGE_CITIES; the rest stay noindex,follow whatever the admin sets.
+  const indexable = (await isIndexableCity(r.city)) && (!serviceSlug || SERVICE_PAGE_CITIES.includes(r.city.slug));
+  return buildMetadata("location", seoKey(r), await seoDefaults(r), { forceNoindex: !indexable });
 }
-
-const WHY = [
-  ["Premium Quality, Affordable Pricing", "Enterprise-quality work at SME-friendly prices. No hidden charges."],
-  ["Fast Turnaround", "Most projects delivered in days, not months. We respect your deadlines."],
-  ["Dedicated Point of Contact", "One developer, one designer — no outsourcing maze. Direct communication."],
-  ["SEO-First Development", "Every site we build is optimized for search engines right from the start."],
-];
 
 /** Wraps each occurrence of the city name in the H1 with the accent highlight. */
 function HighlightCity({ text, city }: { text: string; city: string }) {
@@ -98,7 +99,7 @@ function HighlightCity({ text, city }: { text: string; city: string }) {
       {parts.map((p, i) => (
         <span key={i}>
           {p}
-          {i < parts.length - 1 && <span className="hl">{city}</span>}
+          {i < parts.length - 1 && <span className="text-primary">{city}</span>}
         </span>
       ))}
     </>
@@ -125,6 +126,7 @@ export default async function LocationPage({ citySlug, serviceSlug = "" }: { cit
   ];
 
   const faqs: [string, string][] = [
+    ...service.faqs,
     [
       `How much does ${kw} cost in ${city.name}?`,
       `Our ${kw} packages start at ₹8,000 for small businesses in ${city.name}. The final cost depends on scope, features, and timeline. We offer a free consultation and a fixed quote with no obligation.`,
@@ -170,190 +172,138 @@ export default async function LocationPage({ citySlug, serviceSlug = "" }: { cit
   ];
 
   return (
-    <div className="pg-location">
+    <>
       <JsonLd data={[...schema, ...extraSchema]} />
 
-      {/* ═══ HERO ═══ */}
-      <section className="loc-hero">
-        <div className="loc-grid" />
-        <div className="loc-inner">
-          <nav className="loc-crumb" aria-label="Breadcrumb">
+      <PageHero
+        center={false}
+        eyebrow={
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5">
             {breadcrumbs.map((b, i) => (
               <span key={b.url} className="contents">
-                {i > 0 && <span className="sep">/</span>}
+                {i > 0 && <span aria-hidden="true">/</span>}
                 {i < breadcrumbs.length - 1 ? (
-                  <Link href={b.url.replace(SITE_URL, "") || "/"}>{b.name}</Link>
+                  <Link href={b.url.replace(SITE_URL, "") || "/"} className="hover:text-foreground">
+                    {b.name}
+                  </Link>
                 ) : (
-                  <span className="current">{b.name}</span>
+                  <span className="text-foreground">{b.name}</span>
                 )}
               </span>
             ))}
           </nav>
+        }
+        title={<HighlightCity text={c.h1} city={city.name} />}
+        background={<DottedGlowBackground className="absolute inset-0 -z-10" />}
+        actions={
+          <>
+            <ShimmerLink href={contactUrl}>Get a free quote</ShimmerLink>
+            <CtaLink href="/portfolio" variant="outline">
+              See our work
+            </CtaLink>
+          </>
+        }
+      >
+        {c.intro}
+      </PageHero>
 
-          <div className="loc-badge">
-            Serving {placeName(city)}
-          </div>
-
-          <h1 className="loc-h1">
-            <HighlightCity text={c.h1} city={city.name} />
-          </h1>
-
-          <p className="loc-intro">{c.intro}</p>
-
-          <div className="loc-btns">
-            <Link href={contactUrl} className="btn-primary">
-              Get Free Quote
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-            <Link href="/portfolio" className="btn-outline">
-              View Our Work
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ STATS ═══ */}
-      <section className="loc-sec loc-sec-alt">
-        <div className="loc-wrap">
-          <div style={{ textAlign: "center" }}>
-            <p className="sec-label">By the numbers</p>
-            <h2 className="sec-title">Brave Syntax at a Glance</h2>
-          </div>
-          <div className="loc-stats">
+      {stats.length > 0 && (
+        <div className="border-y">
+          <dl className="mx-auto grid max-w-5xl grid-cols-3 divide-x px-5 py-8 text-center sm:px-6">
             {stats.map(([v, l]) => (
-              <div key={l} className="loc-stat">
-                <div className="loc-stat-v">{v}</div>
-                <div className="loc-stat-l">{l}</div>
+              <div key={l}>
+                <dd className="text-3xl font-semibold tracking-tight">{v}</dd>
+                <dt className="mt-1 px-2 text-sm text-muted-foreground">{l}</dt>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
-      </section>
-
-      {/* ═══ SERVICES ═══ */}
-      <section className="loc-sec">
-        <div className="loc-wrap">
-          <p className="sec-label">What we offer</p>
-          <h2 className="sec-title">{r.serviceSlug ? `${service.label} in ${city.name}` : `Services We Provide in ${city.name}`}</h2>
-          <p className="sec-sub">Everything your business needs to grow online — from the people who design and build it.</p>
-
-          <div className="loc-svc-pills">
-            <Link href={`/${city.slug}`} className={`svc-pill${!r.serviceSlug ? " active" : ""}`}>
-              All Services
-            </Link>
-            {allServices
-              .filter((s) => s.slug !== "")
-              .map((s) => (
-                <Link key={s.slug} href={`/${city.slug}/${s.slug}`} className={`svc-pill${r.serviceSlug === s.slug ? " active" : ""}`}>
-                  {s.label}
-                </Link>
-              ))}
-          </div>
-
-          <div className="loc-features">
-            {features.map((f) => (
-              <div key={f.title} className="feat-card">
-                <span className="feat-icon">
-                  <FeatureIcon name={f.icon} className="h-5 w-5" />
-                </span>
-                <div className="feat-title">{f.title}</div>
-                <div className="feat-desc">{f.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ WHY US ═══ */}
-      <section className="loc-sec loc-sec-alt">
-        <div className="loc-wrap">
-          <p className="sec-label">Why choose us</p>
-          <h2 className="sec-title">Why Businesses in {city.name} Choose Brave Syntax</h2>
-          <div className="loc-why-grid">
-            <ul className="why-list">
-              {WHY.map(([strong, text]) => (
-                <li key={strong} className="why-item">
-                  <span className="why-check">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </span>
-                  <div>
-                    <strong>{strong}</strong>
-                    <span>{text}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="testimonial-card">
-              <p className="testi-quote">
-                &quot;Every project starts with a conversation, not a template. We learn how your business in {city.name} actually works — then we design and build
-                around it.&quot;
-              </p>
-              <div className="testi-author">
-                <div className="testi-avatar">B</div>
-                <div>
-                  <div className="testi-name">Brave Syntax</div>
-                  <div className="testi-role">Our approach to {service.label.toLowerCase()}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ FAQ ═══ */}
-      <section className="loc-sec">
-        <div className="loc-wrap">
-          <p className="sec-label">Common questions</p>
-          <h2 className="sec-title">
-            FAQ — {service.label} in {city.name}
-          </h2>
-          <LocationFaq faqs={faqs} />
-        </div>
-      </section>
-
-      {/* ═══ OTHER CITIES ═══ */}
-      {nearby.length > 0 && (
-        <section className="loc-sec loc-sec-alt">
-          <div className="loc-wrap" style={{ textAlign: "center" }}>
-            <p className="sec-label">We serve across India</p>
-            <h2 className="sec-title">Also Available In</h2>
-            <div className="loc-cities-grid">
-              {nearby.map((n) => (
-                <Link key={n.slug} href={`/${n.slug}${r.serviceSlug ? `/${r.serviceSlug}` : ""}`} className="city-link">
-                  {n.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
       )}
 
-      {/* ═══ CTA ═══ */}
-      <section className="loc-sec">
-        <div className="loc-wrap">
-          <div className="loc-cta-box">
-            <p className="sec-label" style={{ textAlign: "center" }}>
-              Ready to grow?
-            </p>
-            <h2 className="sec-title" style={{ textAlign: "center", margin: "0 auto 14px" }}>
-              Start Your {r.serviceSlug ? service.label : "Digital"} Project in {city.name}
-            </h2>
-            <p className="loc-cta-note">Free consultation · No commitment · Reply {contact.responseTime}</p>
-            <div className="loc-btns" style={{ justifyContent: "center" }}>
-              <Link href={contactUrl} className="btn-primary">
-                Get Free Quote →
-              </Link>
-              <Link href="/services" className="btn-outline">
-                Explore All Services
-              </Link>
-            </div>
+      {(city.about || city.sectors.length > 0) && (
+        <Section label={`Doing business in ${city.name}`}>
+          <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
+            <BlurFade>
+              <p className="text-sm font-medium text-primary">Serving {placeName(city)}</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight lg:text-4xl">{r.serviceSlug ? `${service.label} for ${city.name} businesses` : `Building for businesses in ${city.name}`}</h2>
+              {city.about && <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{city.about}</p>}
+              {service.about && <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{service.about}</p>}
+            </BlurFade>
+            {city.sectors.length > 0 && (
+              <BlurFade delay={0.1} className="space-y-3">
+                <h3 className="text-sm font-medium">What {city.name} businesses often need</h3>
+                {city.sectors.map((s) => (
+                  <SpotlightCard key={s.name} className="rounded-2xl border bg-card p-5">
+                    <div className="relative">
+                      <h4 className="font-medium">{s.name}</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {r.serviceSlug ? `${service.label} here should give them ${s.need}.` : `A good site gives them ${s.need}.`}
+                      </p>
+                    </div>
+                  </SpotlightCard>
+                ))}
+              </BlurFade>
+            )}
           </div>
+        </Section>
+      )}
+
+      <Section muted label="What we offer">
+        <SectionHeading eyebrow="What we offer" title={r.serviceSlug ? `What's included in ${service.keyword}` : `Services for businesses in ${city.name}`}>
+          Pick a service to see how it applies in {city.name}.
+        </SectionHeading>
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Link href={`/${city.slug}`} aria-current={!r.serviceSlug ? "page" : undefined} className={cn("rounded-full border px-3.5 py-1.5 text-sm transition-colors", !r.serviceSlug ? "border-transparent bg-primary font-medium text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground")}>
+            All services
+          </Link>
+          {allServices
+            .filter((s) => s.slug !== "")
+            .map((s) => (
+              <Link key={s.slug} href={`/${city.slug}/${s.slug}`} aria-current={r.serviceSlug === s.slug ? "page" : undefined} className={cn("rounded-full border px-3.5 py-1.5 text-sm transition-colors", r.serviceSlug === s.slug ? "border-transparent bg-primary font-medium text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground")}>
+                {s.label}
+              </Link>
+            ))}
         </div>
-      </section>
-    </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((f) => (
+            <div key={f.title} className="relative rounded-2xl border bg-card p-5">
+              <GlowingEffect />
+              <IconChip>
+                <FeatureIcon name={f.icon} className="size-5" />
+              </IconChip>
+              <h3 className="mt-4 font-medium">{f.title}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section label="Frequently asked questions">
+        <div className="mx-auto max-w-3xl">
+          <SectionHeading center eyebrow="Common questions" title={`${service.label} in ${city.name}: FAQ`} />
+          <Accordion type="single" collapsible className="mt-8">
+            {faqs.map(([q, a]) => (
+              <AccordionItem key={q} value={q}>
+                <AccordionTrigger className="text-left text-base">{q}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">{a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </Section>
+
+      {nearby.length > 0 && (
+        <Section muted label="Other cities">
+          <SectionHeading center eyebrow="Across India" title="Also available in" />
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {nearby.map((n) => (
+              <Link key={n.slug} href={`/${n.slug}${r.serviceSlug ? `/${r.serviceSlug}` : ""}`} className="rounded-full border bg-background px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground">
+                {n.name}
+              </Link>
+            ))}
+          </div>
+        </Section>
+      )}
+    </>
   );
 }

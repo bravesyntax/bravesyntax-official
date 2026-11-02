@@ -1,5 +1,5 @@
 // Admin session tokens: base64url(JSON payload) + "." + base64url(HMAC-SHA256). Web Crypto only, so this
-// module works in middleware (edge runtime) as well as in server components and actions.
+// module works in the proxy as well as in server components and actions.
 
 export const SESSION_COOKIE = "bs_admin";
 /** Holds the pending second step (emailed code) between password check and full sign-in. */

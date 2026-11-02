@@ -49,7 +49,7 @@ export default async function SeoEditPage({ searchParams }: Props) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-xs">
-          <a href={t.path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-accent hover:underline">
+          <a href={t.path} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-brand hover:underline">
             View page <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
           </a>
           {content && (

@@ -1,8 +1,14 @@
 "use client";
 
-import { startTransition, useActionState, useState, type FormEvent } from "react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { startTransition, useActionState, useEffect, useState, type FormEvent } from "react";
 import { submitApplication, type ApplyState } from "@/app/(site)/careers/actions";
-import Icon from "@/components/ui/Icon";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { FileDrop } from "@/components/velora/file-drop";
+import { DotsLoader } from "@/components/velora/loaders";
+import { RippleButton } from "@/components/velora/ripple-button";
 
 type Props = {
   focusJob: { id: number; title: string } | null;
@@ -11,19 +17,17 @@ type Props = {
 };
 
 const RESUME_MAX_BYTES = 5 * 1024 * 1024;
-
-const input =
-  "w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 font-mono text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-accent transition-colors";
-const label = "block text-xs font-mono text-zinc-400 mb-1.5";
-const Optional = () => <span className="text-zinc-600">(optional)</span>;
-
+const Optional = () => <span className="font-normal text-muted-foreground">(optional)</span>;
 const initial: ApplyState = { ok: false, errors: [], values: {} };
 
 export default function ApplicationForm({ focusJob, jobs, uploadsEnabled }: Props) {
   const [state, action, pending] = useActionState(submitApplication, initial);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
-  const [fileName, setFileName] = useState("");
+  const [resume, setResume] = useState<File | null>(null);
+  const [formTs, setFormTs] = useState("");
+  // Set in the browser: a server-rendered value would be the build time of a cached page.
+  useEffect(() => setFormTs(String(Date.now())), []);
   const v = state.values;
   const errors = uploadError ? [uploadError, ...state.errors] : state.errors;
 
@@ -32,18 +36,16 @@ export default function ApplicationForm({ focusJob, jobs, uploadsEnabled }: Prop
     e.preventDefault();
     setUploadError("");
     const fd = new FormData(e.currentTarget);
-    const file = fd.get("resume");
-    fd.delete("resume");
 
-    if (file instanceof File && file.size > 0) {
-      const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-      if (!["pdf", "doc", "docx"].includes(ext)) return setUploadError("Invalid resume format. Only PDF, DOC, DOCX allowed.");
-      if (file.size > RESUME_MAX_BYTES) return setUploadError("Resume file too large. Maximum 5MB allowed.");
+    if (resume) {
+      const ext = resume.name.split(".").pop()?.toLowerCase() ?? "";
+      if (!["pdf", "doc", "docx"].includes(ext)) return setUploadError("Invalid resume format. Only PDF, DOC and DOCX are allowed.");
+      if (resume.size > RESUME_MAX_BYTES) return setUploadError("Resume file too large. Maximum 5 MB allowed.");
       setUploading(true);
       try {
         // Loaded on demand so the uploader isn't in the page bundle for visitors who never attach a file.
         const { upload } = await import("@vercel/blob/client");
-        const blob = await upload(`resumes/resume_${Date.now()}.${ext}`, file, {
+        const blob = await upload(`resumes/resume_${Date.now()}.${ext}`, resume, {
           access: "private",
           handleUploadUrl: "/api/resume-upload",
         });
@@ -61,153 +63,107 @@ export default function ApplicationForm({ focusJob, jobs, uploadsEnabled }: Prop
   const busy = pending || uploading;
 
   return (
-    <div id="apply-form" className="scroll-mt-24">
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 md:p-8">
-        <div className="mb-6">
-          <h2 className="font-display font-bold text-2xl mb-2">{focusJob ? `Apply — ${focusJob.title}` : "Apply to Brave Syntax"}</h2>
-          <p className="font-mono text-sm text-zinc-400">
-            {focusJob
-              ? "Fill in your details below. We'll get back to you within 2-3 business days."
-              : "No fitting role? Send a general application — we'll reach out when there's a match."}
-          </p>
-        </div>
+    <div id="apply-form" className="scroll-mt-24 rounded-3xl border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
+      <h2 className="text-xl font-semibold tracking-tight">{focusJob ? `Apply: ${focusJob.title}` : "Apply to Brave Syntax"}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{focusJob ? "Fill in your details below. We'll get back to you within 2–3 business days." : "No fitting role? Send a general application and we'll reach out when there's a match."}</p>
 
-        {state.ok ? (
-          <div className="bg-emerald-500/15 border border-emerald-500/30 rounded-xl p-5 flex items-start gap-3" role="status">
-            <Icon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
-            <div>
-              <p className="font-display font-semibold text-emerald-300 mb-1">Application received!</p>
-              <p className="font-mono text-sm text-emerald-400/80">Thank you for applying. We&apos;ll review and get back to you within 2-3 business days.</p>
-            </div>
+      {state.ok ? (
+        <div className="mt-6 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4" role="status">
+          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+          <div>
+            <p className="font-medium">Application received</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">Thank you for applying. We&apos;ll review it and get back to you within 2–3 business days.</p>
           </div>
-        ) : (
-          <>
-            {errors.length > 0 && (
-              <div className="bg-red-500/15 border border-red-500/30 rounded-xl p-4 mb-5 space-y-1" role="alert">
-                {errors.map((err) => (
-                  <p key={err} className="font-mono text-sm text-red-300 flex items-center gap-2">
-                    <Icon d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
-                    {err}
-                  </p>
-                ))}
+        </div>
+      ) : (
+        <>
+          {errors.length > 0 && (
+            <div className="mt-5 rounded-xl border border-destructive/30 bg-destructive/10 p-4" role="alert">
+              {errors.map((err) => (
+                <p key={err} className="flex items-start gap-2 text-sm text-destructive">
+                  <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" /> {err}
+                </p>
+              ))}
+            </div>
+          )}
+          {/* key resets uncontrolled inputs to the values the server sent back after a failed submit */}
+          <form onSubmit={handleSubmit} key={JSON.stringify(v)} className="mt-6 grid gap-5 sm:grid-cols-2">
+            <input type="hidden" name="form_ts" value={formTs} />
+            {/* Honeypot: invisible to humans */}
+            <div style={{ position: "absolute", left: -9999, height: 0, overflow: "hidden" }} aria-hidden="true">
+              <label>
+                Leave this empty <input type="text" name="website_url" tabIndex={-1} autoComplete="off" defaultValue="" />
+              </label>
+            </div>
+            {focusJob ? (
+              <input type="hidden" name="job_id" value={focusJob.id} />
+            ) : (
+              jobs.length > 0 && (
+                <div className="grid gap-2 sm:col-span-2">
+                  <Label htmlFor="app-job">
+                    Applying for <Optional />
+                  </Label>
+                  <select id="app-job" name="job_id" defaultValue={v.job_id ?? ""} className="h-11 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30">
+                    <option value="">General application</option>
+                    {jobs.map((j) => (
+                      <option key={j.id} value={j.id}>
+                        {j.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )
+            )}
+            <div className="grid gap-2">
+              <Label htmlFor="app-name">Full name</Label>
+              <Input id="app-name" name="name" required autoComplete="name" defaultValue={v.name} placeholder="Your name" className="h-11" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="app-email">Email</Label>
+              <Input id="app-email" type="email" name="email" required autoComplete="email" defaultValue={v.email} placeholder="you@email.com" className="h-11" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="app-phone">
+                Phone <Optional />
+              </Label>
+              <Input id="app-phone" type="tel" name="phone" autoComplete="tel" defaultValue={v.phone} placeholder="+91 98765 43210" className="h-11" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="app-portfolio">
+                Portfolio URL <Optional />
+              </Label>
+              <Input id="app-portfolio" type="url" name="portfolio_url" defaultValue={v.portfolio_url} placeholder="https://yourportfolio.com" className="h-11" />
+            </div>
+            <div className="grid gap-2 sm:col-span-2">
+              <Label htmlFor="app-linkedin">
+                LinkedIn <Optional />
+              </Label>
+              <Input id="app-linkedin" type="url" name="linkedin_url" defaultValue={v.linkedin_url} placeholder="https://linkedin.com/in/yourprofile" className="h-11" />
+            </div>
+            <div className="grid gap-2 sm:col-span-2">
+              <Label htmlFor="app-cover">
+                Message <Optional />
+              </Label>
+              <Textarea id="app-cover" name="cover_letter" rows={5} defaultValue={v.cover_letter} placeholder="Tell us about yourself and why you'd like to join." />
+            </div>
+            {uploadsEnabled && (
+              <div className="grid gap-2 sm:col-span-2">
+                <span className="text-sm leading-none font-medium">
+                  Resume <Optional />
+                </span>
+                <FileDrop accept=".pdf,.doc,.docx" multiple={false} onFiles={(files) => setResume(files[0] ?? null)} />
+                <p className="text-xs text-muted-foreground">PDF, DOC or DOCX, up to 5 MB.</p>
               </div>
             )}
-
-            {/* key resets uncontrolled inputs to the values the server sent back after a failed submit */}
-            <form onSubmit={handleSubmit} key={JSON.stringify(v)}>
-              {focusJob ? (
-                <input type="hidden" name="job_id" value={focusJob.id} />
-              ) : (
-                jobs.length > 0 && (
-                  <div className="mb-4">
-                    <label className={label} htmlFor="app-job">
-                      Applying for <Optional />
-                    </label>
-                    <select id="app-job" name="job_id" defaultValue={v.job_id ?? ""} className={input}>
-                      <option value="">— General Application —</option>
-                      {jobs.map((j) => (
-                        <option key={j.id} value={j.id}>
-                          {j.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )
-              )}
-
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className={label} htmlFor="app-name">
-                    Full Name <span className="text-red-400">*</span>
-                  </label>
-                  <input id="app-name" type="text" name="name" required defaultValue={v.name} placeholder="Your full name" className={input} />
-                </div>
-                <div>
-                  <label className={label} htmlFor="app-email">
-                    Email <span className="text-red-400">*</span>
-                  </label>
-                  <input id="app-email" type="email" name="email" required defaultValue={v.email} placeholder="you@example.com" className={input} />
-                </div>
-                <div>
-                  <label className={label} htmlFor="app-phone">
-                    Phone <Optional />
-                  </label>
-                  <input id="app-phone" type="tel" name="phone" defaultValue={v.phone} placeholder="+91 9876543210" className={input} />
-                </div>
-                <div>
-                  <label className={label} htmlFor="app-portfolio">
-                    Portfolio URL <Optional />
-                  </label>
-                  <input id="app-portfolio" type="url" name="portfolio_url" defaultValue={v.portfolio_url} placeholder="https://yourportfolio.com" className={input} />
-                </div>
-                <div className="md:col-span-2">
-                  <label className={label} htmlFor="app-linkedin">
-                    LinkedIn <Optional />
-                  </label>
-                  <input
-                    id="app-linkedin"
-                    type="url"
-                    name="linkedin_url"
-                    defaultValue={v.linkedin_url}
-                    placeholder="https://linkedin.com/in/yourprofile"
-                    className={input}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className={label} htmlFor="app-cover">
-                    Cover Letter / Message <Optional />
-                  </label>
-                  <textarea
-                    id="app-cover"
-                    name="cover_letter"
-                    rows={5}
-                    defaultValue={v.cover_letter}
-                    placeholder="Tell us about yourself and why you want to join Brave Syntax..."
-                    className={`${input} resize-y`}
-                  />
-                </div>
-                {uploadsEnabled && (
-                  <div className="md:col-span-2">
-                    <span className={label}>
-                      Resume / CV <span className="text-zinc-600">(PDF, DOC, DOCX — max 5MB, optional)</span>
-                    </span>
-                    <input
-                      type="file"
-                      name="resume"
-                      accept=".pdf,.doc,.docx"
-                      id="resume-upload"
-                      className="hidden"
-                      onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
-                    />
-                    <label
-                      htmlFor="resume-upload"
-                      className="flex items-center gap-3 w-full bg-zinc-800/50 border border-zinc-700 border-dashed hover:border-accent/50 rounded-xl px-4 py-4 cursor-pointer transition-colors group"
-                    >
-                      <Icon
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        className="w-5 h-5 text-zinc-500 group-hover:text-accent transition-colors"
-                        strokeWidth={2}
-                      />
-                      <span className="font-mono text-sm text-zinc-400 group-hover:text-white transition-colors">{fileName || "Click to upload resume"}</span>
-                    </label>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-4 mt-2">
-                <button
-                  type="submit"
-                  disabled={busy}
-                  className="px-8 py-3 bg-accent hover:bg-accent-dark disabled:opacity-60 text-white font-mono text-sm font-semibold rounded-xl transition-colors"
-                >
-                  {uploading ? "Uploading resume…" : pending ? "Submitting…" : "Submit Application →"}
-                </button>
-                <span className="font-mono text-xs text-zinc-500">We respect your privacy.</span>
-              </div>
-            </form>
-          </>
-        )}
-      </div>
+            <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
+              <RippleButton type="submit" disabled={busy || !formTs} className="h-11 rounded-full bg-primary px-7 text-sm font-medium text-primary-foreground disabled:opacity-60">
+                {busy ? <DotsLoader size="sm" label={uploading ? "Uploading resume" : "Submitting"} /> : "Submit application"}
+              </RippleButton>
+              <span className="text-xs text-muted-foreground">We only use your details for this application.</span>
+            </div>
+          </form>
+        </>
+      )}
     </div>
   );
 }

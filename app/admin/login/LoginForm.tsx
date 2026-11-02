@@ -5,9 +5,9 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { cancelLogin, login, resendLoginCode, verifyLoginCode, type LoginState, type OtpState } from "./actions";
 
 const inputCls =
-  "w-full rounded-xl border border-zinc-800 bg-zinc-900 py-3 pl-11 pr-4 text-sm text-white placeholder-zinc-600 transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20";
+  "w-full rounded-xl border border-zinc-800 bg-zinc-900 py-3 pl-11 pr-4 text-sm text-white placeholder-zinc-600 transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20";
 const primaryCls =
-  "flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-60";
+  "flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-60";
 
 function Alert({ tone, children }: { tone: "error" | "success"; children: React.ReactNode }) {
   const Icon = tone === "error" ? AlertCircle : CheckCircle2;
@@ -117,8 +117,8 @@ export function OtpForm({ email }: { email: string }) {
   return (
     <>
       <div className="mb-8">
-        <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/30 bg-accent/10">
-          <MailCheck className="h-6 w-6 text-accent" aria-hidden="true" />
+        <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10">
+          <MailCheck className="h-6 w-6 text-brand" aria-hidden="true" />
         </span>
         <h1 className="font-display text-2xl font-bold">Check your email</h1>
         <p className="mt-1.5 text-sm text-zinc-400">
@@ -165,7 +165,7 @@ export function OtpForm({ email }: { email: string }) {
                   if (e.key === "ArrowLeft" && i > 0) refs.current[i - 1]?.focus();
                   if (e.key === "ArrowRight" && i < DIGITS - 1) refs.current[i + 1]?.focus();
                 }}
-                className="h-14 w-full min-w-0 rounded-xl border border-zinc-800 bg-zinc-900 text-center font-mono text-xl font-semibold text-white transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="h-14 w-full min-w-0 rounded-xl border border-zinc-800 bg-zinc-900 text-center font-mono text-xl font-semibold text-white transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
             ))}
           </div>
@@ -178,7 +178,7 @@ export function OtpForm({ email }: { email: string }) {
 
       <div className="mt-6 flex items-center justify-between text-xs">
         <form action={resend}>
-          <button type="submit" disabled={cooldown > 0 || resending} className="font-medium text-accent transition-colors hover:text-accent-light disabled:cursor-not-allowed disabled:text-zinc-600">
+          <button type="submit" disabled={cooldown > 0 || resending} className="font-medium text-brand transition-colors hover:text-brand-light disabled:cursor-not-allowed disabled:text-zinc-600">
             {resending ? "Sending…" : cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
           </button>
         </form>

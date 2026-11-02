@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { ConfirmButton, SubmitButton } from "@/components/admin/client";
 import { CityNameSlug, FeaturesJson } from "@/components/admin/LocationFields";
 import { AdminPage, Card, inputCls, labelCls, primaryBtn } from "@/components/admin/ui";
+import { jsonToPairs, jsonToSectors } from "@/lib/admin/lines";
 import { formatDate } from "@/lib/content";
 import { rows, sql } from "@/lib/db";
 import { decodeRow } from "@/lib/html";
@@ -20,8 +21,8 @@ import {
 
 export const metadata = { title: "Location Pages" };
 
-type City = { id: number; name: string; slug: string; state: string; latitude: string | null; longitude: string | null; is_active: number; sort_order: number };
-type Service = { id: number; slug: string; label: string; keyword: string; contact_param: string | null; features_json: string | null; is_active: number; sort_order: number };
+type City = { id: number; name: string; slug: string; state: string; latitude: string | null; longitude: string | null; is_active: number; sort_order: number; about: string | null; sectors_json: string | null };
+type Service = { id: number; slug: string; label: string; keyword: string; contact_param: string | null; features_json: string | null; is_active: number; sort_order: number; about: string | null; faq_json: string | null };
 type Override = {
   id: number;
   city_slug: string;
@@ -120,6 +121,16 @@ function CitiesTab({ cities, edit }: { cities: City[]; edit: City | null }) {
             <Input name="longitude" label="Longitude" defaultValue={edit?.longitude} placeholder="77.2090" />
             <Input name="sort_order" label="Sort Order" type="number" defaultValue={edit?.sort_order ?? 0} />
           </div>
+          <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            <div>
+              <label htmlFor="about" className={labelCls}>About this city <span className="text-zinc-600">(unique text shown on its pages)</span></label>
+              <textarea id="about" name="about" rows={5} defaultValue={edit?.about ?? ""} className={`${inputCls} resize-y`} />
+            </div>
+            <div>
+              <label htmlFor="sectors" className={labelCls}>Local sectors <span className="text-zinc-600">(one per line: Sector | what they need)</span></label>
+              <textarea id="sectors" name="sectors" rows={5} defaultValue={jsonToSectors(edit?.sectors_json)} className={`${inputCls} resize-y`} />
+            </div>
+          </div>
           {edit && (
             <label className="mt-5 flex items-center gap-2 cursor-pointer text-sm font-mono text-zinc-300">
               <input type="checkbox" name="is_active" value="1" defaultChecked={!!edit.is_active} className="w-4 h-4 accent-emerald-500" />
@@ -203,6 +214,14 @@ function ServicesTab({ services, edit, quoteOptions }: { services: Service[]; ed
                 </select>
               </div>
               <Input name="sort_order" label="Sort Order" type="number" defaultValue={edit?.sort_order ?? 0} />
+              <div>
+                <label htmlFor="svc_about" className={labelCls}>About this service <span className="text-zinc-600">(unique text on its city pages)</span></label>
+                <textarea id="svc_about" name="about" rows={4} defaultValue={edit?.about ?? ""} className={`${inputCls} resize-y`} />
+              </div>
+              <div>
+                <label htmlFor="svc_faqs" className={labelCls}>FAQ <span className="text-zinc-600">(one per line: Question | Answer)</span></label>
+                <textarea id="svc_faqs" name="faqs" rows={4} defaultValue={jsonToPairs(edit?.faq_json)} className={`${inputCls} resize-y`} />
+              </div>
               {edit && (
                 <label className="flex items-center gap-2 cursor-pointer text-sm font-mono text-zinc-300">
                   <input type="checkbox" name="is_active" value="1" defaultChecked={!!edit.is_active} className="w-4 h-4 accent-emerald-500" />
@@ -261,7 +280,7 @@ function OverridesTab({ overrides, cities, services, edit }: { overrides: Overri
     <>
       <FormCard title={edit ? "Edit Override" : "Add Content Override"}>
         <p className="-mt-3 mb-5 text-xs font-mono text-zinc-500">Override the auto-generated H1 and intro paragraph for any city/service page. Titles and meta descriptions are managed in{" "}
-          <Link href="/admin/seo/locations" className="text-accent hover:underline">
+          <Link href="/admin/seo/locations" className="text-brand hover:underline">
             SEO → Location pages
           </Link>
           .

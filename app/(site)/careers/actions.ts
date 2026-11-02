@@ -29,6 +29,11 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
   };
   const fail = (errors: string[]): ApplyState => ({ ok: false, errors, values });
 
+  // Same traps as the contact form. A hidden field filled in, or a form sent within 3 seconds of loading, is a bot;
+  // it gets the normal success response so it has no reason to adapt.
+  const loadedAt = Number(field(fd, "form_ts"));
+  if (field(fd, "website_url") || !loadedAt || Date.now() - loadedAt < 3000) return { ok: true, errors: [], values: {} };
+
   const ip = await getClientIp();
 
   // Rate limit: at most 3 applications per IP per hour, counted from the applications table itself.

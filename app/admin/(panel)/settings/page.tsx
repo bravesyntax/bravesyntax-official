@@ -29,7 +29,7 @@ function Section({ icon: Icon, title, description, children, cols = "md:grid-col
     <section className="grid gap-6 border-b border-zinc-800 py-8 first:pt-0 last:border-0 lg:grid-cols-[260px_1fr]">
       <div>
         <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Icon className="h-4 w-4 text-accent" aria-hidden="true" />
+          <Icon className="h-4 w-4 text-brand" aria-hidden="true" />
           {title}
         </h3>
         <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">{description}</p>
@@ -83,7 +83,7 @@ export default async function SettingsPage() {
           <Section icon={BarChart3} title="Analytics" description="Visitor tracking. Search engine verification, share images and per-page SEO live in the SEO section.">
             <Field name="google_analytics_id" title="Google Analytics 4 ID" value={v("google_analytics_id")} placeholder="G-XXXXXXXXXX" />
             <div className="flex items-end">
-              <Link href="/admin/seo/settings" className="inline-flex items-center gap-1.5 pb-3 text-xs text-accent hover:underline">
+              <Link href="/admin/seo/settings" className="inline-flex items-center gap-1.5 pb-3 text-xs text-brand hover:underline">
                 SEO settings: verification, share image, organisation schema →
               </Link>
             </div>
@@ -98,7 +98,7 @@ export default async function SettingsPage() {
           <form action={updateAdminEmail} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 lg:p-8 space-y-5">
             <div>
               <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-                <ShieldCheck className="h-4 w-4 text-accent" aria-hidden="true" />
+                <ShieldCheck className="h-4 w-4 text-brand" aria-hidden="true" />
                 Account & two-step sign-in
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
@@ -122,7 +122,7 @@ export default async function SettingsPage() {
           <form action={changePassword} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 lg:p-8 space-y-5">
             <div>
               <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-                <KeyRound className="h-4 w-4 text-accent" aria-hidden="true" />
+                <KeyRound className="h-4 w-4 text-brand" aria-hidden="true" />
                 Change password
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">At least 10 characters with letters and numbers. Other devices are signed out and you get an email alert.</p>
