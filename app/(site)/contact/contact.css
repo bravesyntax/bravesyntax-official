@@ -1,0 +1,33 @@
+/* Contact page styles (prefix ct-*), from pages/contact.php. Scoped under .pg-contact. */
+.pg-contact{--sb:#000;--sb-alt:#09090b;--cb:rgba(24,24,27,.5);--bc:rgba(39,39,42,.6);--tp:#fff;--ts:#a1a1aa;--tm:#71717a;--dc:rgba(39,39,42,.8);}
+html:not(.dark) .pg-contact{--sb:#fff;--sb-alt:#f9fafb;--cb:rgba(255,255,255,.9);--bc:rgba(229,231,235,.8);--tp:#09090b;--ts:#52525b;--tm:#6b7280;--dc:rgba(209,213,225,.7);}
+.pg-contact .ct-hero-section{background-color:var(--sb);}
+.pg-contact .ct-dots{background-color:var(--sb)!important;background-image:radial-gradient(circle,var(--dc) 1px,transparent 1px)!important;}
+.pg-contact .ct-fade-b{background:linear-gradient(to bottom,rgba(0,0,0,.3),transparent,var(--sb))!important;}
+.pg-contact .ct-fade{background:linear-gradient(to bottom,var(--sb),transparent,var(--sb))!important;}
+html:not(.dark) .pg-contact .ct-fade-b{background:linear-gradient(to bottom,rgba(255,255,255,.5),transparent,#fff)!important;}
+html:not(.dark) .pg-contact section.relative{background-color:var(--sb);}
+html:not(.dark) .pg-contact .ct-alt{background-color:var(--sb-alt)!important;}
+html:not(.dark) .pg-contact .ct-t-p{color:var(--tp)!important;}
+html:not(.dark) .pg-contact .ct-t-s{color:var(--ts)!important;}
+html:not(.dark) .pg-contact .ct-t-m{color:var(--tm)!important;}
+html:not(.dark) .pg-contact .ct-border{border-color:var(--bc)!important;}
+html:not(.dark) .pg-contact .ct-form-card{background-color:#fff!important;border-color:rgba(229,231,235,.8)!important;box-shadow:0 4px 32px rgba(0,0,0,.08)!important;}
+html:not(.dark) .pg-contact .ct-input{background-color:#f9fafb!important;border-color:rgba(229,231,235,.9)!important;color:#111827!important;}
+html:not(.dark) .pg-contact .ct-input:focus{border-color:rgba(16,185,129,.5)!important;background-color:#fff!important;}
+html:not(.dark) .pg-contact .ct-input::placeholder{color:#9ca3af!important;}
+html:not(.dark) .pg-contact .ct-label{color:#374151!important;}
+html:not(.dark) .pg-contact .ct-required{color:#059669!important;}
+html:not(.dark) .pg-contact .ct-info-card{background-color:#fff!important;border-color:rgba(229,231,235,.7)!important;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+html:not(.dark) .pg-contact .ct-info-label{color:#6b7280!important;}
+html:not(.dark) .pg-contact .ct-info-value{color:#111827!important;}
+html:not(.dark) .pg-contact .ct-badge-pill{background-color:rgba(255,255,255,.95)!important;border-color:rgba(203,213,225,.9)!important;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+html:not(.dark) .pg-contact .ct-badge-pill span:last-child{color:#374151!important;}
+html:not(.dark) .pg-contact .ct-hero-section>.ct-dots{background-color:#fff!important;background-image:radial-gradient(circle,rgba(203,213,225,.8) 1px,transparent 1px)!important;}
+html:not(.dark) .pg-contact .ct-hero-section>.ct-fade-b{background:linear-gradient(to bottom,rgba(255,255,255,.5),transparent,#fff)!important;}
+html:not(.dark) .pg-contact .ct-cta{background:linear-gradient(135deg,#ecfdf5,#fff,#f0fdf4)!important;}
+html:not(.dark) .pg-contact .ct-error{background-color:rgba(254,226,226,.9)!important;border-color:rgba(239,68,68,.3)!important;}
+html:not(.dark) .pg-contact .ct-error p{color:#b91c1c!important;}
+/* Budget tiles */
+html:not(.dark) .pg-contact .budget-tile{background-color:#f9fafb!important;border-color:rgba(229,231,235,.9)!important;color:#374151!important;}
+html:not(.dark) .pg-contact .budget-tile[aria-checked="true"]{background-color:rgba(16,185,129,.1)!important;border-color:rgba(16,185,129,.5)!important;color:#059669!important;}

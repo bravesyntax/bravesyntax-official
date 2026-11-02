@@ -1,0 +1,111 @@
+/* Location page styles, from pages/location.php. Scoped under .pg-location so nothing leaks onto other pages. */
+/* ════════════════════════════════════════════════════════════
+   THEME TOKENS — driven by the .dark class on <html>
+   (same mechanism + palette used by the site header)
+   ════════════════════════════════════════════════════════════ */
+html.dark .pg-location{
+    --acc:#10b981;        /* accent (text/links/labels) */
+    --acc-l:#34d399;      /* accent hover / lighter */
+    --bg:#000;            /* page base */
+    --bg-alt:#09090b;     /* alt sections + cards */
+    --bd:rgba(39,39,42,.6);     /* default border */
+    --t:#fff;             /* primary text */
+    --tm:#a1a1aa;         /* muted text */
+    --t-dim:#6b7280;      /* dimmest text (roles etc.) */
+    --hl:#fff;            /* breadcrumb current item */
+    --surface:rgba(39,39,42,.5);     /* pills */
+    --surface-soft:rgba(39,39,42,.3);/* why-list items */
+    --acc-bg:rgba(16,185,129,.04);   /* tinted accent bg */
+    --acc-bd:rgba(16,185,129,.12);   /* tinted accent border */
+    --grid-line:rgba(16,185,129,.03);/* hero grid */
+}
+html:not(.dark) .pg-location{
+    --acc:#059669;
+    --acc-l:#10b981;
+    --bg:#f8fafc;
+    --bg-alt:#ffffff;
+    --bd:#e2e8f0;
+    --t:#1e293b;
+    --tm:#64748b;
+    --t-dim:#94a3b8;
+    --hl:#1e293b;
+    --surface:#f1f5f9;
+    --surface-soft:#f8fafc;
+    --acc-bg:rgba(16,185,129,.06);
+    --acc-bd:rgba(16,185,129,.22);
+    --grid-line:rgba(16,185,129,.06);
+}
+
+/* smooth swap when toggling theme */
+.pg-location .loc-hero,.pg-location .loc-sec,.pg-location .feat-card,.pg-location .faq-item,.pg-location .faq-a,.pg-location .svc-pill,.pg-location .why-item,.pg-location .loc-stat,.pg-location .testimonial-card,.pg-location .city-link,.pg-location .loc-cta-box,.pg-location .btn-outline,.pg-location .loc-badge{
+    transition:background-color .3s ease,border-color .3s ease,color .3s ease;
+}
+
+.pg-location .loc-hero{min-height:88vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:130px 24px 90px;background:var(--bg)}
+.pg-location .loc-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(16,185,129,.13),transparent 68%);pointer-events:none}
+.pg-location .loc-grid{position:absolute;inset:0;background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.pg-location .loc-inner{max-width:860px;text-align:center;position:relative;z-index:1}
+.pg-location .loc-crumb{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-family:monospace;color:var(--tm);margin-bottom:22px;flex-wrap:wrap}
+.pg-location .loc-crumb a{color:var(--tm);text-decoration:none;transition:color .2s}.pg-location .loc-crumb a:hover{color:var(--acc)}
+.pg-location .loc-crumb .sep{color:var(--bd)}
+.pg-location .loc-crumb .current{color:var(--hl)}
+.pg-location .loc-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border:1px solid var(--acc-bd);border-radius:99px;font-size:11px;font-family:monospace;color:var(--acc);margin-bottom:22px;background:var(--acc-bg)}
+.pg-location .loc-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--acc);animation:loc-pulse 2s ease-in-out infinite}
+@keyframes loc-pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}60%{box-shadow:0 0 0 6px transparent}}
+.pg-location .loc-h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;color:var(--t);margin:0 0 18px;letter-spacing:-.02em;font-family:var(--font-syne),sans-serif}
+.pg-location .loc-h1 .hl{color:var(--acc)}
+.pg-location .loc-intro{font-size:clamp(.95rem,1.6vw,1.1rem);color:var(--tm);line-height:1.75;max-width:680px;margin:0 auto 34px;font-family:var(--font-jetbrains-mono),monospace}
+.pg-location .loc-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.pg-location .btn-primary{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:var(--acc);color:#000;font-family:monospace;font-weight:700;font-size:14px;border-radius:12px;text-decoration:none;transition:all .2s;box-shadow:0 0 40px rgba(16,185,129,.22)}
+.pg-location .btn-primary:hover{background:var(--acc-l);transform:translateY(-1px)}
+.pg-location .btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border:1px solid var(--bd);color:var(--tm);font-family:monospace;font-size:14px;border-radius:12px;text-decoration:none;transition:all .2s}
+.pg-location .btn-outline:hover{border-color:var(--acc-bd);color:var(--t)}
+.pg-location .loc-sec{padding:80px 24px;background:var(--bg)}
+.pg-location .loc-sec-alt{background:var(--bg-alt)}
+.pg-location .loc-wrap{max-width:1100px;margin:0 auto}
+.pg-location .sec-label{font-family:monospace;font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.pg-location .sec-title{font-family:var(--font-syne),sans-serif;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;color:var(--t);margin:0 0 14px;letter-spacing:-.02em}
+.pg-location .sec-sub{color:var(--tm);font-size:14px;line-height:1.7;max-width:560px;font-family:monospace}
+.pg-location .loc-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:44px}
+.pg-location .loc-stat{background:var(--acc-bg);border:1px solid var(--acc-bd);border-radius:16px;padding:28px 20px;text-align:center}
+.pg-location .loc-stat-v{font-family:monospace;font-size:2rem;font-weight:800;color:var(--acc);line-height:1}
+.pg-location .loc-stat-l{font-size:11px;color:var(--tm);font-family:monospace;margin-top:6px;text-transform:uppercase;letter-spacing:.06em}
+.pg-location .loc-svc-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.pg-location .svc-pill{display:inline-flex;align-items:center;gap:5px;padding:7px 15px;background:var(--surface);border:1px solid var(--bd);border-radius:99px;font-family:monospace;font-size:12px;color:var(--tm);text-decoration:none;transition:all .2s}
+.pg-location .svc-pill:hover,.pg-location .svc-pill.active{border-color:var(--acc-bd);color:var(--acc);background:var(--acc-bg)}
+.pg-location .svc-pill.active{font-weight:700}
+.pg-location .loc-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:44px}
+.pg-location .feat-card{background:var(--bg-alt);border:1px solid var(--bd);border-radius:16px;padding:26px;transition:all .2s}
+.pg-location .feat-card:hover{border-color:var(--acc-bd);transform:translateY(-2px)}
+.pg-location .feat-icon{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-bottom:14px;border-radius:12px;border:1px solid var(--acc-bd);background:var(--acc-bg);color:var(--acc)}
+.pg-location .feat-title{font-family:monospace;font-weight:700;color:var(--t);font-size:13px;margin-bottom:5px}
+.pg-location .feat-desc{font-size:12px;color:var(--tm);line-height:1.6;font-family:monospace}
+.pg-location .loc-why-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;margin-top:44px}
+@media(max-width:768px){.pg-location .loc-why-grid{grid-template-columns:1fr}}
+.pg-location .why-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
+.pg-location .why-item{display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--surface-soft);border:1px solid var(--bd);border-radius:12px}
+.pg-location .why-check{width:22px;height:22px;border-radius:50%;background:rgba(16,185,129,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.pg-location .why-check svg{width:11px;height:11px;stroke:#10b981}
+.pg-location .why-item strong{display:block;font-family:monospace;font-size:12px;color:var(--t);margin-bottom:2px;font-weight:700}
+.pg-location .why-item span{font-size:12px;color:var(--tm);line-height:1.5;font-family:monospace}
+.pg-location .testimonial-card{background:var(--acc-bg);border:1px solid var(--acc-bd);border-radius:20px;padding:28px}
+.pg-location .testi-quote{font-family:monospace;font-size:13px;color:var(--tm);line-height:1.8;margin:0 0 18px;font-style:italic}
+.pg-location .testi-author{display:flex;align-items:center;gap:10px}
+.pg-location .testi-avatar{width:34px;height:34px;border-radius:50%;background:rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;font-weight:800;color:#10b981;flex-shrink:0}
+.pg-location .testi-name{font-family:monospace;font-size:12px;color:var(--t);font-weight:600}
+.pg-location .testi-role{font-family:monospace;font-size:11px;color:var(--t-dim)}
+.pg-location .loc-faq{margin-top:44px;display:flex;flex-direction:column;gap:10px}
+.pg-location .faq-item{background:var(--bg-alt);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.pg-location .faq-q{padding:16px 18px;font-family:monospace;font-size:13px;color:var(--t);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;gap:16px}
+.pg-location .faq-q:hover{color:var(--acc)}
+.pg-location .faq-a{padding:0 18px;max-height:0;overflow:hidden;transition:all .3s;font-size:13px;color:var(--tm);line-height:1.75;font-family:monospace}
+.pg-location .faq-item.open .faq-a{padding:0 18px 16px;max-height:300px}
+.pg-location .faq-item.open .faq-q{color:var(--acc)}
+.pg-location .faq-chevron{flex-shrink:0;transition:transform .3s}
+.pg-location .faq-item.open .faq-chevron{transform:rotate(180deg)}
+.pg-location .loc-cities-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;justify-content:center}
+.pg-location .city-link{padding:6px 14px;border:1px solid var(--bd);border-radius:99px;font-family:monospace;font-size:11px;color:var(--tm);text-decoration:none;transition:all .2s}
+.pg-location .city-link:hover{border-color:var(--acc-bd);color:var(--acc)}
+.pg-location .loc-cta-box{background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.02));border:1px solid var(--acc-bd);border-radius:24px;padding:60px 40px;text-align:center;margin-top:44px}
+.pg-location .loc-cta-note{color:var(--tm);font-size:13px;max-width:500px;margin:0 auto 30px;text-align:center;line-height:1.7;font-family:monospace}
+@media(max-width:600px){.pg-location .loc-cta-box{padding:40px 20px}}

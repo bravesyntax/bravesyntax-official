@@ -1,0 +1,109 @@
+/* Background remover styles, from pages/bg-remover.php. Scoped under .pg-bgremover so nothing leaks onto other pages. */
+
+/* These variables were referenced but never defined on the PHP site, so the rules using them had no effect.
+   Defined here so step dots, swatch highlights and the toast look as designed. */
+.pg-bgremover{--emerald:#10b981;--emerald-glow:rgba(16,185,129,.15);--bg-card2:#f4f4f5;--border:#d4d4d8;--txt-muted:#71717a;--txt-primary:#18181b;--bg-page:#ffffff;}
+.dark .pg-bgremover{--bg-card2:#27272a;--border:#3f3f46;--txt-muted:#a1a1aa;--txt-primary:#fafafa;--bg-page:#000000;}
+/* ── tool‑specific overrides ── */
+.pg-bgremover .upload-zone{
+  transition: border-color 0.2s, background 0.2s;
+}
+.pg-bgremover .upload-zone.drag-over{
+  border-color: var(--emerald);
+  background: rgba(16, 185, 129, 0.08);
+}
+.pg-bgremover .progress-bar-fill{
+  transition: width 0.4s ease;
+}
+.pg-bgremover .step-dot{
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: var(--bg-card2);
+  border: 1.5px solid var(--border);
+  color: var(--txt-muted);
+}
+.pg-bgremover .step-item.active .step-dot{
+  background: var(--emerald-glow);
+  border-color: var(--emerald);
+  color: var(--emerald);
+}
+.pg-bgremover .step-item.done .step-dot{
+  background: var(--emerald);
+  border-color: var(--emerald);
+  color: #fff;
+}
+.pg-bgremover .result-canvas-wrap{
+  background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 0 0 / 20px 20px;
+}
+html.dark .pg-bgremover .result-canvas-wrap{
+  background: repeating-conic-gradient(#2d3748 0% 25%, #1e293b 0% 50%) 0 0 / 20px 20px;
+}
+.pg-bgremover .bg-swatch{
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.pg-bgremover .bg-swatch:hover,.pg-bgremover .bg-swatch.active{
+  border-color: var(--emerald);
+  transform: scale(1.12);
+}
+.pg-bgremover .bg-swatch.transparent-swatch{
+  background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 0 0 / 14px 14px;
+}
+html.dark .pg-bgremover .bg-swatch.transparent-swatch{
+  background: repeating-conic-gradient(#444 0% 25%, #222 0% 50%) 0 0 / 14px 14px;
+}
+.pg-bgremover #bg-color-picker{
+  width: 36px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  padding: 2px;
+  background: transparent;
+  cursor: pointer;
+}
+.pg-bgremover .toast{
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  background: var(--txt-primary);
+  color: var(--bg-page);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+.pg-bgremover .toast.show{
+  transform: translateY(0);
+  opacity: 1;
+}
+.pg-bgremover .toast.success{ background: var(--emerald); color: #fff; }
+.pg-bgremover .toast.error{ background: #ef4444; color: #fff; }
+
+/* ── FAQ accordion ── */
+.pg-bgremover .faq-item.open .faq-a{
+  max-height: 400px;
+  padding-top: 0.6rem;
+}
+.pg-bgremover .faq-a{
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding-top 0.3s ease;
+}

@@ -18,6 +18,8 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      // Static browser scripts (the PDF tool engine) whose functions are called from inline onclick attributes.
+      "public/**",
     ],
   },
 ];
