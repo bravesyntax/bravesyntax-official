@@ -1,11 +1,11 @@
 import "server-only";
 import nodemailer, { type Transporter } from "nodemailer";
 
-// SMTP mailer (send_mail() in includes/functions.php). Defaults match the Hostinger mailbox;
-// only SMTP_PASS is a secret. Without it, mail is skipped and logged so forms still work.
-const SMTP_HOST = process.env.SMTP_HOST ?? "smtp.hostinger.com";
+// SMTP mailer (send_mail() in includes/functions.php). Defaults match the Gmail account; SMTP_PASS must be a Google App Password, and
+// is the only secret. Without it, mail is skipped and logged so forms still work.
+const SMTP_HOST = process.env.SMTP_HOST ?? "smtp.gmail.com";
 const SMTP_PORT = Number(process.env.SMTP_PORT ?? 465);
-const SMTP_USER = process.env.SMTP_USER ?? "support@bravesyntax.com";
+const SMTP_USER = process.env.SMTP_USER ?? "bravesyntax@gmail.com";
 const SMTP_FROM = process.env.SMTP_FROM ?? SMTP_USER;
 const SMTP_FROM_NAME = "Brave Syntax";
 
