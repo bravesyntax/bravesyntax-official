@@ -1,14 +1,13 @@
-import { BadgeCheck, Infinity as InfinityIcon, Languages, Lock, WifiOff } from "lucide-react";
+import { BadgeCheck, Languages, Lock, UserX } from "lucide-react";
 import type { Metadata } from "next";
 import JsonLd from "@/components/JsonLd";
-import PdfToolkit from "@/components/pdf-tools/PdfToolkit";
+import PdfToolGrid from "@/components/tools/PdfToolGrid";
 import { PageHero, Section, RelatedLinks } from "@/components/site/ui";
 import { BlurFade } from "@/components/velora/blur-fade";
 import { RetroGrid } from "@/components/velora/retro-grid";
 import { Typewriter } from "@/components/velora/typewriter";
-import { PDF_TOOL_COUNT } from "@/lib/navigation";
+import { PDF_TOOL_COUNT } from "@/lib/tools/registry";
 import { pageMetadata, pageSchema } from "@/lib/seo";
-import "./pdf-tools.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata("pdf-tools");
@@ -16,14 +15,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const TRUST_BADGES = [
   [Lock, "Files stay on your device"],
-  [WifiOff, "Works offline once loaded"],
   [BadgeCheck, "No watermarks"],
-  [InfinityIcon, "No file size limits"],
-  [Languages, "16 OCR languages"],
+  [UserX, "No sign-up"],
+  [Languages, "OCR in 12 languages"],
 ] as const;
 
 const HOW_IT_WORKS: [string, string, string][] = [
-  ["1", "Pick a tool", "Choose from the tools below."],
+  ["1", "Pick a tool", "Choose from the tools above."],
   ["2", "Add your file", "It's processed in your browser, not uploaded."],
   ["3", "Download", "Save the result straight away. No account needed."],
 ];
@@ -31,7 +29,7 @@ const HOW_IT_WORKS: [string, string, string][] = [
 export default async function PdfToolsPage() {
   const schema = await pageSchema("pdf-tools");
   return (
-    <div className="tool-scope pg-pdftools">
+    <div>
       <JsonLd data={schema} />
       <PageHero
         eyebrow={
@@ -52,6 +50,10 @@ export default async function PdfToolsPage() {
         </span>
       </PageHero>
 
+      <Section label="All PDF tools" className="!pt-4">
+        <PdfToolGrid />
+      </Section>
+
       <Section label="How it works" className="!py-8">
         <div className="grid gap-4 sm:grid-cols-3">
           {HOW_IT_WORKS.map(([n, t, d], i) => (
@@ -67,8 +69,6 @@ export default async function PdfToolsPage() {
           ))}
         </div>
       </Section>
-
-      <PdfToolkit />
 
       <RelatedLinks
         title="More from Brave Syntax"

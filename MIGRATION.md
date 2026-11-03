@@ -19,7 +19,7 @@ The original PHP site in the parent folder stays untouched as the reference unti
 | 2 | Static pages: about, services, industries | Done |
 | 3 | Data pages: portfolio + portfolio/[slug], blog + blog/[slug], careers (application form saves to Neon, no resume yet) | Done |
 | 4 | Forms: contact (SMTP mail, rate limit, honeypot/time trap/spam filter, optional Turnstile), career resume upload (browser → private Vercel Blob, since Vercel caps function bodies at 4.5 MB) | Done |
-| 5 | Tools: pdf-tools (original engine in `public/js/pdf-tools.js`), bg-remover (rewritten in React) | Done |
+| 5 | Tools: rebuilt in React (`components/tools`, `lib/tools`); bg-remover (rewritten in React) | Done |
 | 6 | Location pages `/[city]` and `/[city]/[service]` (410 for removed cities), sitemap.xml, robots.txt | Done |
 | 7 | Admin panel (auth, blog, portfolio, careers, services, SEO, settings, messages, locations) | Done |
 | 8 | Google Search Console tool | |
@@ -40,9 +40,8 @@ The original PHP site in the parent folder stays untouched as the reference unti
 - `career_applications.resume_file`: old rows hold a filename from `uploads/resumes/`; new rows hold a private Blob URL
   (the admin downloads it through `/api/admin/resume/<id>`). Old filenames are shown as "stored on the old server";
   those files would need uploading to the private store to be downloadable — they must not go in `public/`.
-- PDF Toolkit: the 16-tool engine is the PHP page's JavaScript, kept as a static script (`public/js/pdf-tools.js`)
-  with CDN pdf-lib / pdf.js / JSZip / Tesseract as before. The React page renders its markup once and calls
-  `pdfToolsInit()` on each mount. Edit tool behaviour in that file; it is excluded from ESLint.
+- Free tools: every tool has its own page (`/pdf-tools/<slug>`, `/tools/<slug>`), listed in `lib/tools/registry.ts`. Old `/pdf-tools?tool=` links
+  redirect (301). pdf.js and qpdf are served from `public/vendor`, copied from node_modules by `scripts/copy-vendor.mjs`; OCR language data comes from a CDN.
 - Header "Tools" menu links `?tool=pdf-to-word`, `pdf-to-excel` and `word-to-pdf`, which don't exist (same on the
   PHP site); those links open the toolkit without a tool selected.
 - Location pages: unknown city → 404; deactivated city, or a slug in `location_cities_removed_backup` that isn't

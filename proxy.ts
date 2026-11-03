@@ -3,6 +3,7 @@ import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server
 import { SESSION_COOKIE, SESSION_TTL_SECONDS, sessionCookieOptions, signSession, verifySession } from "@/lib/admin/session";
 import { matchRedirect, type RedirectRule } from "@/lib/redirects";
 import { NOT_CITIES } from "@/lib/reserved";
+import { LEGACY_PDF_TOOL_IDS } from "@/lib/tools/registry";
 
 // 0) Admin panel: every /admin page and /api/admin route needs a valid session cookie; an active session is
 //    re-issued so the 1-hour timeout counts from the last request (pages and actions also re-check the
@@ -103,6 +104,15 @@ export async function proxy(req: NextRequest, event: NextFetchEvent) {
   // The PHP quotation module was retired with the move to Next.js: tell search engines it's gone for good.
   if (pathname === "/quotation" || pathname.startsWith("/quotation/")) {
     return NextResponse.rewrite(new URL("/gone", req.url), { status: 410 });
+  }
+
+  // The PDF tools used to open through a query string; each now has its own page.
+  if (pathname === "/pdf-tools" && searchParams.has("tool")) {
+    const slug = LEGACY_PDF_TOOL_IDS[searchParams.get("tool") ?? ""];
+    const url = req.nextUrl.clone();
+    url.search = "";
+    url.pathname = slug ? `/pdf-tools/${slug}` : "/pdf-tools";
+    return NextResponse.redirect(url, 301);
   }
 
   if (pathname === "/pages/blog.php") {

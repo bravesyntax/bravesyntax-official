@@ -3,7 +3,7 @@ import Footer from "@/components/layout/Footer";
 import SiteBanner from "@/components/layout/SiteBanner";
 import SiteHeader from "@/components/layout/SiteHeader";
 import { ScrollProgress } from "@/components/velora/scroll-progress";
-import { PDF_TOOL_COUNT } from "@/lib/navigation";
+import { ALL_TOOL_COUNT } from "@/lib/tools/registry";
 import { getSiteSettings } from "@/lib/settings";
 
 // Public site chrome. DB-backed content (settings, services) is cached and refreshed in the background
@@ -17,7 +17,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   return (
     <>
       <ScrollProgress className="z-60" />
-      <SiteBanner count={PDF_TOOL_COUNT} />
+      <SiteBanner count={ALL_TOOL_COUNT} />
       <SiteHeader />
       <main className="overflow-x-clip">{children}</main>
       <Footer />

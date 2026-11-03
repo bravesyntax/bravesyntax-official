@@ -125,11 +125,22 @@ export default function Header({ services = [], contact, searchDocs = [] }: { se
                       </span>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="items-start gap-3 rounded-xl p-2.5">
+                    <Link href="/tools">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-lg border bg-background text-primary shadow-sm">
+                        <Sparkles className="size-4" aria-hidden="true" />
+                      </span>
+                      <span className="grid gap-0.5">
+                        <span className="font-medium text-foreground">All free tools</span>
+                        <span className="text-xs leading-snug text-muted-foreground">GST invoice, QR codes, images and more</span>
+                      </span>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuLabel className="px-2.5 pt-3 pb-1">Popular</DropdownMenuLabel>
                   <div className="grid grid-cols-2">
                     {PDF_TOOLS.slice(0, 6).map((t) => (
                       <DropdownMenuItem key={t.slug} asChild className="rounded-lg px-2.5 py-1.5 text-sm">
-                        <Link href={`/pdf-tools?tool=${t.slug}`}>{t.name}</Link>
+                        <Link href={`/pdf-tools/${t.slug}`}>{t.name}</Link>
                       </DropdownMenuItem>
                     ))}
                   </div>
@@ -214,6 +225,13 @@ export default function Header({ services = [], contact, searchDocs = [] }: { se
                             <SheetClose asChild>
                               <Link href="/pdf-tools" className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
                                 <FileText className="size-4 text-primary" aria-hidden="true" /> All {PDF_TOOL_COUNT} PDF tools
+                              </Link>
+                            </SheetClose>
+                          </li>
+                          <li>
+                            <SheetClose asChild>
+                              <Link href="/tools" className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+                                <Sparkles className="size-4 text-primary" aria-hidden="true" /> All free tools
                               </Link>
                             </SheetClose>
                           </li>

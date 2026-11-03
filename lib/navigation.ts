@@ -1,3 +1,4 @@
+import { getPdfTool, TOOL_GROUPS } from "@/lib/tools/registry";
 // Menu data shared by the header mega menu and mobile drawer (from includes/header.php).
 
 /** Header menu groups, built from the admin-managed services table (see app/(site)/layout.tsx). */
@@ -20,19 +21,15 @@ export function groupNavServices(services: NavService[]): NavServiceGroup[] {
 
 export type PdfTool = { name: string; slug: string; desc: string; group: string };
 
-/** How many tools public/js/pdf-tools.js has. PDF_TOOLS below is only the popular ones shown in menus. */
-export const PDF_TOOL_COUNT = 16;
+export { PDF_TOOL_COUNT } from "@/lib/tools/registry";
 
-export const PDF_TOOLS: PdfTool[] = [
-  { name: "Image to PDF", slug: "img2pdf", desc: "Convert images to PDF format", group: "Convert" },
-  { name: "PDF to JPG", slug: "pdf2img", desc: "Extract pages as high-quality images", group: "Convert" },
-  { name: "PDF Merge", slug: "merge", desc: "Combine multiple PDFs into one", group: "Organize" },
-  { name: "PDF Split", slug: "split", desc: "Split PDF pages into separate files", group: "Organize" },
-  { name: "Rotate PDF", slug: "rotate", desc: "Rotate PDF pages easily", group: "Organize" },
-  { name: "PDF Compress", slug: "compress", desc: "Reduce PDF file size significantly", group: "Optimize & Secure" },
-  { name: "PDF Watermark", slug: "watermark", desc: "Add text or image watermarks", group: "Optimize & Secure" },
-  { name: "Unlock PDF", slug: "unlock", desc: "Remove PDF password protection", group: "Optimize & Secure" },
-];
+const POPULAR_PDF_TOOLS = ["compress-pdf", "merge-pdf", "split-pdf", "image-to-pdf", "pdf-to-image", "sign-pdf", "protect-pdf", "pdf-to-text"];
+
+/** The popular tools shown in menus. */
+export const PDF_TOOLS: PdfTool[] = POPULAR_PDF_TOOLS.map((slug) => {
+  const t = getPdfTool(slug)!;
+  return { name: t.name, slug: t.slug, desc: t.short, group: TOOL_GROUPS[t.group] };
+});
 
 export const PDF_TOOL_GROUPS: [string, PdfTool[]][] = Object.entries(
   PDF_TOOLS.reduce<Record<string, PdfTool[]>>((acc, t) => {

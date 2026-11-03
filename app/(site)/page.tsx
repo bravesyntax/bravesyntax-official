@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, Boxes, Check, Clock, Code2, Eraser, FileText, Gauge, Handshake, LockKeyhole, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowUpRight, Boxes, Clock, Code2, Eraser, FileText, Gauge, Handshake, LockKeyhole, ShieldCheck, Wallet } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,20 +6,15 @@ import JsonLd from "@/components/JsonLd";
 import { container, CtaLink, IconChip, Section, SectionHeading, ShimmerLink } from "@/components/site/ui";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AnimatedList } from "@/components/velora/animated-list";
-import { BrowserMockup } from "@/components/velora/browser-mockup";
 import { BentoCard, BentoGrid } from "@/components/velora/bento-grid";
 import { BlurFade } from "@/components/velora/blur-fade";
 import { HoverCards } from "@/components/velora/card-hover-effect";
 import { DirectionAwareHover } from "@/components/velora/direction-aware-hover";
 import { EvervaultCard } from "@/components/velora/evervault-card";
 import { GlowingEffect } from "@/components/velora/glowing-effect";
-import { GridPattern } from "@/components/velora/grid-pattern";
 import { NumberTicker } from "@/components/velora/number-ticker";
-import { WordRotate } from "@/components/velora/word-rotate";
-import { BorderBeam } from "@/components/velora/border-beam";
 import { Marquee } from "@/components/velora/marquee";
 import { OrbitingCircles } from "@/components/velora/orbiting-circles";
-import { ScrollVelocity } from "@/components/velora/scroll-velocity";
 import { SpotlightCard } from "@/components/velora/spotlight-card";
 import { Terminal } from "@/components/velora/terminal";
 import { TextHighlighter } from "@/components/velora/text-highlighter";
@@ -28,7 +23,6 @@ import { Timeline } from "@/components/velora/timeline";
 import { WobbleCard } from "@/components/velora/wobble-card";
 import { WorldMap } from "@/components/velora/world-map";
 import { SITE_URL } from "@/lib/config";
-import { cn } from "@/lib/utils";
 import { getContactInfo, type ContactInfo } from "@/lib/contact";
 import { CardsCarousel, CarouselCard } from "@/components/velora/apple-cards-carousel";
 import { categoryLabel, formatDate, getActiveJobs, getLatestPosts, getPortfolios, getSiteFacts } from "@/lib/content";
@@ -36,6 +30,7 @@ import { INDUSTRIES } from "@/lib/industries";
 import { getActiveCities } from "@/lib/locations";
 import { mediaUrl } from "@/lib/media";
 import { PDF_TOOL_COUNT, PDF_TOOLS, serviceHref } from "@/lib/navigation";
+import { ALL_TOOL_COUNT } from "@/lib/tools/registry";
 import { pageMetadata, pageSchema } from "@/lib/seo";
 import { getActiveServices, type DbService } from "@/lib/services";
 
@@ -107,7 +102,7 @@ export default async function HomePage() {
     getSiteFacts(),
   ]);
   const work = projects.filter((p) => p.slug).slice(0, 3);
-  const showcase = projects.filter((p) => p.slug && p.image).slice(0, 1);
+  const showcase = projects.filter((p) => p.slug && p.image);
   const techs = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Postgres", "Figma", "Shopify", "WordPress", "Laravel", "Vercel"];
 
   return (
@@ -115,112 +110,58 @@ export default async function HomePage() {
       <JsonLd data={[...schema, WEBSITE_SCHEMA, localBusinessSchema(contact, services)]} />
 
       {/* ═══ HERO ═══ */}
-      <section className="relative isolate overflow-hidden" aria-label="Introduction">
-        <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/15 via-primary/5 to-background" aria-hidden="true" />
-        <GridPattern aria-hidden width={64} height={64} className="absolute inset-0 -z-10 size-full stroke-foreground/5 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
-        <div className={`${container} grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1fr_1.1fr] lg:gap-12 lg:py-20`}>
-          <div>
-            <BlurFade>
-              <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-background/70 p-1 pr-3 text-sm shadow-sm ring-1 ring-border backdrop-blur transition-colors hover:text-primary">
-                <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">Now booking</span>
-                <TextShimmer>Taking on new projects</TextShimmer>
-                <ArrowRight className="size-3.5" aria-hidden="true" />
-              </Link>
-            </BlurFade>
-            <h1 className="mt-6 text-4xl font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl">
-              Web design and development that <span className="bg-linear-to-r from-brand-from via-brand-via to-brand-to bg-clip-text text-transparent">wins you customers</span>
-            </h1>
-            <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">A design and development studio for growing businesses in India. You get a fixed quote, direct access to the people building your project, and code you own.</p>
-            <BlurFade delay={0.15}>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <section className="relative isolate overflow-hidden border-b" aria-label="Introduction">
+        <div className="absolute -top-40 -left-40 -z-10 size-[42rem] rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
+        <div className={`${container} pt-12 sm:pt-16 lg:pt-20`}>
+          <Link href="/contact" className="inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary">
+            <span className="relative flex size-2" aria-hidden="true">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70 motion-reduce:animate-none" />
+              <span className="relative inline-flex size-2 rounded-full bg-primary" />
+            </span>
+            <TextShimmer>Taking on new projects</TextShimmer>
+          </Link>
+          <h1 className="mt-5 text-[clamp(2.75rem,8.4vw,7.5rem)] leading-[0.98] font-semibold tracking-[-0.04em] text-balance">
+            Web design &amp; development that <span className="bg-linear-to-r from-brand-from via-brand-via to-brand-to bg-clip-text text-transparent">wins customers.</span>
+          </h1>
+          <div className="mt-8 grid items-end gap-8 lg:mt-10 lg:grid-cols-[1.2fr_1fr]">
+            <div>
+              <p className="max-w-xl text-lg text-pretty text-muted-foreground">A design and development studio for growing businesses in India. You get a fixed quote, direct access to the people building your project, and code you own.</p>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <ShimmerLink href="/contact">Start your project</ShimmerLink>
                 <CtaLink href="/portfolio" variant="outline">
                   See our work
                 </CtaLink>
               </div>
-            </BlurFade>
-            <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-              {["Fixed quote", "Direct access", "You own the code"].map((t) => (
-                <li key={t} className="flex items-center gap-1.5">
-                  <Check className="size-4 text-primary" aria-hidden="true" /> {t}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <BlurFade delay={0.1}>
-            <div className="grid grid-cols-6 gap-3">
-              {showcase[0] && (
-                <Link href={`/portfolio/${showcase[0].slug}`} className="group relative col-span-6 overflow-hidden rounded-2xl border bg-card/80 p-3 shadow-sm backdrop-blur transition-colors hover:border-primary/50 sm:col-span-4 sm:row-span-2">
-                  <BrowserMockup url={(showcase[0].live_url ?? "bravesyntax.com").replace(/^https?:\/\//, "").replace(/\/$/, "")}>
-                    <div className="relative aspect-video w-full bg-muted">
-                      <Image src={mediaUrl("portfolio", showcase[0].image!)} alt={`${showcase[0].title} website`} fill priority sizes="(min-width: 1024px) 34vw, (min-width: 640px) 66vw, 100vw" className="object-cover object-top" />
-                    </div>
-                  </BrowserMockup>
-                  <p className="mt-3 flex items-center justify-between gap-2 px-1 text-sm">
-                    <span className="truncate font-medium">{showcase[0].title}</span>
-                    <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground group-hover:text-primary">
-                      Recent work <ArrowUpRight className="size-3.5" aria-hidden="true" />
-                    </span>
-                  </p>
-                </Link>
-              )}
-              <div className="col-span-3 flex min-h-32 flex-col justify-between rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur sm:col-span-2">
-                <p className="text-xs text-muted-foreground">We build</p>
-                <p className="text-2xl font-semibold tracking-tight text-primary">
-                  <WordRotate words={["Websites", "Web apps", "Stores", "Brands"]} />
-                </p>
-              </div>
-              <div className="relative col-span-3 flex min-h-32 flex-col justify-between overflow-hidden rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur sm:col-span-2">
-                <BorderBeam size={70} duration={8} />
-                <Wallet className="size-5 text-primary" aria-hidden="true" />
-                <div>
-                  <p className="text-sm font-medium">Fixed quote</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Price agreed in writing first.</p>
-                </div>
-              </div>
-              {facts && (
-                <dl className="col-span-3 grid grid-cols-2 gap-2 rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur">
-                  {[
-                    [facts.projects, "Projects"],
-                    [facts.services, "Services"],
-                  ].map(([value, label]) => (
-                    <div key={label} className="flex flex-col-reverse">
-                      <dt className="mt-1 text-xs text-muted-foreground">{label}</dt>
-                      <dd className="text-3xl font-semibold tracking-tight">
-                        <NumberTicker value={Number(value)} />
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-              <Link href="/pdf-tools" className={cn("group flex items-center gap-3 rounded-2xl border bg-card/80 p-4 shadow-sm backdrop-blur transition-colors hover:border-primary/50", facts ? "col-span-3" : "col-span-6")}>
-                <IconChip>
-                  <FileText className="size-5" aria-hidden="true" />
-                </IconChip>
-                <span className="min-w-0">
-                  <span className="block text-sm font-medium group-hover:text-primary">{PDF_TOOL_COUNT} free PDF tools</span>
-                  <span className="block text-xs text-muted-foreground">No sign-up, right in your browser.</span>
-                </span>
-              </Link>
             </div>
-          </BlurFade>
+            {facts && (
+              <dl className="grid grid-cols-3 gap-4 border-t pt-5 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8">
+                {[
+                  [facts.projects, "Projects live"],
+                  [facts.services, "Services"],
+                  [ALL_TOOL_COUNT, "Free tools"],
+                ].map(([value, label]) => (
+                  <div key={label} className="flex flex-col-reverse">
+                    <dt className="mt-1 text-sm text-muted-foreground">{label}</dt>
+                    <dd className="text-4xl font-semibold tracking-tight sm:text-5xl">
+                      <NumberTicker value={Number(value)} />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
         </div>
-      </section>
-
-      {/* ═══ SERVICE STRIP ═══ */}
-      <div className="overflow-hidden border-y bg-muted/30 py-4" aria-hidden="true">
-        <ScrollVelocity baseVelocity={2}>
-          <span className="flex items-center gap-8 pr-8 text-sm font-medium text-muted-foreground">
-            {services.map((s) => (
-              <span key={s.title} className="flex items-center gap-8 whitespace-nowrap">
-                {s.title}
-                <span className="size-1 rounded-full bg-primary" />
-              </span>
+        {showcase.length > 0 && (
+          <Marquee pauseOnHover className="mt-12 pb-10 [--duration:70s] [--gap:1.25rem] lg:mt-16" aria-label="Recent projects">
+            {showcase.map((p, i) => (
+              <Link key={p.id} href={`/portfolio/${p.slug}`} className="group relative block aspect-[16/10] w-72 shrink-0 overflow-hidden rounded-2xl border bg-muted shadow-sm sm:w-96 lg:w-[30rem]">
+                <Image src={mediaUrl("portfolio", p.image!)} alt={`${p.title} website`} fill priority={i === 0} sizes="(min-width: 1024px) 480px, (min-width: 640px) 384px, 288px" className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]" />
+                <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 to-transparent p-4 pt-10 text-sm font-medium text-white">{p.title}</span>
+              </Link>
             ))}
-          </span>
-        </ScrollVelocity>
-      </div>
+          </Marquee>
+        )}
+      </section>
 
       {/* ═══ SERVICES ═══ */}
       <Section id="services" label="Services">
@@ -418,10 +359,10 @@ export default async function HomePage() {
         <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
           <div>
             <SectionHeading eyebrow="Free tools" title="Free tools. No sign-up, no uploads.">
-              {PDF_TOOL_COUNT} PDF tools and an AI background remover that run right in your browser. Your files never leave your device.
+              {ALL_TOOL_COUNT} tools for PDFs, images, invoices and your website, all running right in your browser. Your files never leave your device.
             </SectionHeading>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <CtaLink href="/pdf-tools">All {PDF_TOOL_COUNT} PDF tools</CtaLink>
+              <CtaLink href="/tools">All {ALL_TOOL_COUNT} free tools</CtaLink>
               <CtaLink href="/bg-remover" variant="outline" arrow={false}>
                 <Eraser className="size-4" aria-hidden="true" /> Background remover
               </CtaLink>
@@ -438,7 +379,7 @@ export default async function HomePage() {
           <div className="grid gap-3 sm:grid-cols-2">
             {PDF_TOOLS.map((tool, i) => (
               <BlurFade key={tool.slug} delay={(i % 2) * 0.06}>
-                <Link href={`/pdf-tools?tool=${tool.slug}`} className="group flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-primary/40">
+                <Link href={`/pdf-tools/${tool.slug}`} className="group flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-primary/40">
                   <IconChip className="size-9">
                     <FileText className="size-4" aria-hidden="true" />
                   </IconChip>

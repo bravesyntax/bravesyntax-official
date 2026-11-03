@@ -6,6 +6,7 @@ import { getIndexableLocationPaths } from "@/lib/locations";
 import { noindexKeys } from "@/lib/seo";
 import { SEO_PAGES } from "@/lib/seo-pages";
 import { getActiveServices } from "@/lib/services";
+import { PDF_TOOL_LIST, WEB_TOOL_LIST } from "@/lib/tools/registry";
 
 // /sitemap.xml — every indexable public URL. Anything set to noindex in Admin → SEO is left out, as are
 // non-canonical URLs (a page whose canonical points elsewhere shouldn't be listed). Regenerated at most hourly.
@@ -38,6 +39,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const s of await getActiveServices()) {
     if (s.slug) add("page", `services/${s.slug}`, { url: `${SITE_URL}/services/${s.slug}`, changeFrequency: "monthly", priority: 0.8 });
   }
+
+  // 1b. Free tools
+  for (const t of PDF_TOOL_LIST) add("page", `pdf-tools/${t.slug}`, { url: `${SITE_URL}/pdf-tools/${t.slug}`, changeFrequency: "monthly", priority: 0.7 });
+  for (const t of WEB_TOOL_LIST) add("page", `tools/${t.slug}`, { url: `${SITE_URL}/tools/${t.slug}`, changeFrequency: "monthly", priority: 0.7 });
 
   // 1c. Open job pages
   for (const j of await getActiveJobs()) {

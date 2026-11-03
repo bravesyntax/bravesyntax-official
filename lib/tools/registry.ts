@@ -1,0 +1,352 @@
+// Every free tool on the site. Shared by the tool pages, menus, sitemap and search, so it holds text only.
+
+export type ToolGroup = "organize" | "edit" | "convert" | "security" | "image" | "business" | "web";
+
+export type Tool = {
+  slug: string;
+  name: string;
+  /** One line for cards and menus. */
+  short: string;
+  /** Meta description and the lead on the tool's page. */
+  description: string;
+  /** What it does and when to use it, shown under the tool. */
+  about: string;
+  group: ToolGroup;
+  faq: [string, string][];
+};
+
+export const TOOL_GROUPS: Record<ToolGroup, string> = {
+  organize: "Organize",
+  edit: "Edit",
+  convert: "Convert",
+  security: "Security",
+  image: "Images",
+  business: "Business",
+  web: "Web & SEO",
+};
+
+export const PDF_TOOL_LIST: Tool[] = [
+  {
+    slug: "merge-pdf",
+    name: "Merge PDF",
+    short: "Combine several PDFs into one",
+    description: "Combine multiple PDF files into one document in the order you choose. Free, no sign-up, and your files stay on your device.",
+    about: "Add two or more PDFs, put them in order, and download a single file. Page sizes and links inside each page stay as they were.",
+    group: "organize",
+    faq: [["Is there a limit on the number of files?", "There is no fixed limit. The practical limit is your device's memory, so very large merges work best on a computer."]],
+  },
+  {
+    slug: "split-pdf",
+    name: "Split PDF",
+    short: "Pull out pages or split by range",
+    description: "Split a PDF by selecting pages, typing page ranges, or saving every page as its own file. Free and private, right in your browser.",
+    about: "Click the pages you want, type ranges such as 1-3, 7, or save each page as a separate PDF in one ZIP file.",
+    group: "organize",
+    faq: [["How do I type page ranges?", "Separate pages and ranges with commas, for example 1-3, 5, 8-10. Each comma-separated part becomes its own PDF if you choose separate files."]],
+  },
+  {
+    slug: "reorder-pdf-pages",
+    name: "Reorder Pages",
+    short: "Drag pages into a new order",
+    description: "Rearrange the pages of a PDF by dragging thumbnails or using the arrow buttons. Free, with no upload and no watermark.",
+    about: "See every page as a thumbnail, then drag it to its new place. On a phone, use the arrows on each page.",
+    group: "organize",
+    faq: [["Does reordering reduce quality?", "No. Pages are moved, not re-rendered, so text stays selectable and images keep their quality."]],
+  },
+  {
+    slug: "delete-pdf-pages",
+    name: "Delete Pages",
+    short: "Remove pages you don't need",
+    description: "Delete unwanted pages from a PDF by clicking their thumbnails. Free, private, and the remaining pages are untouched.",
+    about: "Click the pages you want gone and download a copy without them. Your original file is not changed.",
+    group: "organize",
+    faq: [["Can I undo a deletion?", "Your original file stays as it is, so you can always start again from it."]],
+  },
+  {
+    slug: "rotate-pdf",
+    name: "Rotate PDF",
+    short: "Turn some or all pages",
+    description: "Rotate all or selected PDF pages by 90 or 180 degrees and save the result permanently. Free and processed on your device.",
+    about: "Fix sideways scans. Choose an angle, apply it to every page or only the ones you select, and the rotation is saved in the file.",
+    group: "organize",
+    faq: [["Is the rotation permanent?", "Yes. The downloaded file opens with the new rotation in any PDF reader."]],
+  },
+  {
+    slug: "compress-pdf",
+    name: "Compress PDF",
+    short: "Make a PDF smaller, keep the text",
+    description: "Reduce PDF file size by recompressing images while text stays sharp and selectable. See the exact saving before you download.",
+    about: "Balanced mode shrinks the images inside the PDF and keeps text as real text. Smallest mode turns each page into an image, which suits scans and very tight email limits.",
+    group: "edit",
+    faq: [
+      ["Why did my file barely shrink?", "PDFs that are mostly text are already small, and there is little to remove. Files full of photos and scans shrink the most."],
+      ["Will my text stay selectable?", "Yes in Balanced and Strong modes. Only Smallest mode turns pages into images, and it warns you first."],
+    ],
+  },
+  {
+    slug: "watermark-pdf",
+    name: "Watermark PDF",
+    short: "Stamp text on every page",
+    description: "Add a text watermark to a PDF in any language, with control over position, size, colour and opacity. Free, with no sign-up.",
+    about: "Mark documents as Confidential or Draft, or add your company name. Hindi and other languages work, and you can repeat the text across the page.",
+    group: "edit",
+    faq: [["Can I write the watermark in Hindi?", "Yes. The text is drawn using your device's fonts, so Hindi and other scripts come out correctly."]],
+  },
+  {
+    slug: "add-page-numbers",
+    name: "Add Page Numbers",
+    short: "Number your pages",
+    description: "Add page numbers to a PDF. Choose the position and format, and skip the cover page if you need to. Free and private.",
+    about: "Pick where the numbers go and how they read, such as 1, Page 1, or 1 / 10. You can start numbering after a cover page.",
+    group: "edit",
+    faq: [["Can I skip the cover page?", "Yes. Set the page to start numbering from, and earlier pages are left unnumbered."]],
+  },
+  {
+    slug: "sign-pdf",
+    name: "Sign PDF",
+    short: "Draw or type a signature",
+    description: "Sign a PDF by drawing, typing or uploading your signature, then click where it goes on the page. Your document never leaves your device.",
+    about: "Good for agreements and forms that only need a visible signature. It is not a certified digital signature, which some legal documents require.",
+    group: "edit",
+    faq: [["Is this legally valid?", "A drawn signature is accepted for many everyday documents, but it is not a certified digital signature. For legal or government filings, check what is required."]],
+  },
+  {
+    slug: "crop-pdf",
+    name: "Crop PDF",
+    short: "Trim the margins of every page",
+    description: "Trim the margins of a PDF, with a live preview of the area you keep. Free, with no upload needed.",
+    about: "Remove white space or printer marks by setting how much to cut from each side. The preview shows what stays.",
+    group: "edit",
+    faq: [["Is cropped content deleted?", "Cropping hides it from view. The hidden content can remain in the file, so don't use cropping to remove sensitive information."]],
+  },
+  {
+    slug: "edit-pdf-metadata",
+    name: "Edit Metadata",
+    short: "Change title, author and keywords",
+    description: "View and edit a PDF's title, author, subject and keywords, or clear them before you share the file. Free and private.",
+    about: "PDFs often carry hidden details such as the author's name. Check them and correct or clear them before sending a file out.",
+    group: "edit",
+    faq: [["Why does metadata matter?", "The title appears in browser tabs and search results, and the author field can reveal who created the file."]],
+  },
+  {
+    slug: "flatten-pdf",
+    name: "Flatten PDF",
+    short: "Lock form fields in place",
+    description: "Flatten a filled PDF form so the answers become part of the page and can't be edited by accident. Free and private.",
+    about: "Use this after filling in a form. Fields turn into ordinary page content, so they look the same in every PDF reader.",
+    group: "edit",
+    faq: [["Can a flattened form be edited again?", "Not as a form. Keep your original file if you may need to change the answers."]],
+  },
+  {
+    slug: "repair-pdf",
+    name: "Repair PDF",
+    short: "Fix a damaged PDF",
+    description: "Try to recover a damaged PDF that won't open or shows errors, by rebuilding its internal structure. Free and private.",
+    about: "This fixes structural damage such as a broken index, often caused by an interrupted download. Content that is truly missing can't be restored.",
+    group: "edit",
+    faq: [["Will it fix every file?", "No. It repairs a damaged structure, but it can't bring back pages or images that are missing from the file."]],
+  },
+  {
+    slug: "image-to-pdf",
+    name: "Image to PDF",
+    short: "Turn JPG, PNG or WebP into a PDF",
+    description: "Convert JPG, PNG and WebP images into one PDF. Choose the page size and margins, and arrange the order. Free, no sign-up.",
+    about: "Great for receipts, photos of documents and portfolios. Use A4 for printing, or keep each page the same size as its image.",
+    group: "convert",
+    faq: [["Which image types work?", "JPG, PNG, WebP, GIF and BMP. iPhone HEIC photos need to be saved as JPG first."]],
+  },
+  {
+    slug: "pdf-to-image",
+    name: "PDF to Image",
+    short: "Save pages as JPG or PNG",
+    description: "Convert PDF pages to JPG or PNG at the quality you choose. Download pages one by one or all together as a ZIP.",
+    about: "Use it for slides, social posts or anywhere a PDF can't be attached. Higher quality gives sharper images and bigger files.",
+    group: "convert",
+    faq: [["JPG or PNG?", "JPG is smaller and suits photos. PNG is larger but keeps text and line drawings crisp."]],
+  },
+  {
+    slug: "pdf-to-text",
+    name: "PDF to Text (OCR)",
+    short: "Extract text, including Hindi scans",
+    description: "Extract text from any PDF, with OCR for scanned pages in Hindi, English and other Indian languages. Copy it or save as a text file.",
+    about: "Normal PDFs give text instantly. For scans and Hindi PDFs that come out garbled, use OCR, which reads the page like an image.",
+    group: "convert",
+    faq: [["Why is OCR slower?", "OCR reads each page image and downloads language data the first time. Your document itself still isn't uploaded."]],
+  },
+  {
+    slug: "pdf-to-word",
+    name: "PDF to Word",
+    short: "Get editable text as a .docx",
+    description: "Convert the text of a PDF into an editable Word document. Free and private, with no upload.",
+    about: "This brings across the text and paragraphs so you can edit them. Complex layouts, tables and images are not recreated.",
+    group: "convert",
+    faq: [["Will it look exactly like my PDF?", "No. It is built for editing the text, so complex layouts, tables and images aren't copied across."]],
+  },
+  {
+    slug: "protect-pdf",
+    name: "Protect PDF",
+    short: "Lock a PDF with a password",
+    description: "Encrypt a PDF with a password using AES-256. It happens on your device, so your file and password never reach a server.",
+    about: "Anyone opening the file will need the password. Keep it safe: if you lose it, the file can't be recovered, by us or anyone else.",
+    group: "security",
+    faq: [["How strong is the protection?", "It uses AES-256 encryption, the current PDF standard. Choose a long password, because a weak one can still be guessed."]],
+  },
+  {
+    slug: "unlock-pdf",
+    name: "Unlock PDF",
+    short: "Remove a password you know",
+    description: "Remove the password from a PDF you are allowed to open. You need the current password. Free and processed on your device.",
+    about: "Enter the password once and save a copy that opens without one. This tool can't crack or bypass a password you don't have.",
+    group: "security",
+    faq: [["Can you unlock a PDF without the password?", "Not if it needs a password to open. Only remove passwords from files you own or have permission to change."]],
+  },
+  {
+    slug: "pdf-viewer",
+    name: "PDF Viewer",
+    short: "Read a PDF with zoom and page controls",
+    description: "Open and read a PDF in your browser with zoom and page navigation. Nothing is uploaded and no software is needed.",
+    about: "A quick way to look through a PDF on any device. Use the arrow keys to change pages on a computer.",
+    group: "security",
+    faq: [["Is my file uploaded?", "No. The PDF opens inside your browser and is gone when you close the page."]],
+  },
+];
+
+export const WEB_TOOL_LIST: Tool[] = [
+  {
+    slug: "invoice-generator",
+    name: "GST Invoice Generator",
+    short: "Create a GST invoice as a PDF",
+    description: "Create a professional GST invoice in minutes, with CGST, SGST or IGST worked out for you, and download it as a PDF. Free, no sign-up.",
+    about: "Add your business details and line items, and tax is split automatically based on whether the sale is within your state. Your details are saved only on this device.",
+    group: "business",
+    faq: [
+      ["When is IGST used instead of CGST and SGST?", "Within the same state, GST splits into CGST and SGST. For a sale to another state, it is charged as IGST. Tick Inter-state and the invoice switches."],
+      ["Is this a replacement for an accountant?", "It helps you produce a clean invoice. Check GST rates and compliance rules for your business with your accountant."],
+    ],
+  },
+  {
+    slug: "qr-code-generator",
+    name: "QR Code Generator",
+    short: "QR codes for links, WhatsApp and UPI",
+    description: "Create a free QR code for a website, WhatsApp chat, UPI payment, phone number or Wi-Fi network. Download as PNG or SVG, with no expiry.",
+    about: "These codes contain your details directly, with no tracking link in between, so they never expire. Always scan a test before printing.",
+    group: "business",
+    faq: [["Do these QR codes expire?", "No. The information is stored in the code itself, so it keeps working for as long as the details stay valid."]],
+  },
+  {
+    slug: "whatsapp-link-generator",
+    name: "WhatsApp Link Generator",
+    short: "A click-to-chat link for your business",
+    description: "Create a WhatsApp click-to-chat link with a ready-made message, for your website, ads or Instagram bio. Free and instant.",
+    about: "Customers tap the link and a chat opens with your message already typed, so they don't have to save your number first.",
+    group: "business",
+    faq: [["Does the customer need to save my number?", "No. The chat opens straight away, which is why these links work so well in ads and bios."]],
+  },
+  {
+    slug: "image-compressor",
+    name: "Image Compressor",
+    short: "Shrink JPG, PNG and WebP",
+    description: "Compress images to make your website faster, with a live before-and-after size. Handles many images at once, with no upload.",
+    about: "Large images are one of the most common reasons a website feels slow. Compress before uploading, and use WebP for the smallest files.",
+    group: "image",
+    faq: [["What quality should I use?", "Around 75 to 80 looks the same as the original for most photos, at a fraction of the size."]],
+  },
+  {
+    slug: "image-resizer",
+    name: "Image Resizer",
+    short: "Resize to exact dimensions",
+    description: "Resize images to exact pixel dimensions, or use presets for Instagram, Facebook, YouTube and passport photos. Free and private.",
+    about: "Set a width and height, or pick a social media preset. Crop mode fills the exact shape; Fit mode keeps the whole image.",
+    group: "image",
+    faq: [["Will resizing blur my image?", "Making an image smaller keeps it sharp. Making it much larger than the original will look soft."]],
+  },
+  {
+    slug: "image-converter",
+    name: "Image Converter",
+    short: "Convert between JPG, PNG and WebP",
+    description: "Convert images between JPG, PNG and WebP in your browser, one at a time or in a batch. Free, with no upload.",
+    about: "Use WebP for websites, JPG for photos and PNG when you need a transparent background. Transparent areas turn white in JPG.",
+    group: "image",
+    faq: [["Which format is best for a website?", "WebP usually gives the smallest file at the same quality, and all modern browsers support it."]],
+  },
+  {
+    slug: "favicon-generator",
+    name: "Favicon Generator",
+    short: "All the icon sizes your site needs",
+    description: "Turn a logo into a complete favicon set for your website, including Apple touch and Android icons, with the HTML to paste in.",
+    about: "Upload a square logo and get every size browsers and phones ask for, packed in a ZIP, along with the code to add to your site.",
+    group: "web",
+    faq: [["What image works best?", "A simple square logo at 512 pixels or more. Fine details disappear at small sizes, so an icon or initial works better than a full wordmark."]],
+  },
+  {
+    slug: "meta-tag-generator",
+    name: "Meta Tag Generator",
+    short: "SEO tags with a Google preview",
+    description: "Write your page title and description with a live Google preview and length checks, then copy ready-made meta and social tags.",
+    about: "See how your page will look in search results and when shared, and catch titles and descriptions that would get cut off.",
+    group: "web",
+    faq: [["How long should a title be?", "Aim for about 50 to 60 characters and a description of up to 160. Longer text may be cut off in search results."]],
+  },
+  {
+    slug: "utm-builder",
+    name: "UTM Link Builder",
+    short: "Track your marketing links",
+    description: "Build UTM tracking links for ads, emails and social posts, so Google Analytics shows which campaigns bring you customers.",
+    about: "Add a source, medium and campaign name to any link, and your analytics will show exactly where each visitor came from.",
+    group: "web",
+    faq: [["Do UTM links affect SEO?", "Not when used on links in ads, emails and social posts. Don't use them on links between pages of your own site."]],
+  },
+  {
+    slug: "word-counter",
+    name: "Word Counter",
+    short: "Words, characters and reading time",
+    description: "Count words, characters, sentences and reading time as you type, with limits for meta tags and social posts. Free and private.",
+    about: "Paste your text to see its length, reading time and most-used words, and check it against common limits for search and social media.",
+    group: "web",
+    faq: [["Is my text saved?", "No. It stays in your browser and is gone when you close the page."]],
+  },
+  {
+    slug: "password-generator",
+    name: "Password Generator",
+    short: "Strong, random passwords",
+    description: "Generate strong random passwords on your device, with a strength estimate. Nothing is sent anywhere or stored.",
+    about: "Passwords are created in your browser using its secure random generator. Use a different one for every account, kept in a password manager.",
+    group: "web",
+    faq: [["How long should a password be?", "At least 16 characters for important accounts. Length adds more strength than symbols do."]],
+  },
+  {
+    slug: "json-formatter",
+    name: "JSON Formatter",
+    short: "Format and validate JSON",
+    description: "Format, validate and minify JSON with clear error messages that point to the problem. Runs in your browser, so data stays private.",
+    about: "Paste JSON to tidy it up or shrink it for production. If it is invalid, you'll see where the error is.",
+    group: "web",
+    faq: [["Is it safe to paste private data?", "It is processed only in your browser and not sent to a server, though it is still good practice to avoid pasting real secrets."]],
+  },
+];
+
+export const PDF_TOOL_COUNT = PDF_TOOL_LIST.length;
+export const ALL_TOOL_COUNT = PDF_TOOL_LIST.length + WEB_TOOL_LIST.length + 1; // +1: the AI background remover
+
+export const getPdfTool = (slug: string) => PDF_TOOL_LIST.find((t) => t.slug === slug);
+export const getWebTool = (slug: string) => WEB_TOOL_LIST.find((t) => t.slug === slug);
+
+/** Old /pdf-tools?tool= ids, kept so existing links and bookmarks still arrive at the right tool. */
+export const LEGACY_PDF_TOOL_IDS: Record<string, string> = {
+  merge: "merge-pdf",
+  split: "split-pdf",
+  reorder: "reorder-pdf-pages",
+  delete: "delete-pdf-pages",
+  rotate: "rotate-pdf",
+  watermark: "watermark-pdf",
+  pagenum: "add-page-numbers",
+  sign: "sign-pdf",
+  metadata: "edit-pdf-metadata",
+  compress: "compress-pdf",
+  img2pdf: "image-to-pdf",
+  pdf2img: "pdf-to-image",
+  extract: "pdf-to-text",
+  protect: "protect-pdf",
+  unlock: "unlock-pdf",
+  viewer: "pdf-viewer",
+};

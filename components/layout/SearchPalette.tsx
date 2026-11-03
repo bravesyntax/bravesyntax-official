@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Briefcase, Building2, Code2, FileText, GraduationCap, ImageIcon, Layers, Mail, Newspaper, Palette, Users, X, type LucideIcon } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { PDF_TOOLS, serviceHref, type NavService } from "@/lib/navigation";
+import { PDF_TOOL_LIST, WEB_TOOL_LIST } from "@/lib/tools/registry";
 
 // Command palette search (from includes/search-overlay.php). Opens with Ctrl/Cmd+K.
 
@@ -28,7 +29,9 @@ const PAGES: Item[] = [
   { title: "Careers", sub: "Open roles and internships", url: "/careers", icon: GraduationCap, section: "Pages" },
   { title: "Contact", sub: "Get a quote or start a project", url: "/contact", icon: Mail, section: "Pages" },
   { title: "Background remover", sub: "Free AI tool, transparent PNG", url: "/bg-remover", icon: ImageIcon, section: "Free Tools" },
-  ...PDF_TOOLS.map((t) => ({ title: t.name, sub: t.desc, url: `/pdf-tools?tool=${t.slug}`, icon: FileText, section: "Free Tools" })),
+  ...WEB_TOOL_LIST.map((t) => ({ title: t.name, sub: t.short, url: `/tools/${t.slug}`, icon: FileText, section: "Free Tools" })),
+  ...PDF_TOOL_LIST.filter((t) => !PDF_TOOLS.some((p) => p.slug === t.slug)).map((t) => ({ title: t.name, sub: t.short, url: `/pdf-tools/${t.slug}`, icon: FileText, section: "Free Tools" })),
+  ...PDF_TOOLS.map((t) => ({ title: t.name, sub: t.desc, url: `/pdf-tools/${t.slug}`, icon: FileText, section: "Free Tools" })),
 ];
 
 const serviceIcon = (category: string) => (category === "design" ? Palette : Code2);

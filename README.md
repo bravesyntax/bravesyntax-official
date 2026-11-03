@@ -82,3 +82,7 @@ Public pages use [Velora UI](https://velora.colorlib.com/) (MIT, see `components
 ## SEO
 
 City hub pages are indexed for the top 20 cities. City + service pages are indexed only for the cities in `SERVICE_PAGE_CITIES` (`lib/locations.ts`); the rest are `noindex, follow` and left out of the sitemap, because the same service page across every city reads too alike. Add a city to that list once its pages have their own content.
+
+## Free tools
+
+Add a tool in `lib/tools/registry.ts`, then its workspace in `components/tools` (PDF tools: `lib/tools/pdf.ts` and `PdfTool.tsx`). Everything runs in the browser, so no file reaches the server. `public/vendor` is generated on `npm run dev` and `npm run build`, and isn't committed.

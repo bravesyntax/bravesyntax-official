@@ -31,10 +31,11 @@ const COMPANY: [string, string][] = [
 ];
 
 const TOOLS: [string, string][] = [
+  ["All free tools", "/tools"],
   ["All PDF tools", "/pdf-tools"],
-  ["Merge PDF", "/pdf-tools?tool=merge"],
-  ["Compress PDF", "/pdf-tools?tool=compress"],
-  ["Image to PDF", "/pdf-tools?tool=img2pdf"],
+  ["GST invoice generator", "/tools/invoice-generator"],
+  ["Compress PDF", "/pdf-tools/compress-pdf"],
+  ["QR code generator", "/tools/qr-code-generator"],
   ["AI background remover", "/bg-remover"],
 ];
 

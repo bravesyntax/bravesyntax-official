@@ -94,6 +94,16 @@ export const SEO_PAGES: SeoPageDef[] = [
     priority: 0.7,
   },
   {
+    slug: "tools",
+    label: "Free Tools",
+    path: "/tools",
+    title: "Free Online Tools for Business: Invoice, QR, Images | Brave Syntax",
+    description: "Free GST invoice generator, QR codes, image compressor, PDF tools and more. They run in your browser, with no sign-up and no watermarks.",
+    schemaType: "CollectionPage",
+    changeFrequency: "monthly",
+    priority: 0.8,
+  },
+  {
     slug: "pdf-tools",
     label: "PDF Tools",
     path: "/pdf-tools",
