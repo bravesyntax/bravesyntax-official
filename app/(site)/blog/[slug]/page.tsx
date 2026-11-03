@@ -165,7 +165,7 @@ export default async function BlogPostPage({ params }: Props) {
             {related.map((rp) => (
               <Link key={rp.id} href={`/blog/${encodeURIComponent(rp.slug)}`} className="group flex flex-col overflow-hidden rounded-2xl border bg-card">
                 <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                  {rp.featured_image && <Image src={mediaUrl("blog", rp.featured_image)} alt={rp.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />}
+                  {rp.featured_image && <Image src={mediaUrl("blog", rp.featured_image)} alt={rp.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain" />}
                 </div>
                 <div className="p-5">
                   <h3 className="line-clamp-2 font-medium group-hover:text-primary">{rp.title}</h3>

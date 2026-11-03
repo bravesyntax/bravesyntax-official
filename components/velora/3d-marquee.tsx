@@ -103,7 +103,7 @@ export function Marquee3D({
                         loading="lazy"
                         draggable={false}
                         className={cn(
-                          "aspect-4/3 w-full rounded-xl bg-muted object-cover shadow-lg ring-1 ring-border",
+                          "aspect-[16/10] w-full rounded-xl bg-muted object-contain shadow-lg ring-1 ring-border",
                           imageClassName
                         )}
                       />

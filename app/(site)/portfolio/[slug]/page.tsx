@@ -13,7 +13,7 @@ import { FocusCards } from "@/components/velora/focus-cards";
 import { Lens } from "@/components/velora/lens";
 import { SITE_URL } from "@/lib/config";
 import { capitalize, getPortfolioBySlug, getPortfolios, getPortfolioSlugs, splitList } from "@/lib/content";
-import { absoluteMediaUrl, mediaUrl } from "@/lib/media";
+import { absoluteMediaUrl, mediaUrl, isExternalImage } from "@/lib/media";
 import { buildMetadata, customSchema, projectSeoDefaults, resolveSeo } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -93,7 +93,7 @@ export default async function CaseStudyPage({ params }: Props) {
           >
             <BrowserMockup url={host} className="size-full">
               <Lens zoomFactor={1.6} className="relative aspect-[16/10] w-full bg-muted">
-                <Image src={mediaUrl("portfolio", project.image)} alt={`${project.title} website`} fill priority sizes="(min-width: 1024px) 1000px, 100vw" className="object-cover object-top" />
+                <Image unoptimized={isExternalImage(project.image)} src={mediaUrl("portfolio", project.image)} alt={`${project.title} website`} fill priority sizes="(min-width: 1024px) 1000px, 100vw" className="object-contain" />
               </Lens>
             </BrowserMockup>
           </ContainerScroll>
@@ -152,6 +152,11 @@ export default async function CaseStudyPage({ params }: Props) {
               {project.live_url && (
                 <CtaLink href={project.live_url} variant="outline" arrow={false} className="w-full">
                   Visit live site <ExternalLink className="size-4" aria-hidden="true" />
+                </CtaLink>
+              )}
+              {project.github_url && (
+                <CtaLink href={project.github_url} variant="outline" arrow={false} className="w-full">
+                  View code on GitHub <ExternalLink className="size-4" aria-hidden="true" />
                 </CtaLink>
               )}
             </aside>

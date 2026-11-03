@@ -44,19 +44,19 @@ export function MacbookScroll({
   const { scrollYProgress } = useScroll({
     container,
     target: ref,
-    offset: ["start start", "end end"],
+    offset: ["start 85%", "end end"],
   });
   const progress = useSpring(scrollYProgress, { stiffness: 200, damping: 34 });
 
-  const rotateX = useTransform(progress, [0, 0.6], [-122, 0]);
-  const scale = useTransform(progress, [0.25, 0.85], [0.7, 1]);
-  const titleY = useTransform(progress, [0, 0.6], [0, -16]);
+  const rotateX = useTransform(progress, [0, 0.5], [-122, 0]);
+  const scale = useTransform(progress, [0.2, 0.7], [0.7, 1]);
+  const titleY = useTransform(progress, [0, 0.5], [0, -16]);
 
   return (
     <div
       ref={ref}
       data-slot="macbook-scroll"
-      className={cn("relative h-[200cqh] motion-reduce:h-auto", className)}
+      className={cn("relative h-[170cqh] motion-reduce:h-auto", className)}
       {...props}
     >
       <div className="sticky top-0 flex h-[100cqh] flex-col items-center justify-center gap-[5cqh] overflow-x-clip px-4">
@@ -84,7 +84,7 @@ export function MacbookScroll({
                   {children ??
                     (src && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img loading="lazy" decoding="async" src={src} alt={alt} className="size-full object-cover object-top" />
+                      <img decoding="async" src={src} alt={alt} className="size-full bg-muted object-contain" />
                     ))}
                 </motion.div>
               </div>

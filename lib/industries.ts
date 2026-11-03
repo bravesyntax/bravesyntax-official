@@ -1,12 +1,14 @@
 // Industries we serve (Industries page and the home page). Each icon is one or more SVG path strings.
-export const INDUSTRIES: { title: string; desc: string; tags: string[]; icon: string[] }[] = [
+export const INDUSTRIES: { slug: string; title: string; desc: string; tags: string[]; icon: string[] }[] = [
   {
+    slug: "ecommerce-retail",
     title: "E-Commerce & Retail",
     desc: "High-converting storefronts on Shopify, MedusaJS, and WooCommerce — built for speed, mobile, and repeat buyers.",
     tags: ["Shopify", "MedusaJS", "WooCommerce"],
     icon: ["M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"],
   },
   {
+    slug: "saas-startups",
     title: "SaaS & Startups",
     desc: "Marketing sites, dashboards, and product UIs in React and Next.js that ship fast and scale with you.",
     tags: ["Next.js", "React", "Dashboards"],
@@ -15,6 +17,7 @@ export const INDUSTRIES: { title: string; desc: string; tags: string[]; icon: st
     ],
   },
   {
+    slug: "manufacturing-industrial",
     title: "Manufacturing & Industrial",
     desc: "Spec-driven catalogs, product pages, and B2B lead capture for manufacturers, exporters, and IndiaMART sellers.",
     tags: ["Catalogs", "B2B Leads", "Spec Sheets"],
@@ -24,18 +27,21 @@ export const INDUSTRIES: { title: string; desc: string; tags: string[]; icon: st
     ],
   },
   {
+    slug: "healthcare-wellness",
     title: "Healthcare & Wellness",
     desc: "Trustworthy, accessible sites for clinics, practitioners, and wellness brands — with booking built in.",
     tags: ["Booking", "Accessible", "Local SEO"],
     icon: ["M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"],
   },
   {
+    slug: "real-estate-property",
     title: "Real Estate & Property",
     desc: "Listing sites and landing pages that turn property searches into qualified enquiries.",
     tags: ["Listings", "Maps", "Lead Forms"],
     icon: ["M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-14h.01M11 7h.01M7 11h.01M11 11h.01M7 15h.01M11 15h.01"],
   },
   {
+    slug: "education-elearning",
     title: "Education & E-Learning",
     desc: "Course platforms, school sites, and enrolment flows that students actually finish.",
     tags: ["LMS", "Enrolment", "WordPress"],
@@ -45,6 +51,7 @@ export const INDUSTRIES: { title: string; desc: string; tags: string[]; icon: st
     ],
   },
   {
+    slug: "finance-fintech",
     title: "Finance & Fintech",
     desc: "Clean, compliant interfaces for fintech products, advisories, and financial dashboards.",
     tags: ["Dashboards", "Security", "Trust UX"],
@@ -53,6 +60,7 @@ export const INDUSTRIES: { title: string; desc: string; tags: string[]; icon: st
     ],
   },
   {
+    slug: "hospitality-food",
     title: "Hospitality & Food",
     desc: "Restaurant, cafe, and hotel sites with menus, reservations, and online ordering.",
     tags: ["Menus", "Reservations", "Orders"],
@@ -61,6 +69,7 @@ export const INDUSTRIES: { title: string; desc: string; tags: string[]; icon: st
     ],
   },
   {
+    slug: "nonprofits-ngos",
     title: "Nonprofits & NGOs",
     desc: "Donation-ready sites and campaigns for foundations and community organisations.",
     tags: ["Donations", "Campaigns", "Reports"],

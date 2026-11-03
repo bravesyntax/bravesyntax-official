@@ -1,5 +1,6 @@
 import { LineChart, Search, Users } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
 import { CtaLink, IconChip, PageHero, Section, SectionHeading, ShimmerLink, RelatedLinks } from "@/components/site/ui";
 import { BlurFade } from "@/components/velora/blur-fade";
@@ -8,7 +9,6 @@ import { Marquee } from "@/components/velora/marquee";
 import { ShootingStars, StarsBackground } from "@/components/velora/shooting-stars";
 import { SpotlightCard } from "@/components/velora/spotlight-card";
 import { INDUSTRIES } from "@/lib/industries";
-import { contactServiceHref } from "@/lib/navigation";
 import { pageMetadata, pageSchema } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -64,7 +64,7 @@ export default async function IndustriesPage() {
                       ))}
                     </svg>
                   </IconChip>
-                  <h2 className="mt-4 text-lg font-medium">{ind.title}</h2>
+                  <h2 className="mt-4 text-lg font-medium"><Link href={`/industries/${ind.slug}`} className="hover:text-primary">{ind.title}</Link></h2>
                   <p className="mt-2 flex-1 text-sm text-muted-foreground">{ind.desc}</p>
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {ind.tags.map((t) => (
@@ -73,9 +73,9 @@ export default async function IndustriesPage() {
                       </span>
                     ))}
                   </div>
-                  <a href={contactServiceHref(ind.title)} className="mt-5 text-sm font-medium text-primary hover:underline">
-                    Discuss a project →
-                  </a>
+                  <Link href={`/industries/${ind.slug}`} aria-label={`${ind.title}: read the guide`} className="mt-5 text-sm font-medium text-primary hover:underline">
+                    Read the guide →
+                  </Link>
                 </div>
               </SpotlightCard>
             </BlurFade>

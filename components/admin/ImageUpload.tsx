@@ -63,7 +63,7 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
             <>
               {preview && (
                 // eslint-disable-next-line @next/next/no-img-element -- local object-URL preview
-                <img src={preview} alt="" className="mb-3 h-40 w-full rounded-xl border object-cover" />
+                <img src={preview} alt="" className="mb-3 h-40 w-full rounded-xl border object-contain" />
               )}
               <FileDrop accept=".jpg,.jpeg,.png,.webp,.gif" multiple={false} onFiles={(files) => onPick(files[0])} />
             </>
@@ -79,7 +79,7 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
             <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-2">Current</div>
             <div className="w-48 h-28 rounded-xl overflow-hidden border border-zinc-700">
               {/* eslint-disable-next-line @next/next/no-img-element -- admin thumbnail */}
-              <img src={mediaUrl(kind, current)} alt="" className="w-full h-full object-cover" />
+              <img src={mediaUrl(kind, current)} alt="" className="w-full h-full object-contain" />
             </div>
             <label className="flex items-center gap-2 mt-2 cursor-pointer">
               <input type="checkbox" name="remove_image" value="1" className="rounded border-zinc-600" />

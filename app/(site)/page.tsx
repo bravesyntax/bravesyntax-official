@@ -2,6 +2,7 @@ import { ArrowUpRight, Boxes, Clock, Code2, Eraser, FileText, Gauge, Handshake, 
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import HeroBuilder from "@/components/home/HeroBuilder";
 import JsonLd from "@/components/JsonLd";
 import { container, CtaLink, IconChip, Section, SectionHeading, ShimmerLink } from "@/components/site/ui";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -28,7 +29,7 @@ import { CardsCarousel, CarouselCard } from "@/components/velora/apple-cards-car
 import { categoryLabel, formatDate, getActiveJobs, getLatestPosts, getPortfolios, getSiteFacts } from "@/lib/content";
 import { INDUSTRIES } from "@/lib/industries";
 import { getActiveCities } from "@/lib/locations";
-import { mediaUrl } from "@/lib/media";
+import { mediaUrl, isExternalImage } from "@/lib/media";
 import { PDF_TOOL_COUNT, PDF_TOOLS, serviceHref } from "@/lib/navigation";
 import { ALL_TOOL_COUNT } from "@/lib/tools/registry";
 import { pageMetadata, pageSchema } from "@/lib/seo";
@@ -102,7 +103,6 @@ export default async function HomePage() {
     getSiteFacts(),
   ]);
   const work = projects.filter((p) => p.slug).slice(0, 3);
-  const showcase = projects.filter((p) => p.slug && p.image);
   const techs = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Postgres", "Figma", "Shopify", "WordPress", "Laravel", "Vercel"];
 
   return (
@@ -111,30 +111,29 @@ export default async function HomePage() {
 
       {/* ═══ HERO ═══ */}
       <section className="relative isolate overflow-hidden border-b" aria-label="Introduction">
-        <div className="absolute -top-40 -left-40 -z-10 size-[42rem] rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
-        <div className={`${container} pt-12 sm:pt-16 lg:pt-20`}>
-          <Link href="/contact" className="inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary">
-            <span className="relative flex size-2" aria-hidden="true">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70 motion-reduce:animate-none" />
-              <span className="relative inline-flex size-2 rounded-full bg-primary" />
-            </span>
-            <TextShimmer>Taking on new projects</TextShimmer>
-          </Link>
-          <h1 className="mt-5 text-[clamp(2.75rem,8.4vw,7.5rem)] leading-[0.98] font-semibold tracking-[-0.04em] text-balance">
-            Web design &amp; development that <span className="bg-linear-to-r from-brand-from via-brand-via to-brand-to bg-clip-text text-transparent">wins customers.</span>
-          </h1>
-          <div className="mt-8 grid items-end gap-8 lg:mt-10 lg:grid-cols-[1.2fr_1fr]">
-            <div>
-              <p className="max-w-xl text-lg text-pretty text-muted-foreground">A design and development studio for growing businesses in India. You get a fixed quote, direct access to the people building your project, and code you own.</p>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <ShimmerLink href="/contact">Start your project</ShimmerLink>
-                <CtaLink href="/portfolio" variant="outline">
-                  See our work
-                </CtaLink>
-              </div>
+        <div className="absolute -top-48 -left-40 -z-10 size-[44rem] rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
+        <div className="absolute -right-40 -bottom-48 -z-10 size-[36rem] rounded-full bg-brand-to/10 blur-3xl" aria-hidden="true" />
+        <div className={`${container} grid grid-cols-[minmax(0,1fr)] items-center gap-8 py-8 sm:gap-10 sm:py-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-12 lg:py-16`}>
+          <div>
+            <Link href="/contact" className="inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary">
+              <span className="relative flex size-2" aria-hidden="true">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70 motion-reduce:animate-none" />
+                <span className="relative inline-flex size-2 rounded-full bg-primary" />
+              </span>
+              <TextShimmer>Taking on new projects</TextShimmer>
+            </Link>
+            <h1 className="mt-5 text-[clamp(2.6rem,5.4vw,5rem)] leading-[1] font-semibold tracking-[-0.035em] text-balance">
+              Web design &amp; development that <span className="bg-linear-to-r from-brand-from via-brand-via to-brand-to bg-clip-text text-transparent">wins customers.</span>
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">A design and development studio for growing businesses in India. You get a fixed quote, direct access to the people building your project, and code you own.</p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <ShimmerLink href="/contact">Start your project</ShimmerLink>
+              <CtaLink href="/portfolio" variant="outline">
+                See our work
+              </CtaLink>
             </div>
             {facts && (
-              <dl className="grid grid-cols-3 gap-4 border-t pt-5 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8">
+              <dl className="mt-8 hidden max-w-md grid-cols-3 gap-4 border-t pt-5 sm:grid">
                 {[
                   [facts.projects, "Projects live"],
                   [facts.services, "Services"],
@@ -142,7 +141,7 @@ export default async function HomePage() {
                 ].map(([value, label]) => (
                   <div key={label} className="flex flex-col-reverse">
                     <dt className="mt-1 text-sm text-muted-foreground">{label}</dt>
-                    <dd className="text-4xl font-semibold tracking-tight sm:text-5xl">
+                    <dd className="text-3xl font-semibold tracking-tight sm:text-4xl">
                       <NumberTicker value={Number(value)} />
                     </dd>
                   </div>
@@ -150,17 +149,8 @@ export default async function HomePage() {
               </dl>
             )}
           </div>
+          <HeroBuilder />
         </div>
-        {showcase.length > 0 && (
-          <Marquee pauseOnHover className="mt-12 pb-10 [--duration:70s] [--gap:1.25rem] lg:mt-16" aria-label="Recent projects">
-            {showcase.map((p, i) => (
-              <Link key={p.id} href={`/portfolio/${p.slug}`} className="group relative block aspect-[16/10] w-72 shrink-0 overflow-hidden rounded-2xl border bg-muted shadow-sm sm:w-96 lg:w-[30rem]">
-                <Image src={mediaUrl("portfolio", p.image!)} alt={`${p.title} website`} fill priority={i === 0} sizes="(min-width: 1024px) 480px, (min-width: 640px) 384px, 288px" className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]" />
-                <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 to-transparent p-4 pt-10 text-sm font-medium text-white">{p.title}</span>
-              </Link>
-            ))}
-          </Marquee>
-        )}
       </section>
 
       {/* ═══ SERVICES ═══ */}
@@ -284,14 +274,14 @@ export default async function HomePage() {
               <BlurFade key={p.id} delay={i * 0.08} className="w-[85%] shrink-0 snap-center sm:w-[60%] md:w-auto">
                 <Link href={`/portfolio/${p.slug}`} className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <DirectionAwareHover
-                    className="aspect-[4/3] rounded-2xl border"
+                    className="aspect-[16/10] rounded-2xl border bg-muted"
                     overlay={
                       <span className="flex items-center gap-1.5 text-sm font-medium">
                         View project <ArrowUpRight className="size-4" aria-hidden="true" />
                       </span>
                     }
                   >
-                    {p.image && <Image src={mediaUrl("portfolio", p.image)} alt={p.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />}
+                    {p.image && <Image unoptimized={isExternalImage(p.image)} src={mediaUrl("portfolio", p.image)} alt={p.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain" />}
                   </DirectionAwareHover>
                   <h3 className="mt-4 font-medium">{p.title}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{categoryLabel(p.category)}</p>
@@ -344,7 +334,7 @@ export default async function HomePage() {
                     </svg>
                   </IconChip>
                   <div className="min-w-0">
-                    <h3 className="font-medium">{ind.title}</h3>
+                    <h3 className="font-medium"><Link href={`/industries/${ind.slug}`} className="hover:text-primary">{ind.title}</Link></h3>
                     <p className="mt-1 line-clamp-2 hidden text-sm text-muted-foreground sm:block">{ind.desc}</p>
                   </div>
                 </div>

@@ -52,9 +52,13 @@ export async function saveProject(fd: FormData) {
       "Live project URL must start with http:// or https://.",
       back,
     );
+  const githubUrl = opt("github_url");
+  if (githubUrl && !/^https:\/\/github\.com\//i.test(githubUrl))
+    await finish("error", "GitHub URL must start with https://github.com/.", back);
   const year = intField(fd, "year", new Date().getFullYear());
   const sortOrder = intField(fd, "sort_order");
   const active = checkbox(fd, "is_active");
+  const featured = checkbox(fd, "is_featured");
 
   const [old] = id
     ? await rows<{ image: string | null }>(
@@ -83,9 +87,11 @@ export async function saveProject(fd: FormData) {
     metric_3: opt("metric_3"),
     image,
     live_url: liveUrl,
+    github_url: githubUrl,
     year,
     sort_order: sortOrder,
     is_active: active,
+    is_featured: featured,
   };
   try {
     if (id) {
@@ -93,16 +99,16 @@ export async function saveProject(fd: FormData) {
         UPDATE portfolios SET title = ${v.title}, slug = ${v.slug}, category = ${v.category}, client_name = ${v.client_name}, tags = ${v.tags},
           description = ${v.description}, challenge = ${v.challenge}, approach = ${v.approach}, results_detail = ${v.results_detail},
           tech_stack = ${v.tech_stack}, metric_1 = ${v.metric_1}, metric_2 = ${v.metric_2}, metric_3 = ${v.metric_3}, image = ${v.image},
-          live_url = ${v.live_url}, year = ${v.year}, sort_order = ${v.sort_order}, is_active = ${v.is_active}
+          live_url = ${v.live_url}, github_url = ${v.github_url}, year = ${v.year}, sort_order = ${v.sort_order}, is_active = ${v.is_active}, is_featured = ${v.is_featured}
         WHERE id = ${id}
       `;
     } else {
       await sql`
         INSERT INTO portfolios (title, slug, category, client_name, tags, description, challenge, approach, results_detail, tech_stack,
-                                metric_1, metric_2, metric_3, image, live_url, year, sort_order, is_active)
+                                metric_1, metric_2, metric_3, image, live_url, github_url, year, sort_order, is_active, is_featured)
         VALUES (${v.title}, ${v.slug}, ${v.category}, ${v.client_name}, ${v.tags}, ${v.description}, ${v.challenge}, ${v.approach},
-                ${v.results_detail}, ${v.tech_stack}, ${v.metric_1}, ${v.metric_2}, ${v.metric_3}, ${v.image}, ${v.live_url}, ${v.year},
-                ${v.sort_order}, ${v.is_active})
+                ${v.results_detail}, ${v.tech_stack}, ${v.metric_1}, ${v.metric_2}, ${v.metric_3}, ${v.image}, ${v.live_url}, ${v.github_url}, ${v.year},
+                ${v.sort_order}, ${v.is_active}, ${v.is_featured})
       `;
     }
   } catch (err) {

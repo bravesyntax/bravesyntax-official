@@ -5,6 +5,7 @@ import { rows, sql } from "@/lib/db";
 import { getIndexableLocationPaths } from "@/lib/locations";
 import { noindexKeys } from "@/lib/seo";
 import { SEO_PAGES } from "@/lib/seo-pages";
+import { INDUSTRIES } from "@/lib/industries";
 import { getActiveServices } from "@/lib/services";
 import { PDF_TOOL_LIST, WEB_TOOL_LIST } from "@/lib/tools/registry";
 
@@ -39,6 +40,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const s of await getActiveServices()) {
     if (s.slug) add("page", `services/${s.slug}`, { url: `${SITE_URL}/services/${s.slug}`, changeFrequency: "monthly", priority: 0.8 });
   }
+
+  // 1b. Industry pages
+  for (const i of INDUSTRIES) add("page", `industries/${i.slug}`, { url: `${SITE_URL}/industries/${i.slug}`, changeFrequency: "monthly", priority: 0.7 });
 
   // 1b. Free tools
   for (const t of PDF_TOOL_LIST) add("page", `pdf-tools/${t.slug}`, { url: `${SITE_URL}/pdf-tools/${t.slug}`, changeFrequency: "monthly", priority: 0.7 });

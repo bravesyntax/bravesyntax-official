@@ -1,4 +1,5 @@
 import "server-only";
+import { BUILDING_SINCE } from "./config";
 import { cache } from "react";
 import { sql } from "./db";
 
@@ -35,10 +36,9 @@ export type SiteFacts = { projects: number; services: number; since: number | nu
 export async function getSiteFacts(): Promise<SiteFacts | null> {
   const [facts] = (await sql`
     SELECT (SELECT COUNT(*) FROM portfolios WHERE is_active = 1)::int AS projects,
-           (SELECT COUNT(*) FROM services WHERE is_active = 1)::int AS services,
-           (SELECT MIN(year) FROM portfolios WHERE is_active = 1)::int AS since
-  `) as SiteFacts[];
-  return facts ?? null;
+           (SELECT COUNT(*) FROM services WHERE is_active = 1)::int AS services
+  `) as Omit<SiteFacts, "since">[];
+  return facts ? { ...facts, since: BUILDING_SINCE } : null;
 }
 
 // ── Portfolio ─────────────────────────────────────────────────
@@ -61,11 +61,16 @@ export type Portfolio = {
   approach: string | null;
   results_detail: string | null;
   tech_stack: string | null;
+  github_url: string | null;
+  is_featured: number;
 };
 
 export async function getPortfolios(): Promise<Portfolio[]> {
   return (await sql`
-    SELECT * FROM portfolios WHERE is_active = 1 ORDER BY sort_order ASC, year DESC, id DESC
+    SELECT * FROM portfolios WHERE is_active = 1
+    ORDER BY is_featured DESC, year DESC NULLS LAST,
+      (COALESCE(challenge, '') <> '')::int + (COALESCE(approach, '') <> '')::int + (COALESCE(results_detail, '') <> '')::int + (COALESCE(tech_stack, '') <> '')::int DESC,
+      sort_order ASC, id DESC
   `) as Portfolio[];
 }
 

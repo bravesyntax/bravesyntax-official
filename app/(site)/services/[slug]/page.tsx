@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Clock, FileCheck2, MessageCircle, Target } from "lucide-react";
+import { AlertTriangle, ArrowRight, Check, Clock, FileCheck2, IndianRupee, MessageCircle, Target } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,9 +14,10 @@ import { Card3D, Card3DItem } from "@/components/velora/3d-card";
 import { SITE_URL } from "@/lib/config";
 import { getContactInfo } from "@/lib/contact";
 import { categoryLabel, getPortfolios } from "@/lib/content";
-import { mediaUrl } from "@/lib/media";
+import { mediaUrl, isExternalImage } from "@/lib/media";
 import { contactServiceHref, serviceHref } from "@/lib/navigation";
 import { buildMetadata, customSchema, serviceSeoDefaults } from "@/lib/seo";
+import { GUIDES_UPDATED, SERVICE_GUIDES } from "@/lib/service-guides";
 import { getActiveServices, getServiceBySlug } from "@/lib/services";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -43,6 +44,8 @@ export default async function ServicePage({ params }: Props) {
   const work = projects.filter((p) => p.slug && p.image).slice(0, 2);
   const paragraphs = service.overview.split(/\n{2,}/).filter(Boolean);
   const url = `${SITE_URL}/services/${service.slug}`;
+  const guide = SERVICE_GUIDES[service.slug];
+  const faqs = [...service.faqs, ...(guide?.faqs ?? []).filter(([q]) => !service.faqs.some(([x]) => x === q))];
 
   const schema: object[] = [
     {
@@ -54,7 +57,15 @@ export default async function ServicePage({ params }: Props) {
       serviceType: service.title,
       provider: { "@type": "Organization", name: contact.siteName, url: SITE_URL },
       areaServed: "IN",
+      ...(guide?.price && {
+        offers: {
+          "@type": "Offer",
+          url,
+          priceSpecification: { "@type": "PriceSpecification", priceCurrency: "INR", minPrice: guide.price.min, ...(guide.price.max && { maxPrice: guide.price.max }) },
+        },
+      }),
     },
+    { "@context": "https://schema.org", "@type": "WebPage", name: service.title, url, description: guide?.definition ?? service.description, ...(guide && { dateModified: GUIDES_UPDATED }) },
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -64,8 +75,8 @@ export default async function ServicePage({ params }: Props) {
         { "@type": "ListItem", position: 3, name: service.title, item: url },
       ],
     },
-    ...(service.faqs.length
-      ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: service.faqs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }]
+    ...(faqs.length
+      ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }]
       : []),
   ];
 
@@ -123,7 +134,16 @@ export default async function ServicePage({ params }: Props) {
       <Section label="About this service">
         <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr]">
           <BlurFade>
-            <h2 className="text-3xl font-semibold tracking-tight">How we approach it</h2>
+            {guide && (
+              <>
+                <h2 className="text-3xl font-semibold tracking-tight">What is {service.title.toLowerCase()}?</h2>
+                <p className="mt-5 text-lg leading-relaxed">{guide.definition}</p>
+                <p className="mt-4 text-sm text-muted-foreground">
+                  Last updated <time dateTime={GUIDES_UPDATED}>{new Date(GUIDES_UPDATED).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</time>
+                </p>
+              </>
+            )}
+            <h2 className={`text-3xl font-semibold tracking-tight${guide ? " mt-12" : ""}`}>How we approach it</h2>
             <div className="mt-5 space-y-4 text-lg leading-relaxed text-muted-foreground">
               {paragraphs.length ? paragraphs.map((p) => <p key={p}>{p}</p>) : <p>{service.description}</p>}
             </div>
@@ -163,6 +183,99 @@ export default async function ServicePage({ params }: Props) {
         </div>
       </Section>
 
+      {guide && (
+        <>
+          <Section muted label="When you need this service">
+            <div className="grid gap-10 lg:grid-cols-2">
+              <div>
+                <SectionHeading eyebrow="Is it right for you?" title="When should you choose this?" />
+                <ul className="mt-8 space-y-4">
+                  {guide.whenToChoose.map((x) => (
+                    <li key={x} className="flex gap-3">
+                      <Check className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" />
+                      {x}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="self-start rounded-2xl border bg-card p-6">
+                <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+                  <IndianRupee className="size-5 text-primary" aria-hidden="true" /> How much does it cost?
+                </h2>
+                <p className="mt-4 leading-relaxed">{guide.pricing}</p>
+                <h3 className="mt-6 font-medium">What affects the price</h3>
+                <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  {guide.costFactors.map((x) => (
+                    <li key={x} className="flex gap-2.5">
+                      <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                      {x}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Section>
+
+          <Section label="How the work happens">
+            <SectionHeading center eyebrow="The process" title="How does the work happen?" />
+            <ol className="mx-auto mt-10 max-w-3xl space-y-4">
+              {guide.steps.map(([title, desc], i) => (
+                <li key={title} className="flex gap-4 rounded-2xl border bg-card p-5">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">{i + 1}</span>
+                  <div>
+                    <h3 className="font-medium">{title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </Section>
+
+          <Section muted label="Comparison">
+            <SectionHeading center eyebrow="Compare your options" title={guide.comparison.title} />
+            <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border bg-card">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="border-b">
+                  <tr>
+                    {guide.comparison.headers.map((h, i) => (
+                      <th key={h || i} scope="col" className="p-3 align-top font-medium sm:px-5 sm:py-4">
+                        {h || <span className="sr-only">Feature</span>}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {guide.comparison.rows.map(([label, a, b]) => (
+                    <tr key={label}>
+                      <th scope="row" className="p-3 align-top font-medium sm:px-5 sm:py-4">
+                        {label}
+                      </th>
+                      <td className="p-3 align-top text-muted-foreground sm:px-5 sm:py-4">{a}</td>
+                      <td className="p-3 align-top text-muted-foreground sm:px-5 sm:py-4">{b}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Section>
+
+          <Section label="Mistakes to avoid">
+            <SectionHeading center eyebrow="Before you start" title="Which mistakes should you avoid?" />
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              {guide.mistakes.map(([title, desc]) => (
+                <div key={title} className="flex gap-3 rounded-2xl border bg-card p-5">
+                  <AlertTriangle className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+                  <div>
+                    <h3 className="font-medium">{title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Section>
+        </>
+      )}
+
       {work.length > 0 && (
         <Section muted label="Selected work">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
@@ -175,7 +288,7 @@ export default async function ServicePage({ params }: Props) {
             {work.map((p) => (
               <Link key={p.id} href={`/portfolio/${p.slug}`} className="group overflow-hidden rounded-2xl border bg-card">
                 <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                  <Image src={mediaUrl("portfolio", p.image!)} alt={p.title} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <Image unoptimized={isExternalImage(p.image)} src={mediaUrl("portfolio", p.image!)} alt={p.title} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-contain" />
                 </div>
                 <div className="flex items-center justify-between gap-3 p-4">
                   <h3 className="font-medium">{p.title}</h3>
@@ -187,12 +300,12 @@ export default async function ServicePage({ params }: Props) {
         </Section>
       )}
 
-      {service.faqs.length > 0 && (
+      {faqs.length > 0 && (
         <Section label="Frequently asked questions">
           <div className="mx-auto max-w-3xl">
             <SectionHeading center eyebrow="FAQ" title={`${service.title}: common questions`} />
             <Accordion type="single" collapsible className="mt-10">
-              {service.faqs.map(([q, a]) => (
+              {faqs.map(([q, a]) => (
                 <AccordionItem key={q} value={q}>
                   <AccordionTrigger className="text-left text-base">{q}</AccordionTrigger>
                   <AccordionContent className="text-muted-foreground">{a}</AccordionContent>

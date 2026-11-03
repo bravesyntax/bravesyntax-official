@@ -317,7 +317,7 @@ async function PostList({
                             <img
                               src={mediaUrl("blog", p.featured_image)}
                               alt=""
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                             />
                           )}
                         </div>

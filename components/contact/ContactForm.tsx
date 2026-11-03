@@ -29,7 +29,8 @@ export function PrefilledContactForm({ services, turnstileSiteKey }: { services:
   const sp = useSearchParams();
   const service = (sp.get("industry") || sp.get("plan") || sp.get("service") || "").trim();
   const project = (sp.get("project") || "").trim();
-  const message = project ? `Hi! I came across your "${project}" project and I'd love something similar. Here is what I have in mind:\n\n` : "";
+  const business = (sp.get("business") || "").trim().slice(0, 60);
+  const message = business ? `Hi! I'd like a website for ${business}. Here is what I have in mind:\n\n` : project ? `Hi! I came across your "${project}" project and I'd love something similar. Here is what I have in mind:\n\n` : "";
   return <ContactForm services={services} turnstileSiteKey={turnstileSiteKey} prefill={{ service, message }} />;
 }
 

@@ -68,7 +68,7 @@ export default async function BlogPage({ searchParams }: Props) {
             <Link href={`/blog/${encodeURIComponent(featured.slug)}`} className="group grid overflow-hidden rounded-3xl border bg-card md:grid-cols-2">
               <div className="relative aspect-[16/9] bg-muted md:aspect-auto md:min-h-72">
                 {featured.featured_image ? (
-                  <Image src={mediaUrl("blog", featured.featured_image)} alt={featured.title} fill priority sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                  <Image src={mediaUrl("blog", featured.featured_image)} alt={featured.title} fill priority sizes="(min-width: 768px) 50vw, 100vw" className="object-contain" />
                 ) : (
                   <div className="grid h-full place-items-center bg-linear-to-br from-brand-from/15 via-brand-via/5 to-brand-to/15">
                     <Search className="size-14 text-primary/50" aria-hidden="true" />
@@ -132,7 +132,7 @@ export default async function BlogPage({ searchParams }: Props) {
                   <Link href={`/blog/${encodeURIComponent(bp.slug)}`} className="group flex h-full flex-col overflow-hidden rounded-2xl border bg-card">
                     <div className="relative aspect-[16/9] overflow-hidden bg-muted">
                       {bp.featured_image ? (
-                        <Image src={mediaUrl("blog", bp.featured_image)} alt={bp.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <Image src={mediaUrl("blog", bp.featured_image)} alt={bp.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-contain" />
                       ) : (
                         <div className="grid h-full place-items-center bg-linear-to-br from-brand-from/15 via-brand-via/5 to-brand-to/15">
                           <Search className="size-10 text-primary/50" aria-hidden="true" />

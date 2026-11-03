@@ -176,7 +176,7 @@ function ProjectForm({ row }: { row: Project | null }) {
               </div>
               <div>
                 <label htmlFor="sort_order" className={labelCls}>
-                  Sort Order
+                  Sort Order <span className="text-zinc-600">(within the same year)</span>
                 </label>
                 <input
                   id="sort_order"
@@ -202,6 +202,22 @@ function ProjectForm({ row }: { row: Project | null }) {
               name="live_url"
               defaultValue={row?.live_url ?? ""}
               placeholder="https://example.com"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label htmlFor="github_url" className={labelCls}>
+              GitHub URL{" "}
+              <span className="text-zinc-600">
+                (shows a &quot;View code&quot; button; leave empty to hide the code)
+              </span>
+            </label>
+            <input
+              id="github_url"
+              type="url"
+              name="github_url"
+              defaultValue={row?.github_url ?? ""}
+              placeholder="https://github.com/bravesyntax/project"
               className={inputCls}
             />
           </div>
@@ -327,6 +343,11 @@ function ProjectForm({ row }: { row: Project | null }) {
             label="Active (visible on site)"
             defaultChecked={row ? !!row.is_active : true}
           />
+          <Toggle
+            name="is_featured"
+            label="Featured (first on the home page and Our Work)"
+            defaultChecked={!!row?.is_featured}
+          />
           <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">
             <SubmitButton className={primaryBtn}>
               {row ? "Update Project" : "Add Project"}
@@ -447,7 +468,7 @@ async function ProjectList({
                           <img
                             src={mediaUrl("portfolio", p.image)}
                             alt=""
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                         )}
                       </div>
@@ -455,6 +476,7 @@ async function ProjectList({
                     <td className="px-4 py-3">
                       <div className="font-mono text-sm text-white font-semibold truncate max-w-[220px]">
                         {p.title}
+                        {!!p.is_featured && <span className="ml-2 text-[10px] font-normal text-amber-400">Featured</span>}
                       </div>
                       {p.client_name && (
                         <div className="font-mono text-[10px] text-zinc-600 truncate max-w-[220px]">

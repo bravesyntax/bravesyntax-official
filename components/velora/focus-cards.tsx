@@ -21,7 +21,7 @@ interface FocusCardsProps extends React.HTMLAttributes<HTMLUListElement> {
 // Blur and shrink every card while a sibling is hovered or keyboard-focused;
 // the card under the pointer or focus opts back out.
 const card = cn(
-  "group/focus-card relative block aspect-[4/3] overflow-hidden rounded-2xl bg-muted shadow-sm transition-[filter,scale] duration-300 ease-out motion-reduce:transition-none",
+  "group/focus-card relative block aspect-[16/10] overflow-hidden rounded-2xl bg-muted shadow-sm transition-[filter,scale] duration-300 ease-out motion-reduce:transition-none",
   "group-has-[[data-focus-card]:hover]/focus-cards:blur-[3px] group-has-[[data-focus-card]:focus-visible]/focus-cards:blur-[3px]",
   "motion-safe:group-has-[[data-focus-card]:hover]/focus-cards:scale-[0.97] motion-safe:group-has-[[data-focus-card]:focus-visible]/focus-cards:scale-[0.97]",
   // `!` because the :has() selectors above out-rank a plain :hover/:focus-visible.
@@ -61,7 +61,7 @@ export function FocusCards({
               alt={alt}
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-out motion-safe:group-hover/focus-card:scale-105 motion-safe:group-focus-visible/focus-card:scale-105"
+              className="absolute inset-0 size-full object-contain"
             />
             <div
               aria-hidden
