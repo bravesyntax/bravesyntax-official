@@ -233,7 +233,19 @@ export default async function HomePage() {
           </CtaLink>
         </div>
         <BlurFade delay={0.1} className="mt-10">
-          <HoverCards columns={3} items={services.map((s) => ({ title: s.title, description: s.tagline || s.description, href: serviceHref(s) }))} />
+          <ul className="divide-y rounded-2xl border bg-card sm:hidden">
+            {services.map((s) => (
+              <li key={s.title}>
+                <Link href={serviceHref(s)} className="flex items-center justify-between gap-3 px-4 py-3.5 text-sm font-medium">
+                  {s.title}
+                  <ArrowUpRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden sm:block">
+            <HoverCards columns={3} items={services.map((s) => ({ title: s.title, description: s.tagline || s.description, href: serviceHref(s) }))} />
+          </div>
         </BlurFade>
       </Section>
 
@@ -326,9 +338,9 @@ export default async function HomePage() {
               All projects
             </CtaLink>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="-mx-5 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
             {work.map((p, i) => (
-              <BlurFade key={p.id} delay={i * 0.08}>
+              <BlurFade key={p.id} delay={i * 0.08} className="w-[85%] shrink-0 snap-center sm:w-[60%] md:w-auto">
                 <Link href={`/portfolio/${p.slug}`} className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <DirectionAwareHover
                     className="aspect-[4/3] rounded-2xl border"
@@ -378,11 +390,11 @@ export default async function HomePage() {
             All industries
           </CtaLink>
         </div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
           {INDUSTRIES.map((ind, i) => (
             <BlurFade key={ind.title} delay={(i % 3) * 0.06} className="h-full">
-              <SpotlightCard className="h-full rounded-2xl border bg-card p-5">
-                <div className="relative flex gap-4">
+              <SpotlightCard className="h-full rounded-2xl border bg-card p-4 sm:p-5">
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:gap-4">
                   <IconChip>
                     <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                       {ind.icon.map((d) => (
@@ -392,7 +404,7 @@ export default async function HomePage() {
                   </IconChip>
                   <div className="min-w-0">
                     <h3 className="font-medium">{ind.title}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{ind.desc}</p>
+                    <p className="mt-1 line-clamp-2 hidden text-sm text-muted-foreground sm:block">{ind.desc}</p>
                   </div>
                 </div>
               </SpotlightCard>

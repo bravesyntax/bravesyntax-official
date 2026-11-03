@@ -13,7 +13,7 @@ export const container = "mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8";
 
 export function Section({ children, className, muted, id, label }: { children: ReactNode; className?: string; muted?: boolean; id?: string; label?: string }) {
   return (
-    <section id={id} aria-label={label} className={cn("relative py-20 sm:py-24 lg:py-28", muted && "bg-muted/40 dark:bg-muted/20", className)}>
+    <section id={id} aria-label={label} className={cn("relative py-14 sm:py-24 lg:py-28", muted && "bg-muted/40 dark:bg-muted/20", className)}>
       <div className={container}>{children}</div>
     </section>
   );
@@ -55,7 +55,7 @@ export function PageHero({
           <DotPattern aria-hidden className="absolute inset-0 -z-10 size-full fill-foreground/10 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
         </>
       )}
-      <div className={cn(container, "relative py-20 sm:py-24 lg:py-28", aside && "grid items-center gap-12 lg:grid-cols-2")}>
+      <div className={cn(container, "relative py-14 sm:py-24 lg:py-28", aside && "grid items-center gap-12 lg:grid-cols-2")}>
         <div className={cn(center && !aside && "mx-auto max-w-3xl text-center", !center && !aside && "max-w-3xl")}>
           {eyebrow && (
             <BlurFade>

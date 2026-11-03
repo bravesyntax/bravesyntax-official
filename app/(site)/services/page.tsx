@@ -60,13 +60,13 @@ const FAQS: [string, string][] = [
 
 function ServiceGrid({ list }: { list: DbService[] }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
       {list.map((s) => (
-        <Link key={s.id} href={serviceHref(s)} className="group relative flex flex-col rounded-2xl border bg-card p-5 transition-colors hover:border-primary/40">
+        <Link key={s.id} href={serviceHref(s)} className="group relative flex flex-col rounded-2xl border bg-card p-4 transition-colors hover:border-primary/40 sm:p-5">
           <GlowingEffect />
           <h3 className="font-medium group-hover:text-primary">{s.title}</h3>
           <p className="mt-2 flex-1 text-sm text-muted-foreground">{s.tagline || s.description}</p>
-          <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+          <span className="mt-4 hidden items-center gap-1.5 text-sm font-medium text-primary sm:inline-flex">
             View service <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </span>
         </Link>

@@ -63,7 +63,7 @@ export function StickyBanner({
           type="button"
           aria-label="Dismiss announcement"
           onClick={dismiss}
-          className="-mr-1 shrink-0 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
+          className="-mr-2 grid size-9 shrink-0 place-items-center rounded-md opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
         >
           <svg
             width="14"

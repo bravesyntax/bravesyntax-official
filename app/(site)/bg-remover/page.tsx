@@ -61,7 +61,7 @@ export default async function BgRemoverPage() {
           </>
         }
         title="Remove image backgrounds in seconds"
-        background={<FlickeringGrid className="absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />}
+        background={<FlickeringGrid className="absolute inset-0 -z-10 opacity-30 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)] sm:opacity-100" />}
       >
         Upload a photo and get a clean transparent PNG. Everything happens in your browser, so your image stays on your device.
         <span className="mt-6 flex flex-wrap justify-center gap-2">

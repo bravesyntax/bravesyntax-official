@@ -102,22 +102,22 @@ function ToolGrid() {
           </button>
         ))}
       </div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="toolsList">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" id="toolsList">
         {TOOLS.filter((t) => cat === "all" || t[3] === cat).map(([id, name, desc, category, icon]) => (
           <button
             key={`${cat}-${id}`}
             onClick={() => engine().openTool?.(id)}
             data-cat={category}
-            className="tool-card group rounded-2xl border bg-card p-5 text-left transition-colors hover:border-primary/40"
+            className="tool-card group rounded-2xl border bg-card p-4 text-left transition-colors hover:border-primary/40 sm:p-5"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="w-11 h-11 bg-brand/10 rounded-xl flex items-center justify-center text-brand group-hover:bg-brand/20 transition-colors">
                 <Icon d={icon} className="w-5 h-5" strokeWidth={2} />
               </div>
-              <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">{category}</span>
+              <span className="hidden text-xs font-mono text-zinc-600 uppercase tracking-wider sm:inline">{category}</span>
             </div>
             <h3 className="font-display font-semibold text-white group-hover:text-brand transition-colors text-sm">{name}</h3>
-            <p className="text-xs text-zinc-500 font-mono mt-1.5 leading-relaxed">{desc}</p>
+            <p className="mt-1.5 hidden text-xs leading-relaxed font-mono text-zinc-500 sm:block">{desc}</p>
           </button>
         ))}
       </div>

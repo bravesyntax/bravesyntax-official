@@ -38,7 +38,7 @@ const TOOLS: [string, string][] = [
   ["AI background remover", "/bg-remover"],
 ];
 
-const linkCls = "text-sm text-muted-foreground transition-colors hover:text-foreground";
+const linkCls = "inline-block py-1 text-sm text-muted-foreground transition-colors hover:text-foreground";
 
 function Column({ title, links }: { title: string; links: [string, string][] }) {
   return (
@@ -137,7 +137,7 @@ export default async function Footer() {
         </div>
         <div className="col-span-2 lg:col-span-4">
           <h3 className="text-sm font-medium">Services</h3>
-          <ul className="mt-4 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+          <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1">
             {services.map((s) => (
               <li key={s.title}>
                 <Link href={serviceHref(s)} className={linkCls}>
@@ -171,7 +171,7 @@ export default async function Footer() {
         </div>
       </div>
       <div className="mx-auto max-w-7xl px-5 pb-6 sm:px-6 lg:px-8" aria-hidden="true">
-        <TextHoverEffect text="BRAVE</SYNTAX>" />
+        <TextHoverEffect text="BRAVE</SYNTAX>" strokeWidth={1.25} />
       </div>
     </footer>
   );

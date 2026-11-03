@@ -192,7 +192,7 @@ export default function BgRemoverTool() {
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               {["JPG", "PNG", "WEBP", "GIF", "Up to 15 MB"].map((t) => (
-                <span key={t} className="px-2.5 py-0.5 bg-zinc-200 dark:bg-zinc-700/50 text-zinc-600 dark:text-zinc-400 text-[10px] font-mono font-semibold rounded">
+                <span key={t} className="px-2.5 py-0.5 bg-zinc-200 dark:bg-zinc-700/50 text-zinc-600 dark:text-zinc-400 text-xs font-mono font-semibold rounded">
                   {t}
                 </span>
               ))}

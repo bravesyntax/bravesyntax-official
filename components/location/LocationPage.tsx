@@ -194,7 +194,7 @@ export default async function LocationPage({ citySlug, serviceSlug = "" }: { cit
           </nav>
         }
         title={<HighlightCity text={c.h1} city={city.name} />}
-        background={<DottedGlowBackground className="absolute inset-0 -z-10" />}
+        background={<DottedGlowBackground className="absolute inset-0 -z-10 opacity-30 sm:opacity-100" />}
         actions={
           <>
             <ShimmerLink href={contactUrl}>Get a free quote</ShimmerLink>

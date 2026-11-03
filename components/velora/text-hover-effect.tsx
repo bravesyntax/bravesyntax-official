@@ -144,7 +144,7 @@ export function TextHoverEffect({
           strokeWidth: strokeWidth * 2,
           style: { transitionDuration: `${drawDuration}s` },
           className:
-            "fill-none stroke-foreground/35 transition-[stroke-dashoffset] ease-in-out [stroke-dasharray:1000] motion-safe:[stroke-dashoffset:1000] motion-reduce:transition-none",
+            "fill-none stroke-foreground/50 transition-[stroke-dashoffset] ease-in-out [stroke-dasharray:1000] motion-safe:[stroke-dashoffset:1000] motion-reduce:transition-none",
           onTransitionEnd: (event) => {
             event.currentTarget.style.strokeDasharray = "none";
           },

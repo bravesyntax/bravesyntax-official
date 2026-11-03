@@ -59,9 +59,9 @@ export function StickyScroll({ items, container, className }: StickyScrollProps)
       data-slot="sticky-scroll"
       className={cn("relative flex gap-12", className)}
     >
-      <div className="flex-1 py-[30cqh]">
+      <div className="flex-1 space-y-8 lg:space-y-0 lg:py-[30cqh]">
         {items.map((item, i) => (
-          <div key={item.title} className="flex min-h-[60cqh] flex-col justify-center">
+          <div key={item.title} className="flex flex-col justify-center lg:min-h-[60cqh]">
             {/* Only the large title dims, and only to a level that keeps
                 3:1 contrast; the description stays at full strength. */}
             <motion.h3

@@ -257,3 +257,10 @@
 .rich-text table { display: block; overflow-x: auto; border-collapse: collapse; font-size: 0.9375rem; }
 .rich-text th, .rich-text td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
 .rich-text th { color: var(--foreground); font-weight: 600; }
+
+/* iOS Safari zooms in on focus for any field under 16px. */
+@media (max-width: 767px) {
+  input:not([type="checkbox"], [type="radio"], [type="file"]), select, textarea { font-size: 16px; }
+  /* Breadcrumbs and small text links keep a tappable height (WCAG 2.5.8). Inline links in articles are unaffected. */
+  main a:not(.rich-text a) { min-height: 24px; }
+}

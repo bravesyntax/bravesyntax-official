@@ -19,7 +19,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <ScrollProgress className="z-60" />
       <SiteBanner count={PDF_TOOL_COUNT} />
       <SiteHeader />
-      <main>{children}</main>
+      <main className="overflow-x-clip">{children}</main>
       <Footer />
       {gaId && (
         <>

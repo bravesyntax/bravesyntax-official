@@ -29,7 +29,7 @@ export default function SiteBanner({ count }: { count: number }) {
         }
       }}
     >
-      <Link href="/pdf-tools" className="inline-flex items-center gap-2 font-medium hover:underline">
+      <Link href="/pdf-tools" className="inline-flex items-center gap-2 py-1 font-medium hover:underline">
         <Sparkles className="size-4" aria-hidden="true" /> {count} free PDF tools and an AI background remover. No sign-up.
       </Link>
     </StickyBanner>
