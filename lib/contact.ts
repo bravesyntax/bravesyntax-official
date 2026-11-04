@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { ADMIN_EMAIL, SITE_NAME } from "./config";
+import { SITE_NAME, SUPPORT_EMAIL } from "./config";
 import { getSiteSettings } from "./settings";
 
 // Business contact details, all editable in Admin → Settings. Pages, schema and emails read them from here
@@ -32,7 +32,7 @@ const digits = (s: string) => s.replace(/[^\d+]/g, "");
 
 export const getContactInfo = cache(async (): Promise<ContactInfo> => {
   const s = await getSiteSettings();
-  const email = s.contact_email || ADMIN_EMAIL;
+  const email = s.contact_email || SUPPORT_EMAIL;
   const phone = s.contact_phone || "";
   const whatsapp = s.contact_whatsapp || phone;
   const wa = digits(whatsapp).replace(/^\+/, "");

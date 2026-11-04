@@ -7,4 +7,5 @@ export const SITE_URL = (
 ).replace(/\/$/, "");
 export const SITE_NAME = "Brave Syntax";
 export const SITE_TAGLINE = "Design & Development Services";
-export const ADMIN_EMAIL = "bravesyntax@gmail.com";
+/** Public, contact and careers address. */
+export const SUPPORT_EMAIL = "support@bravesyntax.com";

@@ -47,7 +47,7 @@ export default function ErrorScreen({ error, reset, area = "site" }: { error: Er
             <Home className="h-4 w-4" aria-hidden="true" /> {area === "admin" ? "Dashboard" : "Home"}
           </Link>
           {area === "site" && (
-            <a href="mailto:bravesyntax@gmail.com" className={secondary}>
+            <a href="mailto:support@bravesyntax.com" className={secondary}>
               <Mail className="h-4 w-4" aria-hidden="true" /> Email us
             </a>
           )}

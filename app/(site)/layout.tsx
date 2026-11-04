@@ -1,5 +1,6 @@
 import Script from "next/script";
 import Footer from "@/components/layout/Footer";
+import { NavigationLoader } from "@/components/layout/NavigationLoader";
 import SiteBanner from "@/components/layout/SiteBanner";
 import SiteHeader from "@/components/layout/SiteHeader";
 import { ScrollProgress } from "@/components/velora/scroll-progress";
@@ -16,6 +17,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <>
+      <NavigationLoader />
       <ScrollProgress className="z-60" />
       <SiteBanner count={ALL_TOOL_COUNT} />
       <SiteHeader />

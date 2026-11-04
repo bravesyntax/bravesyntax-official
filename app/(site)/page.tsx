@@ -334,7 +334,7 @@ export default async function HomePage() {
                     </svg>
                   </IconChip>
                   <div className="min-w-0">
-                    <h3 className="font-medium"><Link href={`/industries/${ind.slug}`} className="hover:text-primary">{ind.title}</Link></h3>
+                    <h3 className="font-medium"><Link href={`/industries/${ind.slug}`} className="after:absolute after:inset-0 hover:text-primary">{ind.title}</Link></h3>
                     <p className="mt-1 line-clamp-2 hidden text-sm text-muted-foreground sm:block">{ind.desc}</p>
                   </div>
                 </div>

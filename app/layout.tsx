@@ -24,7 +24,7 @@ const themeInit = `(function(){try{var m=document.cookie.match(/(?:^|; )theme=(\
 // Document shell shared by the public site (app/(site)) and the admin panel (app/admin).
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`scroll-smooth ${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" className={`scroll-smooth ${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>

@@ -264,3 +264,13 @@
   /* Breadcrumbs and small text links keep a tappable height (WCAG 2.5.8). Inline links in articles are unaffected. */
   main a:not(.rich-text a) { min-height: 24px; }
 }
+
+/* Top bar while moving between pages: rushes at first, then slows as it waits for the next page. */
+@keyframes nav-progress {
+  from {
+    width: 8%;
+  }
+  to {
+    width: 92%;
+  }
+}
