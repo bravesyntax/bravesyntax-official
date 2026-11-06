@@ -20,15 +20,15 @@ export type Feature = { icon: string; title: string; desc: string };
 /** Same slug rule as router.php. */
 export const CITY_SLUG_RE = /^[a-z][a-z0-9-]{0,49}$/;
 
-/** Only the top N cities (by sort_order, name) are indexable and in the sitemap; the rest are noindex,follow. */
 /**
- * Cities whose service pages (/{city}/{service}) are indexed: where we're based, and the largest markets. The same
- * service page across 20 cities reads ~66% alike, which search engines treat as doorway pages; city hub pages have
- * their own written content and stay indexed. Other service pages still work for visitors, as noindex,follow.
+ * The only cities whose pages are indexed and in the sitemap: Delhi NCR, where we're based and actually work. Pages
+ * that differ mainly by city name read as doorway pages to search engines, which can weigh on the whole site. Every
+ * other city page, and its service pages, still works for visitors as noindex,follow.
  */
-export const SERVICE_PAGE_CITIES = ["ghaziabad", "noida", "delhi", "mumbai", "bangalore"];
+export const INDEXED_CITIES = ["ghaziabad", "noida", "delhi"];
 
-export const LOCATION_INDEXABLE_CITY_LIMIT = Number(process.env.LOCATION_INDEXABLE_CITY_LIMIT ?? 20);
+/** Cities whose service pages (/{city}/{service}) are indexed too. */
+export const SERVICE_PAGE_CITIES = INDEXED_CITIES;
 
 export const ALSO_AVAILABLE_LIMIT = 6;
 
@@ -111,19 +111,7 @@ export async function getActiveCities(limit = 12): Promise<{ name: string; slug:
   `) as { name: string; slug: string; state: string }[];
 }
 
-/** True when the city ranks inside the indexable tier (0-based rank by sort_order, then name). */
-export async function isIndexableCity(city: City): Promise<boolean> {
-  try {
-    const [{ rank }] = (await sql`
-      SELECT COUNT(*)::int AS rank FROM location_cities
-      WHERE is_active = 1
-        AND (sort_order < ${city.sort_order} OR (sort_order = ${city.sort_order} AND name < ${city.name}))
-    `) as { rank: number }[];
-    return rank < LOCATION_INDEXABLE_CITY_LIMIT;
-  } catch {
-    return false; // fail safe: don't index if the tier can't be verified
-  }
-}
+export const isIndexableCity = (city: Pick<City, "slug">) => INDEXED_CITIES.includes(city.slug);
 
 export function parseFeatures(json: string | null): Feature[] {
   if (json) {
@@ -144,10 +132,10 @@ export function parseFeatures(json: string | null): Feature[] {
   ];
 }
 
-/** Top-tier cities, the cities with indexed service pages, and all non-root services, for static generation and the sitemap. */
+/** Indexed cities, the cities with indexed service pages, and all non-root services, for static generation and the sitemap. */
 export async function getIndexableLocationPaths(): Promise<{ cities: string[]; serviceCities: string[]; services: string[] }> {
   const cities = (await sql`
-    SELECT slug FROM location_cities WHERE is_active = 1 ORDER BY sort_order ASC, name ASC LIMIT ${LOCATION_INDEXABLE_CITY_LIMIT}
+    SELECT slug FROM location_cities WHERE is_active = 1 AND slug = ANY(${INDEXED_CITIES}) ORDER BY sort_order ASC, name ASC
   `) as { slug: string }[];
   const services = (await sql`
     SELECT slug FROM location_services WHERE is_active = 1 AND slug <> '' ORDER BY sort_order ASC

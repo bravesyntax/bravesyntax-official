@@ -86,8 +86,8 @@ async function content(r: Resolved) {
 
 export async function locationMetadata(citySlug: string, serviceSlug = ""): Promise<Metadata> {
   const r = await resolve(citySlug, serviceSlug);
-  // Only the top-tier cities are indexable, and service pages only in SERVICE_PAGE_CITIES; the rest stay noindex,follow whatever the admin sets.
-  const indexable = (await isIndexableCity(r.city)) && (!serviceSlug || SERVICE_PAGE_CITIES.includes(r.city.slug));
+  // Only Delhi NCR city pages and their service pages are indexable; the rest stay noindex,follow whatever the admin sets.
+  const indexable = isIndexableCity(r.city) && (!serviceSlug || SERVICE_PAGE_CITIES.includes(r.city.slug));
   return buildMetadata("location", seoKey(r), await seoDefaults(r), { forceNoindex: !indexable });
 }
 

@@ -1,7 +1,7 @@
 import "server-only";
 import { SITE_URL } from "@/lib/config";
 import { rows, sql } from "@/lib/db";
-import { LOCATION_INDEXABLE_CITY_LIMIT, SERVICE_PAGE_CITIES } from "@/lib/locations";
+import { isIndexableCity, SERVICE_PAGE_CITIES } from "@/lib/locations";
 import {
   applySeo, fillLocationTemplates, getSeoSettings, pageDefaults, postSeoDefaults, projectSeoDefaults, serviceSeoDefaults,
   type ResolvedSeo, type SeoDefaults, type SeoEntity, type SeoRecord, type SeoSettings,
@@ -94,8 +94,8 @@ function build(raw: Awaited<ReturnType<typeof loadRaw>>): SeoTarget[] {
     if (!p.slug) continue; // no public URL
     push("project", String(p.id), p.title, p.category ?? "", projectSeoDefaults(p), p.is_active ? null : "Hidden");
   }
-  raw.cities.forEach((c, rank) => {
-    const tier = rank < LOCATION_INDEXABLE_CITY_LIMIT ? null : `Outside top ${LOCATION_INDEXABLE_CITY_LIMIT} cities`;
+  raw.cities.forEach((c) => {
+    const tier = isIndexableCity(c) ? null : "Outside Delhi NCR";
     push("location", c.slug, c.name, c.state, { ...fillLocationTemplates(raw.settings, { city: c.name, state: c.state }), path: `/${c.slug}` }, tier);
     for (const s of raw.services) {
       const d = fillLocationTemplates(raw.settings, { city: c.name, state: c.state, service: s });
