@@ -13,7 +13,7 @@ import { confettiBurst } from "@/components/velora/confetti";
 import { DotsLoader } from "@/components/velora/loaders";
 import { RippleButton } from "@/components/velora/ripple-button";
 import { Stepper } from "@/components/velora/stepper";
-import { track } from "@/lib/analytics";
+import { trackLead } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const BUDGETS = ["Under ₹10,000", "₹10,000–₹30,000", "₹30,000–₹75,000", "₹75,000+", "Not sure yet"];
@@ -42,7 +42,7 @@ export default function ContactForm({ services, turnstileSiteKey, prefill = { se
 
   useEffect(() => {
     if (state.status === "ok") {
-      track("generate_lead", { method: "contact_form" });
+      trackLead("contact_form");
       const r = announcer.current?.getBoundingClientRect();
       confettiBurst(r ? { x: r.left + r.width / 2, y: r.top + 20 } : {});
     }

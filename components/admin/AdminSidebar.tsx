@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Briefcase, ExternalLink, FileText, FolderGit2, FolderKanban, Inbox, LayoutDashboard, LogOut, Mail, MapPin, Menu, Moon, Newspaper, Search, Settings,
+  Briefcase, ChartNoAxesColumn, ExternalLink, FileText, FolderGit2, FolderKanban, Inbox, LayoutDashboard, LogOut, Mail, MapPin, Menu, Moon, Newspaper, Search, Settings,
   Wrench, X, type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,6 +28,7 @@ const GROUPS: [title: string, items: NavItem[]][] = [
   [
     "SEO & Growth",
     [
+      ["/admin/leads", "Leads", ChartNoAxesColumn],
       ["/admin/seo", "SEO", Search],
       ["/admin/location", "Location Pages", MapPin],
     ],
