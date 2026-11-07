@@ -23,6 +23,7 @@ export function defaultLegalHtml(slug: LegalSlug, c: ContactInfo): string {
 <li><strong>Job applications:</strong> your name, contact details, portfolio and LinkedIn links, cover letter and resume.</li>
 <li><strong>Technical data:</strong> your IP address and browser details, used to prevent spam and abuse.</li>
 <li><strong>Analytics:</strong> if enabled, Google Analytics collects anonymous usage statistics through cookies.</li>
+<li><strong>Website assistant:</strong> questions you type into the assistant are sent to our AI provider (Google Gemini) to generate an answer. We do not store these conversations, but on the free tier Google may use them to improve its services, and people at Google may review them. Please don't include personal or confidential details.</li>
 </ul>
 <h2>Free PDF tools and background remover</h2>
 <p>These tools run entirely in your browser. Files you open are processed on your device and are never uploaded to our servers.</p>

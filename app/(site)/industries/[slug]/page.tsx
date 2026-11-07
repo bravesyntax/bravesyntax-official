@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const found = find(slug);
   if (!found) return {};
-  return buildMetadata("page", `industries/${slug}`, { title: `${found.industry.title} Website Design & Development`, suffix: true, description: found.industry.desc, path: `/industries/${slug}` });
+  return buildMetadata("page", `industries/${slug}`, { title: `${found.industry.title} Websites`, suffix: true, description: found.industry.desc, path: `/industries/${slug}` });
 }
 
 export default async function IndustryPage({ params }: Props) {

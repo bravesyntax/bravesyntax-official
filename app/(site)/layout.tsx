@@ -1,6 +1,9 @@
 import Script from "next/script";
 import Footer from "@/components/layout/Footer";
 import { LeadTracker } from "@/components/layout/LeadTracker";
+import { ProjectPlanner } from "@/components/planner/ProjectPlanner";
+import { assistantEnabled } from "@/lib/assistant";
+import { getContactInfo } from "@/lib/contact";
 import { NavigationLoader } from "@/components/layout/NavigationLoader";
 import SiteBanner from "@/components/layout/SiteBanner";
 import SiteHeader from "@/components/layout/SiteHeader";
@@ -13,7 +16,7 @@ import { getSiteSettings } from "@/lib/settings";
 export const revalidate = 300;
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSiteSettings();
+  const [settings, contact] = await Promise.all([getSiteSettings(), getContactInfo()]);
   const gaId = settings.google_analytics_id;
 
   return (
@@ -25,6 +28,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <SiteHeader />
       <main className="overflow-x-clip">{children}</main>
       <Footer />
+      <ProjectPlanner whatsappHref={contact.whatsappHref} assistant={assistantEnabled()} />
       {gaId && (
         <>
           <Script src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`} strategy="afterInteractive" />
