@@ -7,6 +7,8 @@ import { decodeEntities } from "@/lib/html";
 import { getContactInfo } from "@/lib/contact";
 import { enquiryReplyEmail } from "@/lib/email/templates";
 import { sendMail } from "@/lib/mailer";
+import { draftEnquiryReply } from "@/lib/admin/ai";
+import { geminiEnabled } from "@/lib/gemini";
 
 const PAGE = "/admin/messages";
 
@@ -54,3 +56,18 @@ export async function replyToMessage(fd: FormData) {
   await finish("success", `Reply sent successfully to ${msg.email}.`, back);
 }
 
+
+/** An AI reply draft for an enquiry. Returns text for the reply box; nothing is sent. */
+export async function draftReplyWithAi(id: number): Promise<{ text: string } | { error: string }> {
+  await requireAdmin();
+  if (!geminiEnabled()) return { error: "Add GEMINI_API_KEY to turn on AI drafting." };
+  const [m] = await rows<{ id: number; name: string; service: string | null; budget: string | null; message: string }>(
+    sql`SELECT id, name, service, budget, message FROM contact_messages WHERE id = ${id}`,
+  );
+  if (!m) return { error: "Message not found." };
+  try {
+    return { text: await draftEnquiryReply({ ...m, name: decodeEntities(m.name), message: decodeEntities(m.message) }) };
+  } catch (err) {
+    return { error: err instanceof Error && err.message.startsWith("Gemini") ? err.message : "AI drafting failed. Try again." };
+  }
+}

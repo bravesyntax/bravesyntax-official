@@ -28,6 +28,9 @@ import {
 import type { Portfolio } from "@/lib/content";
 import { rows, sql } from "@/lib/db";
 import { mediaUrl } from "@/lib/media";
+import { AiFill } from "@/components/admin/AiFill";
+import { geminiEnabled } from "@/lib/gemini";
+import { aiPortfolioDraft } from "../ai-actions";
 import {
   bulkDeleteProjects,
   deleteProject,
@@ -221,6 +224,7 @@ function ProjectForm({ row }: { row: Project | null }) {
               className={inputCls}
             />
           </div>
+          {geminiEnabled() && <AiFill label="Write case study with AI" read={["title", "client_name", "category", "tags", "tech_stack", "live_url", "year", "description"]} run={aiPortfolioDraft} hint="Fills the description, challenge, approach and results from the details above. It never invents results." />}
           <div>
             <label htmlFor="description" className={labelCls}>
               Description <span className="text-emerald-400">*</span>

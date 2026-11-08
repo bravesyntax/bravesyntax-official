@@ -29,7 +29,6 @@ export default async function NewsletterAdminPage() {
         ]}
       />
       <div className="mb-4 flex justify-end">
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- a CSV download, not a page */}
         <a href="/api/admin/newsletter" download className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:border-brand/50 hover:text-brand">
           <Download className="size-3.5" aria-hidden="true" /> Export subscribed (CSV)
         </a>

@@ -33,6 +33,9 @@ import {
 import { formatDate } from "@/lib/content";
 import { rows, sql } from "@/lib/db";
 import { mediaUrl } from "@/lib/media";
+import { AiFill } from "@/components/admin/AiFill";
+import { geminiEnabled } from "@/lib/gemini";
+import { aiBlogDraft } from "../ai-actions";
 import {
   bulkDeletePosts,
   deletePost,
@@ -116,6 +119,7 @@ async function PostForm({ row }: { row: Post | null }) {
               current={row?.category ?? "general"}
             />
           </TitleSlugFields>
+          {geminiEnabled() && <AiFill label="Draft post with AI" read={["title", "excerpt", "tags"]} run={aiBlogDraft} hint="Writes the excerpt, content and tags from your title. Add notes in the excerpt first to steer it." />}
           <div>
             <label htmlFor="excerpt" className={labelCls}>
               Excerpt{" "}

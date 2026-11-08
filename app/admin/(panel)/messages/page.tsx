@@ -5,7 +5,10 @@ import { AdminPage, BackLink, Card, EmptyState, FilterTabs, Pagination, StatGrid
 import Icon, { ICONS } from "@/components/ui/Icon";
 import { rows, sql } from "@/lib/db";
 import { decodeRow } from "@/lib/html";
-import { bulkDeleteMessages, deleteMessage, replyToMessage, setMessageStatus } from "./actions";
+import { ReplyComposer } from "@/components/admin/ReplyComposer";
+import { analyseEnquiry } from "@/lib/admin/ai";
+import { geminiEnabled } from "@/lib/gemini";
+import { bulkDeleteMessages, deleteMessage, draftReplyWithAi, replyToMessage, setMessageStatus } from "./actions";
 
 export const metadata = { title: "Messages" };
 
@@ -22,6 +25,15 @@ type Message = {
   is_read: number;
   is_replied: number;
   created_at: Date;
+  ai_summary: string | null;
+  ai_priority: "hot" | "warm" | "cold" | null;
+  ai_next_step: string | null;
+};
+
+const PRIORITY: Record<string, [string, string]> = {
+  hot: ["Hot lead", "bg-red-500/10 text-red-300 border-red-500/25"],
+  warm: ["Warm", "bg-amber-500/10 text-amber-300 border-amber-500/25"],
+  cold: ["Cold", "bg-zinc-700/40 text-zinc-400 border-zinc-700"],
 };
 type Props = { searchParams: Promise<{ view?: string; status?: string; page?: string }> };
 
@@ -47,6 +59,9 @@ async function MessageView({ id }: { id: number }) {
   if (!raw) redirect("/admin/messages");
   if (!raw.is_read) await sql`UPDATE contact_messages SET is_read = 1 WHERE id = ${id}`;
   const m = decodeRow({ ...raw, is_read: 1 });
+  // Analysed once, the first time the message is opened, then read from the row.
+  const insight = m.ai_summary ? { summary: m.ai_summary, priority: m.ai_priority ?? "warm", next_step: m.ai_next_step ?? "" } : await analyseEnquiry(m);
+  const ai = geminiEnabled();
   const at = new Date(m.created_at);
 
   return (
@@ -93,6 +108,18 @@ async function MessageView({ id }: { id: number }) {
             </div>
           ))}
         </div>
+
+        {insight && (
+          <div className="mx-6 mt-5 rounded-xl border border-brand/20 bg-brand/5 p-4">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-brand">AI notes</span>
+              <span className={`inline-block rounded border px-2 py-0.5 text-[10px] font-mono ${PRIORITY[insight.priority]?.[1] ?? ""}`}>{PRIORITY[insight.priority]?.[0]}</span>
+            </div>
+            <p className="text-sm text-zinc-200">{insight.summary}</p>
+            {insight.next_step && <p className="mt-1.5 text-xs text-zinc-400">Next step: {insight.next_step}</p>}
+            <p className="mt-2 text-[10px] text-zinc-600">Written by AI from the message alone (no name or contact details are sent). Use your own judgement.</p>
+          </div>
+        )}
 
         <div className="px-6 py-5">
           <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-3">Message</div>
@@ -141,19 +168,11 @@ async function MessageView({ id }: { id: number }) {
               className="w-full px-4 py-2.5 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-brand transition-colors"
             />
           </div>
-          <div>
-            <label htmlFor="reply_message" className="block text-xs font-mono text-zinc-400 mb-2">
-              Message <span className="text-emerald-400">*</span>
-            </label>
-            <textarea
-              id="reply_message"
-              name="reply_message"
-              rows={10}
-              required
-              defaultValue={`Hi ${m.name},\n\nThank you for reaching out to Brave Syntax!\n\n`}
-              className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-brand transition-colors resize-y"
-            />
-          </div>
+          <ReplyComposer initial={`Hi ${m.name},
+
+Thank you for reaching out to Brave Syntax!
+
+`} draft={ai ? draftReplyWithAi.bind(null, m.id) : undefined} />
           <div className="flex items-center gap-3">
             <SubmitButton
               pending="Sending…"
@@ -255,6 +274,7 @@ async function MessageList({ status, page }: { status: string; page: number }) {
                         {!m.is_read && <span className="w-2 h-2 rounded-full bg-brand flex-shrink-0" title="Unread" />}
                         <div className="min-w-0">
                           <div className={`font-mono text-sm text-white truncate max-w-[140px] ${!m.is_read ? "font-semibold" : "font-normal"}`}>{m.name}</div>
+                          {m.ai_priority && <span className={`mt-0.5 inline-block rounded border px-1.5 py-px text-[9px] font-mono ${PRIORITY[m.ai_priority]?.[1] ?? ""}`}>{PRIORITY[m.ai_priority]?.[0]}</span>}
                           <div className="font-mono text-xs text-zinc-500 truncate max-w-[140px]">{m.email}</div>
                         </div>
                       </div>

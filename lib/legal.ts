@@ -34,6 +34,7 @@ export function defaultLegalHtml(slug: LegalSlug, c: ContactInfo): string {
 <li>To reply to your enquiry and prepare proposals.</li>
 <li>To review job applications and contact candidates.</li>
 <li>To keep the website secure and free of spam.</li>
+<li>To help us reply faster, we may use an AI tool (Google Gemini) to summarise your enquiry and draft our reply. We send only the text of your message, service and budget, with your name, email and phone number left out, and a person reads every reply before it is sent.</li>
 </ul>
 <p>We do not sell or rent your personal information. We share it only with service providers that help us run the website (hosting, email delivery, storage), under confidentiality obligations.</p>
 <h2>How long we keep it</h2>

@@ -9,6 +9,9 @@ import { rows, sql } from "@/lib/db";
 import { decodeEntities } from "@/lib/html";
 import { mailConfigured } from "@/lib/mailer";
 import { getSiteSettings } from "@/lib/settings";
+import { AiReport } from "@/components/admin/AiReport";
+import { geminiEnabled } from "@/lib/gemini";
+import { weeklyReport } from "./ai-actions";
 
 export const metadata = { title: "Dashboard" };
 
@@ -79,6 +82,7 @@ export default async function DashboardPage() {
 
   return (
     <AdminPage title="Dashboard">
+      {geminiEnabled() && <AiReport report={weeklyReport} />}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat icon={Inbox} label="Enquiries" value={c.messages} sub={`${c.unread} unread · ${c.week} this week`} href="/admin/messages" tone="bg-blue-500/10 text-blue-400" />
         <Stat icon={UserRound} label="Job applications" value={c.apps} sub={`${c.apps_new} new · ${c.jobs} open roles`} href="/admin/careers?tab=applications" tone="bg-purple-500/10 text-purple-400" />
