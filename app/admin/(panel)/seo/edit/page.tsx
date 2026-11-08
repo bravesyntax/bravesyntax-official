@@ -9,7 +9,8 @@ import { ISSUES, loadSeoTarget, TYPE_LABEL, TYPE_PLURAL, TYPE_ROUTE } from "@/li
 import { SITE_URL } from "@/lib/config";
 import type { SeoEntity } from "@/lib/seo";
 import { DESCRIPTION_RANGE, TITLE_RANGE } from "@/lib/seo-pages";
-import { resetSeoMeta, saveSeoMeta } from "../actions";
+import { resetSeoMeta, saveSeoMeta, suggestSeoWithAi } from "../actions";
+import { geminiEnabled } from "@/lib/gemini";
 
 export const metadata = { title: "SEO · Edit" };
 
@@ -106,6 +107,7 @@ export default async function SeoEditPage({ searchParams }: Props) {
         titleRange={TITLE_RANGE as [number, number]}
         descriptionRange={DESCRIPTION_RANGE as [number, number]}
         action={saveSeoMeta}
+        suggest={geminiEnabled() ? suggestSeoWithAi.bind(null, t.type, t.key) : undefined}
       />
     </SeoShell>
   );

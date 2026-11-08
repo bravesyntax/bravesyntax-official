@@ -33,6 +33,7 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
   // it gets the normal success response so it has no reason to adapt.
   const loadedAt = Number(field(fd, "form_ts"));
   if (field(fd, "website_url") || !loadedAt || Date.now() - loadedAt < 3000) return { ok: true, errors: [], values: {} };
+  if (field(fd, "consent") !== "yes") return fail(["Please tick the box to agree to our privacy policy before applying."]);
 
   const ip = await getClientIp();
 
@@ -82,12 +83,12 @@ export async function submitApplication(_prev: ApplyState, fd: FormData): Promis
   try {
     [{ id: appId }] = (await sql`
       INSERT INTO career_applications
-        (job_id, name, email, phone, portfolio_url, linkedin_url, cover_letter, resume_file, ip_address)
+        (job_id, name, email, phone, portfolio_url, linkedin_url, cover_letter, resume_file, ip_address, consent_at)
       VALUES (
         ${jobId}, ${values.name}, ${sanitizeEmail(values.email)},
         ${values.phone ? sanitizePhone(values.phone).slice(0, 30) : null},
         ${values.portfolio_url || null}, ${values.linkedin_url || null}, ${values.cover_letter || null},
-        ${resumeUrl}, ${ip}
+        ${resumeUrl}, ${ip}, LOCALTIMESTAMP
       )
       RETURNING id
     `) as { id: number }[];

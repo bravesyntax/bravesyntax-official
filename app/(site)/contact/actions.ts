@@ -55,6 +55,7 @@ export async function submitContact(_prev: ContactState, fd: FormData): Promise<
     errors.push('Please complete the "I am human" check, then send again.');
   }
 
+  if (field(fd, "consent") !== "yes") errors.push("Please tick the box to agree to our privacy policy, so we can reply to you.");
   if (values.name.length < 2) errors.push("Full name is required (at least 2 characters).");
   else if (values.name.length > 100) errors.push("Full name is too long.");
   if (!isValidEmail(values.email) || values.email.length > 150) errors.push("A valid email address is required.");
@@ -72,8 +73,8 @@ export async function submitContact(_prev: ContactState, fd: FormData): Promise<
 
   try {
     await sql`
-      INSERT INTO contact_messages (name, email, phone, service, budget, message, ip_address, user_agent)
-      VALUES (${values.name}, ${email}, ${phone}, ${serviceField}, ${budget}, ${values.message}, ${ip}, ${userAgent})
+      INSERT INTO contact_messages (name, email, phone, service, budget, message, ip_address, user_agent, consent_at)
+      VALUES (${values.name}, ${email}, ${phone}, ${serviceField}, ${budget}, ${values.message}, ${ip}, ${userAgent}, LOCALTIMESTAMP)
     `;
   } catch (err) {
     console.error("[submitContact]", err);

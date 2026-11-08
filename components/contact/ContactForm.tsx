@@ -14,6 +14,7 @@ import { DotsLoader } from "@/components/velora/loaders";
 import { RippleButton } from "@/components/velora/ripple-button";
 import { Stepper } from "@/components/velora/stepper";
 import { trackLead } from "@/lib/analytics";
+import { ConsentCheckbox } from "@/components/site/ConsentCheckbox";
 import { cn } from "@/lib/utils";
 
 const BUDGETS = ["Under ₹10,000", "₹10,000–₹30,000", "₹30,000–₹75,000", "₹75,000+", "Not sure yet"];
@@ -206,6 +207,7 @@ function FormBody({
             </span>
           </div>
         </div>
+        <ConsentCheckbox>I agree that Brave Syntax may store my details and contact me about this enquiry.</ConsentCheckbox>
         {turnstileSiteKey && <Turnstile siteKey={turnstileSiteKey} />}
       </div>
 
@@ -230,7 +232,7 @@ function FormBody({
           Check your details
         </button>
       )}
-      <p className="mt-5 text-center text-xs text-muted-foreground">Your details are only used to reply to you. See our privacy policy.</p>
+      <p className="mt-5 text-center text-xs text-muted-foreground">Your details are only used to reply to you.</p>
     </form>
   );
 }

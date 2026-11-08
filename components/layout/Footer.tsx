@@ -9,6 +9,7 @@ import { TextHoverEffect } from "@/components/velora/text-hover-effect";
 import { WordRotate } from "@/components/velora/word-rotate";
 import { getContactInfo } from "@/lib/contact";
 import { serviceHref } from "@/lib/navigation";
+import { CookieSettingsLink } from "@/components/layout/CookieConsent";
 import { getActiveServices } from "@/lib/services";
 
 // Site footer. Services, contact details and social profiles all come from the admin (Services / Settings).
@@ -168,6 +169,7 @@ export default async function Footer() {
             <Link href="/terms" className={linkCls}>
               Terms of Service
             </Link>
+            <CookieSettingsLink className={linkCls} />
           </nav>
         </div>
       </div>

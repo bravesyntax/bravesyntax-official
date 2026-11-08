@@ -5,6 +5,10 @@ import { checkbox, finish, intField, refreshPublicSite } from "@/lib/admin/commo
 import { rows, sql } from "@/lib/db";
 import { normalizePath } from "@/lib/redirects";
 import type { SeoEntity } from "@/lib/seo";
+import { loadSeoTarget } from "@/lib/admin/seo-audit";
+import { SITE_URL } from "@/lib/config";
+import { generate, geminiEnabled } from "@/lib/gemini";
+import { DESCRIPTION_RANGE, TITLE_RANGE } from "@/lib/seo-pages";
 import { isValidHttpUrl } from "@/lib/validation";
 import { field } from "@/lib/validation";
 
@@ -194,4 +198,42 @@ export async function saveSeoSettings(fd: FormData) {
   refreshPublicSite();
   const back = field(fd, "return_to") === "locations" ? "/admin/seo/locations" : SETTINGS;
   await finish("success", "SEO settings saved. Every page is updated.", back);
+}
+
+export type SeoSuggestion = { title: string; description: string; focus_keyword: string } | { error: string };
+
+/** Drafts an SEO title, description and focus keyword with Gemini, from the page's live text. Nothing is saved. */
+export async function suggestSeoWithAi(type: string, key: string): Promise<SeoSuggestion> {
+  await requireAdmin();
+  if (!geminiEnabled()) return { error: "Add GEMINI_API_KEY to turn on AI writing." };
+  if (!TYPES.includes(type as SeoEntity) || !KEY_RE.test(key)) return { error: "Unknown page." };
+  const { target } = await loadSeoTarget(type as SeoEntity, key);
+  if (!target) return { error: "Unknown page." };
+  let text = "";
+  try {
+    const res = await fetch(`${SITE_URL}${target.path}`, { signal: AbortSignal.timeout(15_000), cache: "no-store" });
+    const html = await res.text();
+    text = (html.split(/<main[^>]*>/)[1] ?? html).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'").replace(/\s+/g, " ").trim().slice(0, 4000);
+  } catch {
+    /* fall back to the page's name and default description */
+  }
+  try {
+    const out = await generate({
+      json: true,
+      system: `You write search snippets for Brave Syntax, a web design and development studio in Ghaziabad, India.
+Return JSON: {"title": string, "description": string, "focus_keyword": string}.
+- title: ${TITLE_RANGE[0]}-${TITLE_RANGE[1] - 14} characters, the main topic first, no brand name (it is added automatically).
+- description: ${DESCRIPTION_RANGE[0]}-${DESCRIPTION_RANGE[1]} characters, plain and specific, ending with a reason to click.
+- focus_keyword: the 2-4 word search phrase this page should rank for.
+Use only facts in the page text. Never invent prices, numbers, clients, results or guarantees. Natural English, no clickbait, no ALL CAPS.`,
+      prompt: `Page: ${target.label} (${target.path})\nCurrent default title: ${target.defaults.title}\nCurrent default description: ${target.defaults.description ?? ""}\n\nPage text:\n${text || "(not available)"}`,
+    });
+    const j = JSON.parse(out) as Record<string, unknown>;
+    const s = (v: unknown, max: number) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "");
+    const result = { title: s(j.title, 200), description: s(j.description, 300), focus_keyword: s(j.focus_keyword, 100) };
+    if (!result.title || !result.description) return { error: "Gemini's answer was incomplete. Try again." };
+    return result;
+  } catch (err) {
+    return { error: err instanceof Error && err.message.startsWith("Gemini") ? err.message : "AI writing failed. Try again." };
+  }
 }

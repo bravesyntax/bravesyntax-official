@@ -1,6 +1,7 @@
-import Script from "next/script";
 import Footer from "@/components/layout/Footer";
+import { CookieConsent } from "@/components/layout/CookieConsent";
 import { LeadTracker } from "@/components/layout/LeadTracker";
+import { NewsletterPopup } from "@/components/layout/NewsletterPopup";
 import { ProjectPlanner } from "@/components/planner/ProjectPlanner";
 import { assistantEnabled } from "@/lib/assistant";
 import { getContactInfo } from "@/lib/contact";
@@ -29,14 +30,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <main className="overflow-x-clip">{children}</main>
       <Footer />
       <ProjectPlanner whatsappHref={contact.whatsappHref} assistant={assistantEnabled()} />
-      {gaId && (
-        <>
-          <Script src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`} strategy="afterInteractive" />
-          <Script id="gtag-init" strategy="afterInteractive">
-            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config',${JSON.stringify(gaId)});`}
-          </Script>
-        </>
-      )}
+      <CookieConsent gaId={gaId ?? ""} />
+      <NewsletterPopup />
     </>
   );
 }

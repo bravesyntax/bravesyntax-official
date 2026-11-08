@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { FileDrop } from "@/components/velora/file-drop";
 import { DotsLoader } from "@/components/velora/loaders";
+import { ConsentCheckbox } from "@/components/site/ConsentCheckbox";
 import { RippleButton } from "@/components/velora/ripple-button";
 
 type Props = {
@@ -155,6 +156,9 @@ export default function ApplicationForm({ focusJob, jobs, uploadsEnabled }: Prop
                 <p className="text-xs text-muted-foreground">PDF, DOC or DOCX, up to 5 MB.</p>
               </div>
             )}
+            <div className="sm:col-span-2">
+              <ConsentCheckbox>I agree that Brave Syntax may store my application and contact me about this role.</ConsentCheckbox>
+            </div>
             <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
               <RippleButton type="submit" disabled={busy || !formTs} className="h-11 rounded-full bg-primary px-7 text-sm font-medium text-primary-foreground disabled:opacity-60">
                 {busy ? <DotsLoader size="sm" label={uploading ? "Uploading resume" : "Submitting"} /> : "Submit application"}

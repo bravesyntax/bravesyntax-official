@@ -22,7 +22,9 @@ export function defaultLegalHtml(slug: LegalSlug, c: ContactInfo): string {
 <li><strong>Enquiries:</strong> your name, email, phone number, the service you are interested in, budget and message when you use the contact form.</li>
 <li><strong>Job applications:</strong> your name, contact details, portfolio and LinkedIn links, cover letter and resume.</li>
 <li><strong>Technical data:</strong> your IP address and browser details, used to prevent spam and abuse.</li>
-<li><strong>Analytics:</strong> if enabled, Google Analytics collects anonymous usage statistics through cookies.</li>
+<li><strong>Analytics:</strong> only if you choose "Accept" in the cookie notice, Google Analytics collects usage statistics through cookies. If you decline, analytics does not load. You can change your choice any time from "Cookie settings" in the footer.</li>
+<li><strong>Newsletter:</strong> if you subscribe, your email address, the page you signed up on and the time you agreed. Every email has an unsubscribe link, and unsubscribing stops all newsletter emails.</li>
+<li><strong>Your consent:</strong> forms that collect personal details ask you to agree first, and we record the time you agreed.</li>
 <li><strong>Website assistant:</strong> questions you type into the assistant are sent to our AI provider (Google Gemini) to generate an answer. We do not store these conversations, but on the free tier Google may use them to improve its services, and people at Google may review them. Please don't include personal or confidential details.</li>
 </ul>
 <h2>Free PDF tools and background remover</h2>

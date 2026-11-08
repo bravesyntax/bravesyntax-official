@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, Circle, Code2, Globe, Image as ImageIcon, Link2, Search, Share2, Target } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Circle, Code2, Globe, Image as ImageIcon, Link2, Search, Share2, Sparkles, Target } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { SubmitButton } from "./client";
 import { inputCls, labelCls, primaryBtn } from "./styles";
@@ -32,6 +32,8 @@ type Props = {
   titleRange: [number, number];
   descriptionRange: [number, number];
   action: (fd: FormData) => void;
+  /** Drafts title, description and keyword with AI; absent when AI writing is not set up. */
+  suggest?: () => Promise<{ title: string; description: string; focus_keyword: string } | { error: string }>;
 };
 
 type Check = { ok: boolean | null; text: string };
@@ -72,6 +74,18 @@ const cut = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1).trimE
 export default function SeoMetaEditor(p: Props) {
   const [v, setV] = useState(p.values);
   const set = <K extends keyof SeoEditorValues>(k: K, val: SeoEditorValues[K]) => setV((x) => ({ ...x, [k]: val }));
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiNote, setAiNote] = useState("");
+  const writeWithAi = async () => {
+    if (!p.suggest) return;
+    setAiBusy(true);
+    setAiNote("");
+    const r = await p.suggest().catch(() => ({ error: "AI writing failed. Try again." }));
+    setAiBusy(false);
+    if ("error" in r) return setAiNote(r.error);
+    setV((x) => ({ ...x, title: r.title, description: r.description, focus_keyword: r.focus_keyword || x.focus_keyword }));
+    setAiNote("Draft filled in from the page text. Check it, then save.");
+  };
 
   const title = v.title.trim() || p.defaults.title;
   const description = v.description.trim() || p.defaults.description;
@@ -124,7 +138,18 @@ export default function SeoMetaEditor(p: Props) {
       <input type="hidden" name="entity_key" value={p.entityKey} />
 
       <div className="min-w-0 space-y-6">
-        <Panel icon={Search} title="Search appearance">
+        <Panel
+          icon={Search}
+          title="Search appearance"
+          aside={
+            p.suggest ? (
+              <button type="button" onClick={writeWithAi} disabled={aiBusy} className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-2.5 py-1 text-xs font-medium text-zinc-300 hover:border-brand/50 hover:text-brand disabled:opacity-50">
+                <Sparkles className="size-3.5" aria-hidden="true" /> {aiBusy ? "Writing…" : "Write with AI"}
+              </button>
+            ) : undefined
+          }
+        >
+          {aiNote && <p role="status" className="mb-4 text-xs text-zinc-400">{aiNote}</p>}
           <div className="space-y-5">
             <div>
               <label htmlFor="seo-title" className={labelCls}>
