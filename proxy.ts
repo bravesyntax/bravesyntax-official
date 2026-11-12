@@ -125,7 +125,8 @@ export async function proxy(req: NextRequest, event: NextFetchEvent) {
 
   const [first] = pathname.split("/").filter(Boolean);
   if (first && !NOT_CITIES.has(first) && CITY_SLUG_RE.test(first) && (await goneCities()).has(first)) {
-    return NextResponse.rewrite(new URL("/gone", req.url), { status: 410 });
+    // Still 410 (so search engines drop it), but the page names the city and offers remote help to visitors.
+    return NextResponse.rewrite(new URL(`/gone?city=${first}`, req.url), { status: 410 });
   }
   return NextResponse.next();
 }

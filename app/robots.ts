@@ -10,6 +10,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/uploads/",
       disallow: ["/admin/", "/api/", "/gone", "/*?q=", "/*&q="],
     },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    // sitemap-removed.xml is temporary: it lists removed city pages so Google drops them sooner.
+    sitemap: [`${SITE_URL}/sitemap.xml`, `${SITE_URL}/sitemap-removed.xml`],
   };
 }
