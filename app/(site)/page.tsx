@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import HeroBuilder from "@/components/home/HeroBuilder";
+import InstagramFeed from "@/components/home/InstagramFeed";
 import ReelVideo from "@/components/home/ReelVideo";
 import JsonLd from "@/components/JsonLd";
 import { container, CtaLink, IconChip, Section, SectionHeading, ShimmerLink } from "@/components/site/ui";
@@ -26,6 +27,7 @@ import { WobbleCard } from "@/components/velora/wobble-card";
 import { WorldMap } from "@/components/velora/world-map";
 import { SITE_URL } from "@/lib/config";
 import { getContactInfo, type ContactInfo } from "@/lib/contact";
+import { getInstagramAccount, getInstagramPosts } from "@/lib/instagram";
 import { CardsCarousel, CarouselCard } from "@/components/velora/apple-cards-carousel";
 import { categoryLabel, formatDate, getActiveJobs, getLatestPosts, getPortfolios, getSiteFacts } from "@/lib/content";
 import { INDUSTRIES } from "@/lib/industries";
@@ -93,7 +95,7 @@ function localBusinessSchema(c: ContactInfo, services: DbService[]) {
 const WEBSITE_SCHEMA = { "@context": "https://schema.org", "@type": "WebSite", name: "Brave Syntax", alternateName: "BraveSyntax", url: SITE_URL };
 
 export default async function HomePage() {
-  const [schema, services, contact, projects, posts, jobs, cities, facts] = await Promise.all([
+  const [schema, services, contact, projects, posts, jobs, cities, facts, igPosts, igUser] = await Promise.all([
     pageSchema("home"),
     getActiveServices(),
     getContactInfo(),
@@ -102,6 +104,8 @@ export default async function HomePage() {
     getActiveJobs(),
     getActiveCities(16),
     getSiteFacts(),
+    getInstagramPosts(),
+    getInstagramAccount().then((a) => a?.username ?? "", () => ""),
   ]);
   const work = projects.filter((p) => p.slug).slice(0, 3);
   const techs = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Postgres", "Figma", "Shopify", "WordPress", "Laravel", "Vercel"];
@@ -453,6 +457,9 @@ export default async function HomePage() {
           </CardsCarousel>
         </Section>
       )}
+
+      {/* ═══ INSTAGRAM ═══ (hidden until an account is connected in Admin → Settings) */}
+      <InstagramFeed posts={igPosts} username={igUser} profileUrl={contact.socials.find((x) => x.name === "Instagram")?.url ?? ""} />
 
       {/* ═══ TECH ═══ */}
       <div className="border-y py-8" aria-label="Technologies we use">

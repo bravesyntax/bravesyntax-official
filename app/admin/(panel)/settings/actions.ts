@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { updateTag } from "next/cache";
 import { after } from "next/server";
 import { cookies } from "next/headers";
 import { requireAdmin } from "@/lib/admin/auth";
@@ -8,6 +9,7 @@ import { finish, refreshPublicSite } from "@/lib/admin/common";
 import { passwordFingerprint, SESSION_COOKIE, sessionCookieOptions, signSession } from "@/lib/admin/session";
 import { getContactInfo } from "@/lib/contact";
 import { rows, sql } from "@/lib/db";
+import { connectInstagram, disconnectInstagram, INSTAGRAM_TAG } from "@/lib/instagram";
 import { passwordChangedEmail } from "@/lib/email/templates";
 import { sendMail } from "@/lib/mailer";
 import { getClientIp, isValidEmail, isValidHttpUrl } from "@/lib/validation";
@@ -84,4 +86,29 @@ export async function updateAdminEmail(fd: FormData) {
 
   await sql`UPDATE admin_users SET email = ${email}, full_name = ${name || null} WHERE id = ${admin.id}`;
   await finish("success", "Account details updated. Sign-in codes will go to the new address.", PAGE);
+}
+
+/** Instagram feed: checks the pasted long-lived token with Instagram, then stores it (see lib/instagram.ts). */
+export async function saveInstagram(fd: FormData) {
+  await requireAdmin();
+  const token = String(fd.get("instagram_token") ?? "").trim();
+  const userId = String(fd.get("instagram_user_id") ?? "").replace(/\D/g, "");
+  if (!/^[A-Za-z0-9_-]{20,1000}$/.test(token)) await finish("error", "Paste the full access token (it starts with EAA… or IG…).", PAGE);
+  let username = "";
+  try {
+    username = await connectInstagram(token, userId);
+  } catch (err) {
+    await finish("error", `Meta didn't accept this token: ${err instanceof Error ? err.message : "unknown error"}`, PAGE);
+  }
+  updateTag(INSTAGRAM_TAG);
+  refreshPublicSite();
+  await finish("success", `Instagram connected${username ? ` as @${username}` : ""}. Your latest posts now show on the home page.`, PAGE);
+}
+
+export async function removeInstagram() {
+  await requireAdmin();
+  await disconnectInstagram();
+  updateTag(INSTAGRAM_TAG);
+  refreshPublicSite();
+  await finish("success", "Instagram disconnected. The feed is hidden from the website.", PAGE);
 }
