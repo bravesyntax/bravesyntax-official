@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Briefcase, ChartNoAxesColumn, MailPlus, ExternalLink, FileText, FolderGit2, FolderKanban, Inbox, LayoutDashboard, LogOut, Mail, MapPin, Menu, Moon, Newspaper, Search, Settings,
+  Briefcase, ChartNoAxesColumn, Images, MailPlus, ExternalLink, FileText, FolderGit2, FolderKanban, Inbox, LayoutDashboard, LogOut, Mail, MapPin, Menu, Moon, Newspaper, Search, Settings,
   Wrench, X, type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +22,7 @@ const GROUPS: [title: string, items: NavItem[]][] = [
       ["/admin/github", "GitHub Projects", FolderGit2],
       ["/admin/blog", "Blog", Newspaper],
       ["/admin/careers", "Careers", Briefcase],
+      ["/admin/media", "Media", Images],
       ["/admin/legal", "Legal Pages", FileText],
     ],
   ],

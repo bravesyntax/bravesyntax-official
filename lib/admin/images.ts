@@ -4,6 +4,7 @@ import { access, mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { del } from "@vercel/blob";
 import type { MediaKind } from "@/lib/media";
+import { isLibraryFile } from "./media-lib";
 
 // Blog/portfolio images uploaded in the admin go to one of two places:
 //   blob  – Vercel Blob (when BLOB_READ_WRITE_TOKEN is set; required on Vercel, whose disk is read-only)
@@ -69,36 +70,22 @@ export async function deleteImage(value: string | null, kind?: MediaKind) {
 }
 
 /**
- * Works out the image column after a form submit: a fresh upload (validated as ours) replaces the old image,
- * "remove image" clears it, otherwise the old value stays. Returns { value } or { error }.
+ * Works out the image column after a form submit: a new image (uploaded, or picked from the media library)
+ * replaces the old one, "remove image" clears it, otherwise the old value stays. Returns { value } or { error }.
+ * Files are never deleted here: the same file can be used in several places, so unused files are deleted from
+ * Admin → Media instead.
  */
-export async function resolveImage(
-  fd: FormData,
-  kind: MediaKind,
-  old: string | null,
-  /** True when another record still uses `old` (e.g. a blog translation sharing its image): never delete it then. */
-  keepOld = false,
-): Promise<{ value: string | null } | { error: string }> {
-  const uploaded = String(fd.get("image_url") ?? "").trim();
-  if (uploaded) {
-    let ok = false;
-    if (isBlobUrl(uploaded)) {
-      try {
-        ok = new URL(uploaded).pathname.startsWith(`/${kind}/`);
-      } catch {
-        ok = false;
-      }
-    } else {
-      // A filename returned by /api/admin/upload-local for this kind of image.
-      ok = LOCAL_NAME_RE.test(uploaded) && uploaded.startsWith(`${PREFIX[kind]}_`) && (await exists(path.join(UPLOAD_DIR, kind, uploaded)));
-    }
-    if (!ok) return { error: "Invalid image upload." };
-    if (old && old !== uploaded && !keepOld) await deleteImage(old, kind);
-    return { value: uploaded };
+export async function resolveImage(fd: FormData, kind: MediaKind, old: string | null): Promise<{ value: string | null } | { error: string }> {
+  const chosen = String(fd.get("image_url") ?? "").trim();
+  if (chosen) {
+    const ok =
+      // A file in the media library (Blob upload, or an image from the old site under /uploads/).
+      (await isLibraryFile(chosen)) ||
+      // A filename returned by /api/admin/upload-local for this kind of image (local development without Blob).
+      (!isBlobUrl(chosen) && LOCAL_NAME_RE.test(chosen) && chosen.startsWith(`${PREFIX[kind]}_`) && (await exists(path.join(UPLOAD_DIR, kind, chosen))));
+    if (!ok) return { error: "Invalid image. Upload it again or choose it from the media library." };
+    return { value: chosen };
   }
-  if (fd.get("remove_image")) {
-    if (!keepOld) await deleteImage(old, kind);
-    return { value: null };
-  }
+  if (fd.get("remove_image")) return { value: null };
   return { value: old };
 }

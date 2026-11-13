@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MediaPicker } from "@/components/admin/MediaPicker";
 import { FileDrop } from "@/components/velora/file-drop";
+import { formatBytes, uploadMedia } from "@/lib/admin/upload-client";
 import { mediaUrl, type MediaKind } from "@/lib/media";
 
-// Featured image field for blog posts and portfolio items. The file uploads as soon as it's picked — to Vercel
-// Blob, or (local mode) to public/uploads/ on this server — and the form then submits only the resulting
-// Blob URL or filename (in the hidden "image_url" input). While a file is still uploading, the form can't be
-// saved: otherwise the post is saved without the image and the upload finishes with nothing pointing to it.
+// Featured image field for blog posts and portfolio items. A new file is resized and converted to WebP in the
+// browser, uploaded to Vercel Blob and added to Admin → Media as soon as it's picked; or an existing file can be
+// chosen from the media library. The form then submits only the file's address (hidden "image_url" input).
+// While a file is still uploading the form can't be saved: otherwise the post is saved without the image.
 
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_LOCAL_BYTES = 5 * 1024 * 1024;
 
 export default function ImageUpload({ kind, current, mode, hint }: { kind: MediaKind; current: string | null; mode: "blob" | "local" | null; hint: string }) {
   const [url, setUrl] = useState("");
@@ -19,15 +21,14 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
   const [progress, setProgress] = useState(0);
   const guard = useRef<HTMLInputElement>(null);
 
-  // A required-looking field that is invalid while uploading: the browser blocks the form and shows the message.
+  // A hidden field that is invalid while uploading: the browser blocks the form and shows the message.
   useEffect(() => {
     guard.current?.setCustomValidity(busy ? "Please wait: the image is still uploading. Save once it says Uploaded." : "");
   }, [busy]);
 
   async function onPick(file: File | undefined) {
     if (!file || busy) return;
-    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) return setStatus("Invalid file type.");
-    if (file.size > MAX_BYTES) return setStatus("Image too large. Max 5 MB.");
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) return setStatus("Only JPG, PNG, WebP or GIF images.");
     setPreview(URL.createObjectURL(file));
     setBusy(true);
     setProgress(0);
@@ -35,6 +36,7 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
     setStatus("Uploading… please wait before saving.");
     try {
       if (mode === "local") {
+        if (file.size > MAX_LOCAL_BYTES) throw new Error("Image too large. Max 5 MB.");
         const body = new FormData();
         body.append("kind", kind);
         body.append("file", file);
@@ -45,15 +47,12 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
         setStatus("Uploaded ✓ Now save the post to keep it.");
         return;
       }
-      const { upload } = await import("@vercel/blob/client");
-      const ext = file.name.split(".").pop()?.toLowerCase().replace("jpeg", "jpg") ?? "jpg";
-      const blob = await upload(`${kind}/${kind === "blog" ? "blog" : "pf"}_${Date.now()}.${ext}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/admin/upload",
-        onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
+      const item = await uploadMedia(file, (p, stage) => {
+        setProgress(p);
+        setStatus(stage === "Optimising" ? "Optimising (WebP)… please wait before saving." : "Uploading… please wait before saving.");
       });
-      setUrl(blob.url);
-      setStatus("Uploaded ✓ Now save the post to keep it.");
+      setUrl(item.url);
+      setStatus(`Uploaded ✓ ${item.width && item.height ? `${item.width}×${item.height} WebP, ` : ""}${formatBytes(item.size_bytes)}. Now save the post to keep it.`);
     } catch (err) {
       setPreview("");
       setStatus(err instanceof Error ? err.message : "Upload failed.");
@@ -64,9 +63,20 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
 
   return (
     <div>
-      <span className="block text-xs font-mono text-zinc-400 mb-3">
-        Featured Image <span className="text-zinc-600">({hint})</span>
-      </span>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <span className="block text-xs font-mono text-zinc-400">
+          Featured Image <span className="text-zinc-600">({hint})</span>
+        </span>
+        {mode === "blob" && (
+          <MediaPicker
+            onSelect={(m) => {
+              setUrl(m.url);
+              setPreview(m.url);
+              setStatus(`Chosen from Media: ${m.name}. Now save the post to keep it.`);
+            }}
+          />
+        )}
+      </div>
       <input type="hidden" name="image_url" value={url} />
       <input ref={guard} aria-hidden="true" tabIndex={-1} className="sr-only" defaultValue="" />
       <div className="flex items-start gap-5">
@@ -74,10 +84,11 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
           {mode ? (
             <>
               {preview && (
-                // eslint-disable-next-line @next/next/no-img-element -- local object-URL preview
+                // eslint-disable-next-line @next/next/no-img-element -- local object-URL or library preview
                 <img src={preview} alt="" className="mb-3 h-40 w-full rounded-xl border object-contain" />
               )}
               <FileDrop accept=".jpg,.jpeg,.png,.webp,.gif" multiple={false} onFiles={(files) => onPick(files[0])} />
+              {mode === "blob" && <p className="mt-1.5 text-[11px] text-zinc-600">Large photos are resized to 1920 px and converted to WebP automatically.</p>}
             </>
           ) : (
             <p className="text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
@@ -90,7 +101,7 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
             </div>
           )}
           {status && (
-            <p role="status" className={`mt-2 text-xs font-mono ${status.includes("✓") ? "text-brand" : busy ? "text-amber-400" : "text-red-400"}`}>
+            <p role="status" className={`mt-2 text-xs font-mono ${status.includes("✓") || status.startsWith("Chosen") ? "text-brand" : busy ? "text-amber-400" : "text-red-400"}`}>
               {busy && progress > 0 ? `${status} ${progress}%` : status}
             </p>
           )}
@@ -106,6 +117,7 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
               <input type="checkbox" name="remove_image" value="1" className="rounded border-zinc-600" />
               <span className="text-xs font-mono text-red-400">Remove image</span>
             </label>
+            <p className="mt-1 max-w-48 text-[10px] text-zinc-600">Removing only unlinks it; the file stays in Media.</p>
           </div>
         )}
       </div>

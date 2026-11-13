@@ -9,18 +9,20 @@ const OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
     "h1", "h2", "h3", "h4", "h5", "h6", "p", "br", "hr", "blockquote", "pre", "code", "span", "div",
     "strong", "b", "em", "i", "u", "s", "mark", "small", "sub", "sup",
-    "ul", "ol", "li", "dl", "dt", "dd", "a", "img", "figure", "figcaption",
+    "ul", "ol", "li", "dl", "dt", "dd", "a", "img", "figure", "figcaption", "video",
     "table", "thead", "tbody", "tfoot", "tr", "th", "td", "caption",
   ],
   allowedAttributes: {
     a: ["href", "title", "target", "rel"],
     img: ["src", "alt", "title", "width", "height", "loading"],
+    // Videos from the media library: no autoplay with sound, nothing that runs script.
+    video: ["src", "poster", "controls", "preload", "playsinline", "muted", "loop", "width", "height"],
     th: ["colspan", "rowspan", "scope"],
     td: ["colspan", "rowspan"],
     "*": ["id", "class"],
   },
   allowedSchemes: ["http", "https", "mailto", "tel"],
-  allowedSchemesByTag: { img: ["http", "https", "data"] },
+  allowedSchemesByTag: { img: ["http", "https", "data"], video: ["https"] },
   allowProtocolRelative: false,
   transformTags: {
     // External links open safely in a new tab.

@@ -8,7 +8,7 @@ import {
   intField,
   refreshPublicSite,
 } from "@/lib/admin/common";
-import { deleteImage, resolveImage } from "@/lib/admin/images";
+import { resolveImage } from "@/lib/admin/images";
 import { rows, sql } from "@/lib/db";
 import { field, isValidHttpUrl } from "@/lib/validation";
 
@@ -113,7 +113,6 @@ export async function saveProject(fd: FormData) {
     }
   } catch (err) {
     console.error("[saveProject]", err);
-    if (!id) await deleteImage(image, "portfolio");
     await finish("error", "DB error saving the project.", back);
   }
   refreshPublicSite("portfolio");
@@ -135,11 +134,9 @@ export async function toggleProject(fd: FormData) {
 export async function deleteProject(fd: FormData) {
   await requireAdmin();
   const id = intField(fd, "id");
-  const [row] = await rows<{ image: string | null }>(
-    sql`DELETE FROM portfolios WHERE id = ${id} RETURNING image`,
-  );
+  // The image stays in Admin → Media (it may be used elsewhere); delete it there if it's no longer needed.
+  await sql`DELETE FROM portfolios WHERE id = ${id}`;
   await sql`DELETE FROM seo_meta WHERE entity_type = 'project' AND entity_key = ${String(id)}`;
-  await deleteImage(row?.image ?? null, "portfolio");
   refreshPublicSite("portfolio");
   await finish("success", "Project deleted.", PAGE);
 }
@@ -148,11 +145,8 @@ export async function bulkDeleteProjects(fd: FormData) {
   await requireAdmin();
   const ids = idsField(fd);
   if (ids.length) {
-    const deleted = await rows<{ image: string | null }>(
-      sql`DELETE FROM portfolios WHERE id = ANY(${ids}) RETURNING image`,
-    );
+    await sql`DELETE FROM portfolios WHERE id = ANY(${ids})`;
     await sql`DELETE FROM seo_meta WHERE entity_type = 'project' AND entity_key = ANY(${ids.map(String)})`;
-    for (const r of deleted) await deleteImage(r.image, "portfolio");
   }
   refreshPublicSite("portfolio");
   await finish("success", `${ids.length} project(s) deleted.`, PAGE);

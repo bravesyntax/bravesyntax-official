@@ -251,6 +251,7 @@
 .rich-text strong { color: var(--foreground); font-weight: 600; }
 .rich-text blockquote { border-left: 3px solid var(--primary); padding-left: 1.125rem; font-style: italic; }
 .rich-text img { max-width: 100%; height: auto; border-radius: var(--radius-xl, 0.875rem); }
+.rich-text video { display: block; width: 100%; max-width: 100%; height: auto; margin: 1.5rem 0; border-radius: var(--radius-xl, 0.875rem); background: #000; }
 .rich-text code { background: var(--muted); border-radius: 0.3rem; padding: 0.1rem 0.35rem; font-family: var(--font-geist-mono), monospace; font-size: 0.875em; }
 .rich-text pre { overflow-x: auto; background: var(--muted); border-radius: 0.75rem; padding: 1rem; font-size: 0.875rem; }
 .rich-text pre code { background: none; padding: 0; }

@@ -3,7 +3,7 @@
 import { translatePostToHindi } from "@/lib/admin/ai";
 import { requireAdmin } from "@/lib/admin/auth";
 import { checkbox, finish, idsField, intField, makeSlug, refreshPublicSite } from "@/lib/admin/common";
-import { deleteImage, resolveImage } from "@/lib/admin/images";
+import { resolveImage } from "@/lib/admin/images";
 import { isBlogLang } from "@/lib/blog-lang";
 import { rows, sql } from "@/lib/db";
 import { geminiEnabled } from "@/lib/gemini";
@@ -13,13 +13,6 @@ const PAGE = "/admin/blog";
 
 const stripTags = (html: string) => html.replace(/<[^>]*>/g, " ");
 const readTime = (html: string) => Math.max(1, Math.ceil(stripTags(html).split(/\s+/).filter(Boolean).length / 200));
-
-/** A translation and its original can share one featured image: only delete an image no other post uses. */
-async function imageInUse(image: string | null, exceptIds: number[]) {
-  if (!image) return false;
-  const [r] = await rows<{ n: number }>(sql`SELECT COUNT(*)::int AS n FROM blog_posts WHERE featured_image = ${image} AND NOT (id = ANY(${exceptIds}))`);
-  return r.n > 0;
-}
 
 /** The SEO title/description box on the post form writes to seo_meta (the rest is set in Admin → SEO). */
 async function saveSeoBasics(postId: number, title: string | null, description: string | null) {
@@ -70,7 +63,7 @@ export async function savePost(fd: FormData) {
     : [];
   if (id && !old) await finish("error", "Post not found.", PAGE);
 
-  const img = await resolveImage(fd, "blog", old?.featured_image ?? null, await imageInUse(old?.featured_image ?? null, [id]));
+  const img = await resolveImage(fd, "blog", old?.featured_image ?? null);
   if ("error" in img) await finish("error", img.error, back);
   const image = "value" in img ? img.value : null;
   // published_at is set on first publish and kept afterwards
@@ -127,9 +120,9 @@ export async function togglePublish(fd: FormData) {
 export async function deletePost(fd: FormData) {
   await requireAdmin();
   const id = intField(fd, "id");
-  const [row] = await rows<{ featured_image: string | null }>(sql`DELETE FROM blog_posts WHERE id = ${id} RETURNING featured_image`);
+  // The featured image stays in Admin → Media (it may be used elsewhere); delete it there if it's no longer needed.
+  await sql`DELETE FROM blog_posts WHERE id = ${id}`;
   await sql`DELETE FROM seo_meta WHERE entity_type = 'post' AND entity_key = ${String(id)}`;
-  if (!(await imageInUse(row?.featured_image ?? null, [id]))) await deleteImage(row?.featured_image ?? null, "blog");
   refreshPublicSite("blog");
   await finish("success", "Post deleted.", PAGE);
 }
@@ -138,9 +131,8 @@ export async function bulkDeletePosts(fd: FormData) {
   await requireAdmin();
   const ids = idsField(fd);
   if (ids.length) {
-    const deleted = await rows<{ featured_image: string | null }>(sql`DELETE FROM blog_posts WHERE id = ANY(${ids}) RETURNING featured_image`);
+    await sql`DELETE FROM blog_posts WHERE id = ANY(${ids})`;
     await sql`DELETE FROM seo_meta WHERE entity_type = 'post' AND entity_key = ANY(${ids.map(String)})`;
-    for (const r of deleted) if (!(await imageInUse(r.featured_image, ids))) await deleteImage(r.featured_image, "blog");
   }
   refreshPublicSite("blog");
   await finish("success", `${ids.length} post(s) deleted.`, PAGE);

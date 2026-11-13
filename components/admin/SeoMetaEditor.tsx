@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, Circle, Code2, Globe, Image as ImageIcon, 
 import { useMemo, useState, type ReactNode } from "react";
 import { SubmitButton } from "./client";
 import { inputCls, labelCls, primaryBtn } from "./styles";
+import { MediaPicker } from "./MediaPicker";
 
 // Editor for one URL's SEO (Admin → SEO → edit). Empty fields fall back to the defaults shown as
 // placeholders, so an admin only fills in what they want to change. Previews and checks update live.
@@ -195,7 +196,10 @@ export default function SeoMetaEditor(p: Props) {
             <ImageIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
             <input id="seo-img" name="og_image" value={v.og_image} onChange={(e) => set("og_image", e.target.value)} placeholder={p.defaults.image || "https://… or /images/…"} className={`${inputCls} pl-9`} />
           </div>
-          <p className="mt-1.5 text-[11px] text-zinc-500">Shown when the link is shared on WhatsApp, LinkedIn, X or Facebook.</p>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <MediaPicker onSelect={(m) => set("og_image", m.url)} />
+            <p className="text-[11px] text-zinc-500">Shown when the link is shared on WhatsApp, LinkedIn, X or Facebook.</p>
+          </div>
         </Panel>
 
         <Panel icon={Globe} title="Indexing">

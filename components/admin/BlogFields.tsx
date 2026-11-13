@@ -2,6 +2,8 @@
 
 import { useRef, useState, type ReactNode } from "react";
 import { addBlogCategory } from "@/app/admin/(panel)/blog/actions";
+import type { MediaItem } from "@/app/admin/(panel)/media/actions";
+import { MediaPicker } from "./MediaPicker";
 import { inputCls, labelCls } from "./styles";
 
 // Interactive parts of the blog post editor (the inline scripts in admin/blog.php).
@@ -192,6 +194,25 @@ export function ContentEditor({ content }: { content: string }) {
     t.focus();
   }
 
+  /** Puts a picture or video from the media library into the article at the cursor. */
+  function insertMedia(m: MediaItem) {
+    const t = ref.current!;
+    const { selectionStart: s, selectionEnd: e, value } = t;
+    const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+    const size = m.width && m.height ? ` width="${m.width}" height="${m.height}"` : "";
+    const html =
+      m.kind === "video"
+        ? `
+<video src="${esc(m.url)}" controls preload="metadata" playsinline${size}></video>
+`
+        : `
+<img src="${esc(m.url)}" alt="${esc(m.alt ?? "")}"${size} loading="lazy">
+`;
+    t.value = value.slice(0, s) + html + value.slice(e);
+    t.focus();
+    t.selectionStart = t.selectionEnd = s + html.length;
+  }
+
   return (
     <div>
       <label htmlFor="postContent" className={labelCls}>
@@ -201,7 +222,7 @@ export function ContentEditor({ content }: { content: string }) {
           &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;a&gt;, &lt;code&gt;)
         </span>
       </label>
-      <div className="flex gap-2 mb-2">
+      <div className="flex flex-wrap items-center gap-2 mb-2">
         {TAGS.map(([tag, label]) => (
           <button
             key={tag}
@@ -212,6 +233,7 @@ export function ContentEditor({ content }: { content: string }) {
             {label}
           </button>
         ))}
+        <MediaPicker accept="all" label="Insert media" onSelect={insertMedia} className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-mono bg-zinc-800 border border-zinc-700 rounded text-zinc-300 hover:text-brand hover:border-brand/50 transition-colors" />
       </div>
       <textarea
         ref={ref}
