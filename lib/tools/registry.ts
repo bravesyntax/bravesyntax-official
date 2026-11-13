@@ -213,6 +213,19 @@ export const PDF_TOOL_LIST: Tool[] = [
 
 export const WEB_TOOL_LIST: Tool[] = [
   {
+    slug: "website-audit",
+    name: "Free Website Audit",
+    short: "Check your site's SEO, speed and mobile score",
+    description: "Free website audit: check your site's Google SEO, mobile speed, security and how easily visitors can contact you, with a score out of 100 and a clear list of fixes.",
+    about: "Enter your website address and we check more than 25 things that decide whether visitors find you on Google, stay on a phone and get in touch: page titles and descriptions, sitemap, speed (with Google PageSpeed), HTTPS, WhatsApp and call buttons, enquiry forms and more. Every problem comes with a plain-English fix. The report is saved on our side so we can improve the tool; we only contact you if you ask for a free review.",
+    group: "web",
+    faq: [
+      ["Is the website audit really free?", "Yes. There's no sign-up and no limit on what the report shows. If you'd like help fixing the problems, you can ask for a free expert review, with no obligation."],
+      ["Do you store my website's report?", "Yes, we keep the report for the website address you check. Your name and contact details are saved only if you fill in the review form and agree to be contacted."],
+      ["Why is my score different from other audit tools?", "Every tool weighs things differently. Ours focuses on what matters most for a small business: being found on Google, loading fast on phones, and making it easy to call, WhatsApp or enquire."],
+    ],
+  },
+  {
     slug: "invoice-generator",
     name: "GST Invoice Generator",
     short: "Create a GST invoice as a PDF",

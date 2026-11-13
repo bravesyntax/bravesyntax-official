@@ -17,6 +17,7 @@ const PdfTool = dynamic(() => import("./PdfTool"), { ssr: false, loading });
 const ImageTool = dynamic(() => import("./ImageTools"), { ssr: false, loading });
 
 const TOOLS: Record<string, ComponentType<object>> = {
+  "website-audit": client(() => import("./WebsiteAuditTool")),
   "invoice-generator": client(() => import("./InvoiceTool")),
   "favicon-generator": client(() => import("./ImageTools").then((m) => ({ default: m.FaviconTool }))),
   "qr-code-generator": client(() => import("./WebTools").then((m) => ({ default: m.QrTool }))),

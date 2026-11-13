@@ -3,7 +3,7 @@
 
 type Gtag = (command: "event", name: string, params?: Record<string, string>) => void;
 
-export const LEAD_METHODS = ["contact_form", "whatsapp", "phone", "email"] as const;
+export const LEAD_METHODS = ["contact_form", "whatsapp", "phone", "email", "audit_review"] as const;
 export type LeadMethod = (typeof LEAD_METHODS)[number];
 
 const SOURCE_KEY = "bs_source";
@@ -66,7 +66,7 @@ export function track(name: string, params: Record<string, string> = {}) {
 
 /** Records a lead in Google Analytics and Admin → Leads. The same lead on the same page counts once per 30 minutes. */
 export function trackLead(method: LeadMethod) {
-  track(method === "contact_form" ? "generate_lead" : "contact_click", { method });
+  track(method === "contact_form" || method === "audit_review" ? "generate_lead" : "contact_click", { method });
   const key = `${method}:${location.pathname}`;
   let seen: Record<string, number> = {};
   try {

@@ -7,6 +7,8 @@ import { getWebTool, WEB_TOOL_LIST } from "@/lib/tools/registry";
 type Props = { params: Promise<{ slug: string }> };
 
 export const dynamicParams = false;
+// The Website Audit tool's server action fetches the visitor's site and Google PageSpeed (up to about a minute).
+export const maxDuration = 90;
 
 export function generateStaticParams() {
   return WEB_TOOL_LIST.map((t) => ({ slug: t.slug }));

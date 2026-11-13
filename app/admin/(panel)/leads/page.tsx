@@ -1,4 +1,4 @@
-import { Mail, MessageCircle, Phone, Send } from "lucide-react";
+import { Mail, MessageCircle, Phone, ScanSearch, Send } from "lucide-react";
 import Link from "next/link";
 import { AdminPage, Card, EmptyState, FilterTabs, StatGrid, Th, timeAgo } from "@/components/admin/ui";
 import { rows, sql } from "@/lib/db";
@@ -18,6 +18,7 @@ const METHODS: Record<LeadMethod, [string, typeof Mail, string]> = {
   whatsapp: ["WhatsApp", MessageCircle, "text-emerald-400"],
   phone: ["Phone call", Phone, "text-sky-400"],
   email: ["Email", Mail, "text-amber-400"],
+  audit_review: ["Audit review request", ScanSearch, "text-purple-400"],
 };
 // Days are counted in Indian time; created_at is stored in the database's UTC.
 const IST = sql`(created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata')`;
