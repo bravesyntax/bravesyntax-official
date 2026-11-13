@@ -105,7 +105,7 @@ export async function savePost(fd: FormData) {
     console.error("[savePost] SEO", err);
     seoSaved = false;
   }
-  refreshPublicSite();
+  refreshPublicSite("blog");
   if (!seoSaved) await finish("error", "The post was saved, but its SEO title and description weren't. Open it and save again.", `${PAGE}?edit=${postId}`);
   await finish("success", id ? "Blog post updated." : `Blog post "${title}" created.`, PAGE);
 }
@@ -120,7 +120,7 @@ export async function togglePublish(fd: FormData) {
     UPDATE blog_posts SET is_published = ${next}, published_at = CASE WHEN ${next} = 1 THEN COALESCE(published_at, LOCALTIMESTAMP) ELSE published_at END
     WHERE id = ${id}
   `;
-  refreshPublicSite();
+  refreshPublicSite("blog");
   await finish("success", next ? "Post published." : "Post unpublished (draft).", PAGE);
 }
 
@@ -130,7 +130,7 @@ export async function deletePost(fd: FormData) {
   const [row] = await rows<{ featured_image: string | null }>(sql`DELETE FROM blog_posts WHERE id = ${id} RETURNING featured_image`);
   await sql`DELETE FROM seo_meta WHERE entity_type = 'post' AND entity_key = ${String(id)}`;
   if (!(await imageInUse(row?.featured_image ?? null, [id]))) await deleteImage(row?.featured_image ?? null, "blog");
-  refreshPublicSite();
+  refreshPublicSite("blog");
   await finish("success", "Post deleted.", PAGE);
 }
 
@@ -142,7 +142,7 @@ export async function bulkDeletePosts(fd: FormData) {
     await sql`DELETE FROM seo_meta WHERE entity_type = 'post' AND entity_key = ANY(${ids.map(String)})`;
     for (const r of deleted) if (!(await imageInUse(r.featured_image, ids))) await deleteImage(r.featured_image, "blog");
   }
-  refreshPublicSite();
+  refreshPublicSite("blog");
   await finish("success", `${ids.length} post(s) deleted.`, PAGE);
 }
 

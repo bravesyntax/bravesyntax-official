@@ -12,9 +12,10 @@ import { ScrollProgress } from "@/components/velora/scroll-progress";
 import { ALL_TOOL_COUNT } from "@/lib/tools/registry";
 import { getSiteSettings } from "@/lib/settings";
 
-// Public site chrome. DB-backed content (settings, services) is cached and refreshed in the background
-// every 5 minutes, and immediately after an admin edit. Next.js requires a literal here.
-export const revalidate = 300;
+// Public site chrome. DB-backed content (settings, services) is cached; admin edits refresh the affected pages
+// immediately (refreshPublicSite), so the timed refresh is only a daily safety net. Every refresh of a cached
+// page is a Vercel ISR write, which the Hobby plan limits. Next.js requires a literal here.
+export const revalidate = 86400;
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [settings, contact] = await Promise.all([getSiteSettings(), getContactInfo()]);

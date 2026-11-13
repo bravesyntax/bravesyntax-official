@@ -21,7 +21,7 @@ import { getActiveServices } from "@/lib/services";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const revalidate = 300;
+export const revalidate = 86400; // admin edits refresh it immediately
 export const dynamicParams = false;
 
 export function generateStaticParams() {

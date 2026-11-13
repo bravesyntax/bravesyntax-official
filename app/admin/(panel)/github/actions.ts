@@ -63,7 +63,7 @@ export async function addRepo(fd: FormData) {
     if (match) {
       await fillEmpty(match.id, repo);
       await sql`UPDATE portfolios SET is_active = 1 WHERE id = ${match.id}`;
-      refreshPublicSite();
+      refreshPublicSite("portfolio");
       return finish("success", `Linked "${repo.name}" to the existing project for the same website and filled its empty details.`, PAGE);
     }
     const d = await repoDetails(repo);
@@ -73,7 +73,7 @@ export async function addRepo(fd: FormData) {
               ${d.metrics[0]}, ${d.metrics[1]}, ${d.metrics[2]}, ${d.image}, ${repo.homepage ? repo.homepage.slice(0, 500) : null}, ${repo.name}, ${repo.isPrivate ? null : repo.url},
               ${new Date(repo.createdAt).getFullYear()}, 1)
     `;
-    refreshPublicSite();
+    refreshPublicSite("portfolio");
     return finish("success", `"${d.title}" now shows in Our Work with its details filled in. Check it over and use Edit to change anything.`, PAGE);
   } catch (err) {
     unstable_rethrow(err);
@@ -89,7 +89,7 @@ export async function fillRepoDetails(fd: FormData) {
     const repo = await getRepo(field(fd, "repo"));
     if (!repo) return finish("error", "That repository wasn't found on GitHub.", PAGE);
     await fillEmpty(id, repo);
-    refreshPublicSite();
+    refreshPublicSite("portfolio");
     return finish("success", `Filled the empty details from "${repo.name}". Anything you had already written was kept.`, PAGE);
   } catch (err) {
     unstable_rethrow(err);
@@ -103,6 +103,6 @@ export async function setRepoVisibility(fd: FormData) {
   const id = intField(fd, "id");
   const show = field(fd, "show") === "1" ? 1 : 0;
   await sql`UPDATE portfolios SET is_active = ${show} WHERE id = ${id}`;
-  refreshPublicSite();
+  refreshPublicSite("portfolio");
   return finish("success", show ? "Project is showing in Our Work." : "Project hidden from Our Work.", PAGE);
 }

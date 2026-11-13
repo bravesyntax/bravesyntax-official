@@ -116,7 +116,7 @@ export async function saveProject(fd: FormData) {
     if (!id) await deleteImage(image, "portfolio");
     await finish("error", "DB error saving the project.", back);
   }
-  refreshPublicSite();
+  refreshPublicSite("portfolio");
   await finish(
     "success",
     id ? "Project updated." : "Project added successfully.",
@@ -128,7 +128,7 @@ export async function toggleProject(fd: FormData) {
   await requireAdmin();
   const id = intField(fd, "id");
   await sql`UPDATE portfolios SET is_active = 1 - is_active WHERE id = ${id}`;
-  refreshPublicSite();
+  refreshPublicSite("portfolio");
   await finish("success", "Visibility updated.", PAGE);
 }
 
@@ -140,7 +140,7 @@ export async function deleteProject(fd: FormData) {
   );
   await sql`DELETE FROM seo_meta WHERE entity_type = 'project' AND entity_key = ${String(id)}`;
   await deleteImage(row?.image ?? null, "portfolio");
-  refreshPublicSite();
+  refreshPublicSite("portfolio");
   await finish("success", "Project deleted.", PAGE);
 }
 
@@ -154,6 +154,6 @@ export async function bulkDeleteProjects(fd: FormData) {
     await sql`DELETE FROM seo_meta WHERE entity_type = 'project' AND entity_key = ANY(${ids.map(String)})`;
     for (const r of deleted) await deleteImage(r.image, "portfolio");
   }
-  refreshPublicSite();
+  refreshPublicSite("portfolio");
   await finish("success", `${ids.length} project(s) deleted.`, PAGE);
 }

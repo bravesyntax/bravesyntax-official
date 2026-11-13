@@ -46,21 +46,21 @@ export async function saveCity(fd: FormData) {
     console.error("[saveCity]", err);
     await finish("error", isDuplicate(err) ? `Slug "${slug}" already exists.` : id ? "Update failed." : "Failed to add city.", back);
   }
-  refreshPublicSite();
+  refreshPublicSite("locations");
   await finish("success", id ? "City updated." : `City "${name}" added.`, tabUrl("cities"));
 }
 
 export async function toggleCity(fd: FormData) {
   await requireAdmin();
   await sql`UPDATE location_cities SET is_active = 1 - is_active WHERE id = ${intField(fd, "id")}`;
-  refreshPublicSite();
+  refreshPublicSite("locations");
   await finish("success", "Visibility toggled.", tabUrl("cities"));
 }
 
 export async function deleteCity(fd: FormData) {
   await requireAdmin();
   await sql`DELETE FROM location_cities WHERE id = ${intField(fd, "id")}`;
-  refreshPublicSite();
+  refreshPublicSite("locations");
   await finish("success", "City deleted.", tabUrl("cities"));
 }
 
@@ -106,21 +106,21 @@ export async function saveLocationService(fd: FormData) {
     console.error("[saveLocationService]", err);
     await finish("error", isDuplicate(err) ? "Failed. Slug may already exist." : "Update failed.", back);
   }
-  refreshPublicSite();
+  refreshPublicSite("locations");
   await finish("success", id ? "Service updated." : `Service "${label}" added.`, tabUrl("services"));
 }
 
 export async function toggleLocationService(fd: FormData) {
   await requireAdmin();
   await sql`UPDATE location_services SET is_active = 1 - is_active WHERE id = ${intField(fd, "id")}`;
-  refreshPublicSite();
+  refreshPublicSite("locations");
   await finish("success", "Toggled.", tabUrl("services"));
 }
 
 export async function deleteLocationService(fd: FormData) {
   await requireAdmin();
   await sql`DELETE FROM location_services WHERE id = ${intField(fd, "id")}`;
-  refreshPublicSite();
+  refreshPublicSite("locations");
   await finish("success", "Service deleted.", tabUrl("services"));
 }
 
@@ -152,13 +152,13 @@ export async function saveOverride(fd: FormData) {
     console.error("[saveOverride]", err);
     await finish("error", isDuplicate(err) ? "Another override already exists for that page." : "Save failed.", tabUrl("overrides", id ? `&edit_override=${id}` : ""));
   }
-  refreshPublicSite();
+  refreshPublicSite("locations");
   await finish("success", `Override saved for ${city}${service ? `/${service}` : ""}.`, tabUrl("overrides"));
 }
 
 export async function deleteOverride(fd: FormData) {
   await requireAdmin();
   await sql`DELETE FROM location_page_overrides WHERE id = ${intField(fd, "id")}`;
-  refreshPublicSite();
+  refreshPublicSite("locations");
   await finish("success", "Override deleted.", tabUrl("overrides"));
 }

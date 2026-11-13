@@ -58,6 +58,37 @@ async function redirectRules(): Promise<RedirectRule[]> {
   }
 }
 
+// 4) Unknown slugs: any one- or two-segment path would reach app/[city] (and /blog/x, /portfolio/x, /services/x
+//    their own dynamic pages), which renders a 404 and stores it in the ISR cache. Bots probe thousands of made-up
+//    URLs (/wp-login, /xyz/abc), and every one cost an ISR write. Real slugs are kept in memory, and anything else
+//    gets the pre-built /missing page with a 404 status: served from the cache, never written.
+const KNOWN_TTL_MS = 60 * 1000;
+type Known = { city: Set<string>; svc: Set<string>; blog: Set<string>; portfolio: Set<string>; service: Set<string> };
+let known: { sets: Known; expires: number } | null = null;
+
+async function knownSlugs(): Promise<Known | null> {
+  if (known && known.expires > Date.now()) return known.sets;
+  try {
+    const sql = neon(process.env.DATABASE_URL!);
+    const rows = (await sql`
+      SELECT 'city' AS k, slug FROM location_cities WHERE is_active = 1
+      UNION ALL SELECT 'svc', slug FROM location_services WHERE is_active = 1 AND slug <> ''
+      UNION ALL SELECT 'blog', slug FROM blog_posts WHERE is_published = 1
+      UNION ALL SELECT 'portfolio', slug FROM portfolios WHERE is_active = 1 AND COALESCE(slug, '') <> ''
+      UNION ALL SELECT 'service', slug FROM services WHERE is_active = 1 AND COALESCE(slug, '') <> ''
+    `) as { k: keyof Known; slug: string }[];
+    const sets: Known = { city: new Set(), svc: new Set(), blog: new Set(), portfolio: new Set(), service: new Set() };
+    for (const r of rows) sets[r.k]?.add(r.slug);
+    known = { sets, expires: Date.now() + KNOWN_TTL_MS };
+    return sets;
+  } catch (err) {
+    console.error("[proxy] slug lookup failed", err);
+    return known?.sets ?? null; // fail open: the pages decide
+  }
+}
+
+const missing = (req: NextRequest) => NextResponse.rewrite(new URL("/missing", req.url), { status: 404 });
+
 function countHit(event: NextFetchEvent, id: number) {
   event.waitUntil(
     neon(process.env.DATABASE_URL!)`UPDATE seo_redirects SET hits = hits + 1, last_hit_at = LOCALTIMESTAMP WHERE id = ${id}`
@@ -123,10 +154,31 @@ export async function proxy(req: NextRequest, event: NextFetchEvent) {
     return NextResponse.redirect(url, 301);
   }
 
-  const [first] = pathname.split("/").filter(Boolean);
+  const segs = pathname.split("/").filter(Boolean);
+  const [first] = segs;
   if (first && !NOT_CITIES.has(first) && CITY_SLUG_RE.test(first) && (await goneCities()).has(first)) {
     // Still 410 (so search engines drop it), but the page names the city and offers remote help to visitors.
     return NextResponse.rewrite(new URL(`/gone?city=${first}`, req.url), { status: 410 });
+  }
+
+  // 4) Paths that would reach a dynamic page with a slug that doesn't exist. Files (anything with an extension,
+  //    such as /media/home-reel.mp4) are left to the static file server.
+  if ((segs.length === 1 || segs.length === 2) && !/\.[a-z0-9]{1,5}$/i.test(pathname)) {
+    let slug = "";
+    try {
+      slug = decodeURIComponent(segs[segs.length - 1]);
+    } catch {
+      return missing(req);
+    }
+    const dynamicChild: Record<string, keyof Known> = { blog: "blog", portfolio: "portfolio", services: "service" };
+    if (segs.length === 2 && dynamicChild[first]) {
+      const sets = await knownSlugs();
+      if (sets && !sets[dynamicChild[first]].has(slug)) return missing(req);
+    } else if (!NOT_CITIES.has(first)) {
+      // Not a real top-level route: only an active city (and, below it, an active location service) exists here.
+      const sets = await knownSlugs();
+      if (sets && (!sets.city.has(first) || (segs.length === 2 && !sets.svc.has(slug)))) return missing(req);
+    }
   }
   return NextResponse.next();
 }

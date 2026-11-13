@@ -84,7 +84,7 @@ export async function saveJob(fd: FormData) {
       back,
     );
   }
-  refreshPublicSite();
+  refreshPublicSite("careers");
   await finish(
     "success",
     id ? "Job updated successfully." : `Job "${title}" added successfully.`,
@@ -95,7 +95,7 @@ export async function saveJob(fd: FormData) {
 export async function deleteJob(fd: FormData) {
   await requireAdmin();
   await sql`DELETE FROM career_jobs WHERE id = ${intField(fd, "id")}`;
-  refreshPublicSite();
+  refreshPublicSite("careers");
   await finish("success", "Job deleted.", JOBS);
 }
 

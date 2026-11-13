@@ -94,6 +94,9 @@ function localBusinessSchema(c: ContactInfo, services: DbService[]) {
 // Tells search engines the site's name, so results show "Brave Syntax" rather than the bare domain.
 const WEBSITE_SCHEMA = { "@context": "https://schema.org", "@type": "WebSite", name: "Brave Syntax", alternateName: "BraveSyntax", url: SITE_URL };
 
+// Hourly: the Instagram section's image links are signed by Instagram and expire.
+export const revalidate = 3600;
+
 export default async function HomePage() {
   const [schema, services, contact, projects, posts, jobs, cities, facts, igPosts, igUser] = await Promise.all([
     pageSchema("home"),
