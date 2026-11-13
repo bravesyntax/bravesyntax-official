@@ -106,6 +106,10 @@ export type BlogPost = {
   meta_description: string | null;
   published_at: Date | null;
   updated_at: Date | null;
+  /** "en" or "hi" (see lib/blog-lang.ts). */
+  language: string;
+  /** For a translation: the id of the original post. */
+  translation_of: number | null;
 };
 
 export const BLOG_PER_PAGE = 9;
@@ -120,7 +124,8 @@ export async function getBlogCategories(): Promise<{ slug: string; label: string
   return rows.map((r) => ({ slug: r.slug, label: categoryLabel(r.slug) }));
 }
 
-export async function getBlogListing({ cat, tag, q = "", page }: { cat: string; tag: string; q?: string; page: number }) {
+/** Lists original posts; with a language, every post written in that language (translations included). */
+export async function getBlogListing({ cat, tag, q = "", page, lang = null }: { cat: string; tag: string; q?: string; page: number; lang?: string | null }) {
   const catFilter = cat !== "all" && /^[a-z0-9-]{1,50}$/.test(cat) ? cat : null;
   const tagLike = tag ? `%${tag}%` : null;
   // % and _ in what a visitor types are literal characters, not wildcards.
@@ -130,6 +135,7 @@ export async function getBlogListing({ cat, tag, q = "", page }: { cat: string; 
     const [{ total }] = (await sql`
       SELECT COUNT(*)::int AS total FROM blog_posts
       WHERE is_published = 1
+        AND (${lang}::text IS NULL AND translation_of IS NULL OR language = ${lang})
         AND (${catFilter}::text IS NULL OR category = ${catFilter})
         AND (${tagLike}::text IS NULL OR tags ILIKE ${tagLike})
         AND (${qLike}::text IS NULL OR title ILIKE ${qLike} OR excerpt ILIKE ${qLike} OR tags ILIKE ${qLike})
@@ -142,6 +148,7 @@ export async function getBlogListing({ cat, tag, q = "", page }: { cat: string; 
     const posts = (await sql`
       SELECT * FROM blog_posts
       WHERE is_published = 1
+        AND (${lang}::text IS NULL AND translation_of IS NULL OR language = ${lang})
         AND (${catFilter}::text IS NULL OR category = ${catFilter})
         AND (${tagLike}::text IS NULL OR tags ILIKE ${tagLike})
         AND (${qLike}::text IS NULL OR title ILIKE ${qLike} OR excerpt ILIKE ${qLike} OR tags ILIKE ${qLike})
@@ -150,9 +157,9 @@ export async function getBlogListing({ cat, tag, q = "", page }: { cat: string; 
     `) as BlogPost[];
 
     let featured: BlogPost | null = null;
-    if (current === 1 && !catFilter && !tag && !q) {
+    if (current === 1 && !catFilter && !tag && !q && !lang) {
       const rows = (await sql`
-        SELECT * FROM blog_posts WHERE is_published = 1 AND is_featured = 1 ORDER BY published_at DESC NULLS LAST LIMIT 1
+        SELECT * FROM blog_posts WHERE is_published = 1 AND is_featured = 1 AND translation_of IS NULL ORDER BY published_at DESC NULLS LAST LIMIT 1
       `) as BlogPost[];
       featured = rows[0] ?? null;
     }
@@ -169,6 +176,29 @@ export const getBlogPostBySlug = cache(async (slug: string): Promise<BlogPost | 
   return rows[0] ?? null;
 });
 
+/** Published versions of a post in every language, the post itself included (for hreflang and the language switch). */
+export async function getPostVersions(post: Pick<BlogPost, "id" | "translation_of">): Promise<{ id: number; slug: string; language: string }[]> {
+  const root = post.translation_of ?? post.id;
+  try {
+    return (await sql`
+      SELECT id, slug, language FROM blog_posts WHERE is_published = 1 AND (id = ${root} OR translation_of = ${root}) ORDER BY id
+    `) as { id: number; slug: string; language: string }[];
+  } catch (err) {
+    console.error("[getPostVersions]", err);
+    return [];
+  }
+}
+
+/** Whether any post is published in this language (shows the language tab on the blog). */
+export async function hasPostsIn(lang: string): Promise<boolean> {
+  try {
+    const [r] = (await sql`SELECT EXISTS (SELECT 1 FROM blog_posts WHERE is_published = 1 AND language = ${lang}) AS has`) as { has: boolean }[];
+    return !!r?.has;
+  } catch {
+    return false;
+  }
+}
+
 export async function getBlogSlugs(): Promise<string[]> {
   try {
     const rows = (await sql`SELECT slug FROM blog_posts WHERE is_published = 1`) as { slug: string }[];
@@ -183,7 +213,7 @@ export async function getRelatedPosts(post: BlogPost) {
   try {
     return (await sql`
       SELECT id, title, slug, excerpt, featured_image, published_at FROM blog_posts
-      WHERE is_published = 1 AND id <> ${post.id}
+      WHERE is_published = 1 AND id <> ${post.id} AND language = ${post.language}
         AND (category = ${post.category} OR tags ILIKE ${`%${firstTag}%`})
       ORDER BY published_at DESC NULLS LAST LIMIT 3
     `) as Pick<BlogPost, "id" | "title" | "slug" | "excerpt" | "featured_image" | "published_at">[];
@@ -196,7 +226,7 @@ export async function getRelatedPosts(post: BlogPost) {
 /** Newest published posts (home page). */
 export async function getLatestPosts(limit = 3): Promise<BlogPost[]> {
   return (await sql`
-    SELECT * FROM blog_posts WHERE is_published = 1 ORDER BY published_at DESC NULLS LAST, created_at DESC LIMIT ${limit}
+    SELECT * FROM blog_posts WHERE is_published = 1 AND translation_of IS NULL ORDER BY published_at DESC NULLS LAST, created_at DESC LIMIT ${limit}
   `) as BlogPost[];
 }
 

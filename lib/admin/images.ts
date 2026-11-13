@@ -76,6 +76,8 @@ export async function resolveImage(
   fd: FormData,
   kind: MediaKind,
   old: string | null,
+  /** True when another record still uses `old` (e.g. a blog translation sharing its image): never delete it then. */
+  keepOld = false,
 ): Promise<{ value: string | null } | { error: string }> {
   const uploaded = String(fd.get("image_url") ?? "").trim();
   if (uploaded) {
@@ -91,11 +93,11 @@ export async function resolveImage(
       ok = LOCAL_NAME_RE.test(uploaded) && uploaded.startsWith(`${PREFIX[kind]}_`) && (await exists(path.join(UPLOAD_DIR, kind, uploaded)));
     }
     if (!ok) return { error: "Invalid image upload." };
-    if (old && old !== uploaded) await deleteImage(old, kind);
+    if (old && old !== uploaded && !keepOld) await deleteImage(old, kind);
     return { value: uploaded };
   }
   if (fd.get("remove_image")) {
-    await deleteImage(old, kind);
+    if (!keepOld) await deleteImage(old, kind);
     return { value: null };
   }
   return { value: old };

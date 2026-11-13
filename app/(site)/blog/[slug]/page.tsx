@@ -1,5 +1,7 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Languages } from "lucide-react";
 import type { Metadata } from "next";
+import { Noto_Sans_Devanagari } from "next/font/google";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -10,13 +12,31 @@ import { BlurFade } from "@/components/velora/blur-fade";
 import { BorderBeam } from "@/components/velora/border-beam";
 import { TracingBeam } from "@/components/velora/tracing-beam";
 import { SITE_URL } from "@/lib/config";
-import { categoryLabel, formatDate, getBlogPostBySlug, getBlogSlugs, getRelatedPosts, splitList } from "@/lib/content";
+import { BLOG_LANGS, isBlogLang, POST_UI, type BlogLang } from "@/lib/blog-lang";
+import { categoryLabel, formatDate, getBlogPostBySlug, getBlogSlugs, getPostVersions, getRelatedPosts, splitList } from "@/lib/content";
 import { decodeEntities } from "@/lib/html";
 import { buildMetadata, customSchema, postSeoDefaults, resolveSeo } from "@/lib/seo";
 import { sanitizeRichHtml } from "@/lib/sanitize";
 import { mediaUrl } from "@/lib/media";
 
 type Props = { params: Promise<{ slug: string }> };
+
+// Geist has no Devanagari letters: Hindi posts fall back to Noto Sans Devanagari for them. Not preloaded, so
+// English pages never download it.
+const deva = Noto_Sans_Devanagari({ subsets: ["devanagari"], weight: ["400", "500", "600", "700"], variable: "--font-deva", display: "swap", preload: false });
+const DEVA_STACK = "var(--font-geist-sans), var(--font-deva), ui-sans-serif, system-ui, sans-serif";
+
+const langOf = (l: string): BlogLang => (isBlogLang(l) ? l : "en");
+const postUrl = (slug: string) => `${SITE_URL}/blog/${encodeURIComponent(slug)}`;
+
+/** hreflang map for a post that has published versions in more than one language. */
+function hreflang(versions: { slug: string; language: string }[]): Record<string, string> | undefined {
+  if (versions.length < 2) return undefined;
+  const map: Record<string, string> = {};
+  for (const v of versions) map[langOf(v.language)] = postUrl(v.slug);
+  map["x-default"] = map.en ?? postUrl(versions[0].slug);
+  return map;
+}
 
 export async function generateStaticParams() {
   return (await getBlogSlugs()).map((slug) => ({ slug }));
@@ -26,7 +46,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getBlogPostBySlug((await params).slug);
   if (!post) return {};
-  return buildMetadata("post", String(post.id), postSeoDefaults(post));
+  const [meta, versions] = await Promise.all([buildMetadata("post", String(post.id), postSeoDefaults(post)), getPostVersions(post)]);
+  const languages = hreflang(versions);
+  return {
+    ...meta,
+    alternates: { ...meta.alternates, ...(languages && { languages }) },
+    openGraph: { ...meta.openGraph, locale: BLOG_LANGS[langOf(post.language)].ogLocale },
+  };
 }
 
 /** Gives every <h2> in the post an id (section0, section1, …) and returns the TOC labels. */
@@ -43,7 +69,13 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await getBlogPostBySlug((await params).slug);
   if (!post) notFound();
 
-  const related = await getRelatedPosts(post);
+  const lang = langOf(post.language);
+  const ui = POST_UI[lang];
+  const [related, versions] = await Promise.all([getRelatedPosts(post), getPostVersions(post)]);
+  const others = versions.filter((v) => v.id !== post.id);
+  // Hindi text: the post's own language on the wrapper (for screen readers and search engines) and a font stack
+  // that has Devanagari letters.
+  const langProps = lang === "en" ? {} : { lang, className: deva.variable, style: { fontFamily: DEVA_STACK, "--font-heading": DEVA_STACK } as CSSProperties };
   const tags = splitList(post.tags);
   const { html, toc } = withHeadingIds(sanitizeRichHtml(post.content));
   const [seo, extraSchema] = await Promise.all([resolveSeo("post", String(post.id), postSeoDefaults(post)), customSchema("post", String(post.id))]);
@@ -57,6 +89,7 @@ export default async function BlogPostPage({ params }: Props) {
     description: seo.description,
     mainEntityOfPage: canonical,
     url: canonical,
+    inLanguage: lang === "hi" ? "hi-IN" : "en-IN",
     ...(post.published_at && { datePublished: new Date(post.published_at).toISOString() }),
     ...(post.updated_at && { dateModified: new Date(post.updated_at).toISOString() }),
     author: { "@type": "Person", name: post.author || "Brave Syntax" },
@@ -81,16 +114,17 @@ export default async function BlogPostPage({ params }: Props) {
     <>
       <JsonLd data={[articleSchema, breadcrumb, ...extraSchema]} />
 
+      <div {...langProps}>
       <section className="relative isolate overflow-hidden">
         <AuroraBackground intensity="subtle" />
         <div className={`${container} max-w-4xl py-16 lg:py-20`}>
           <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="size-4" aria-hidden="true" /> Back to blog
+            <ArrowLeft className="size-4" aria-hidden="true" /> {ui.back}
           </Link>
           <p className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
             <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">{categoryLabel(post.category)}</span>
             <span>{formatDate(post.published_at)}</span>
-            {post.read_time ? <span>· {post.read_time} min read</span> : null}
+            {post.read_time ? <span>· {ui.minRead(post.read_time)}</span> : null}
           </p>
           <h1 className="mt-4 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{post.title}</h1>
           {post.excerpt && <p className="mt-5 text-lg text-pretty text-muted-foreground">{post.excerpt}</p>}
@@ -99,6 +133,14 @@ export default async function BlogPostPage({ params }: Props) {
               {(post.author || "B").charAt(0).toUpperCase()}
             </span>
             <span className="text-sm font-medium">{post.author}</span>
+            {others.map((v) => {
+              const l = langOf(v.language);
+              return (
+                <Link key={v.id} href={`/blog/${encodeURIComponent(v.slug)}`} hrefLang={l} lang={l} className="ml-auto inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-sm font-medium transition-colors hover:border-primary/40 hover:text-primary">
+                  <Languages className="size-4" aria-hidden="true" /> {BLOG_LANGS[l].readIn}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -131,10 +173,10 @@ export default async function BlogPostPage({ params }: Props) {
 
             <div className="relative mt-10 overflow-hidden rounded-3xl border bg-card p-8">
               <BorderBeam />
-              <h2 className="text-xl font-semibold tracking-tight">Need help with this?</h2>
-              <p className="mt-2 text-muted-foreground">Tell us about your project and we&apos;ll send a clear plan and a fixed quote.</p>
+              <h2 className="text-xl font-semibold tracking-tight">{ui.ctaTitle}</h2>
+              <p className="mt-2 text-muted-foreground">{ui.ctaText}</p>
               <ShimmerLink href="/contact" className="mt-5">
-                Start a project
+                {ui.ctaButton}
               </ShimmerLink>
             </div>
           </div>
@@ -142,7 +184,7 @@ export default async function BlogPostPage({ params }: Props) {
           {toc.length > 0 && (
             <aside className="hidden lg:block">
               <nav aria-label="On this page" className="sticky top-24 rounded-2xl border bg-card p-5">
-                <h2 className="text-sm font-medium">On this page</h2>
+                <h2 className="text-sm font-medium">{ui.onPage}</h2>
                 <ul className="mt-3 max-h-[70vh] space-y-2 overflow-y-auto">
                   {toc.map((label, i) => (
                     <li key={i}>
@@ -159,8 +201,8 @@ export default async function BlogPostPage({ params }: Props) {
       </section>
 
       {related.length > 0 && (
-        <Section muted label="Related articles">
-          <SectionHeading eyebrow="Keep reading" title="Related articles" />
+        <Section muted label={ui.related}>
+          <SectionHeading eyebrow={ui.keepReading} title={ui.related} />
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {related.map((rp) => (
               <Link key={rp.id} href={`/blog/${encodeURIComponent(rp.slug)}`} className="group flex flex-col overflow-hidden rounded-2xl border bg-card">
@@ -176,6 +218,7 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
         </Section>
       )}
+      </div>
     </>
   );
 }

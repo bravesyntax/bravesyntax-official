@@ -4,7 +4,7 @@ import "server-only";
 
 export const geminiEnabled = () => !!process.env.GEMINI_API_KEY;
 
-export async function generate({ system, prompt, json = false, maxTokens = 600 }: { system: string; prompt: string; json?: boolean; maxTokens?: number }) {
+export async function generate({ system, prompt, json = false, maxTokens = 600, timeoutMs = 30_000 }: { system: string; prompt: string; json?: boolean; maxTokens?: number; timeoutMs?: number }) {
   const model = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: "POST",
@@ -14,7 +14,7 @@ export async function generate({ system, prompt, json = false, maxTokens = 600 }
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.4, maxOutputTokens: maxTokens, ...(json && { responseMimeType: "application/json" }) },
     }),
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) throw new Error(res.status === 429 || res.status === 503 ? "Gemini is busy right now. Try again in a minute." : `Gemini returned an error (${res.status}).`);
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };

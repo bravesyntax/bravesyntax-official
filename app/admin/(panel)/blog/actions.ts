@@ -1,15 +1,25 @@
 "use server";
 
+import { translatePostToHindi } from "@/lib/admin/ai";
 import { requireAdmin } from "@/lib/admin/auth";
 import { checkbox, finish, idsField, intField, makeSlug, refreshPublicSite } from "@/lib/admin/common";
 import { deleteImage, resolveImage } from "@/lib/admin/images";
+import { isBlogLang } from "@/lib/blog-lang";
 import { rows, sql } from "@/lib/db";
+import { geminiEnabled } from "@/lib/gemini";
 import { field } from "@/lib/validation";
 
 const PAGE = "/admin/blog";
 
 const stripTags = (html: string) => html.replace(/<[^>]*>/g, " ");
 const readTime = (html: string) => Math.max(1, Math.ceil(stripTags(html).split(/\s+/).filter(Boolean).length / 200));
+
+/** A translation and its original can share one featured image: only delete an image no other post uses. */
+async function imageInUse(image: string | null, exceptIds: number[]) {
+  if (!image) return false;
+  const [r] = await rows<{ n: number }>(sql`SELECT COUNT(*)::int AS n FROM blog_posts WHERE featured_image = ${image} AND NOT (id = ANY(${exceptIds}))`);
+  return r.n > 0;
+}
 
 /** The SEO title/description box on the post form writes to seo_meta (the rest is set in Admin → SEO). */
 async function saveSeoBasics(postId: number, title: string | null, description: string | null) {
@@ -47,13 +57,20 @@ export async function savePost(fd: FormData) {
   const seoDesc = field(fd, "seo_description").replace(/\s+/g, " ").slice(0, 400) || null;
   const published = checkbox(fd, "is_published");
   const featured = checkbox(fd, "is_featured");
+  const language = isBlogLang(field(fd, "language")) ? field(fd, "language") : "en";
+  // "Translation of" must point at a different, original post (translations don't chain).
+  const translationOf: number | null = Number(field(fd, "translation_of")) || null;
+  if (translationOf) {
+    const [orig] = await rows<{ translation_of: number | null }>(sql`SELECT translation_of FROM blog_posts WHERE id = ${translationOf}`);
+    if (!orig || translationOf === id || orig.translation_of) await finish("error", "Choose an original post (not a translation) for \"Translation of\".", back);
+  }
 
   const [old] = id
     ? await rows<{ featured_image: string | null; published_at: Date | null }>(sql`SELECT featured_image, published_at FROM blog_posts WHERE id = ${id}`)
     : [];
   if (id && !old) await finish("error", "Post not found.", PAGE);
 
-  const img = await resolveImage(fd, "blog", old?.featured_image ?? null);
+  const img = await resolveImage(fd, "blog", old?.featured_image ?? null, await imageInUse(old?.featured_image ?? null, [id]));
   if ("error" in img) await finish("error", img.error, back);
   const image = "value" in img ? img.value : null;
   // published_at is set on first publish and kept afterwards
@@ -65,15 +82,15 @@ export async function savePost(fd: FormData) {
       await sql`
         UPDATE blog_posts SET title = ${title}, slug = ${slug}, excerpt = ${excerpt}, content = ${content}, category = ${category},
           tags = ${tags}, featured_image = ${image}, author = ${author}, read_time = ${readTime(content)}, is_published = ${published},
-          is_featured = ${featured}, published_at = ${publishedAt}
+          is_featured = ${featured}, published_at = ${publishedAt}, language = ${language}, translation_of = ${translationOf}
         WHERE id = ${id}
       `;
     } else {
       [{ id: postId }] = await rows<{ id: number }>(sql`
         INSERT INTO blog_posts (title, slug, excerpt, content, category, tags, featured_image, author, read_time,
-                                is_published, is_featured, published_at)
+                                is_published, is_featured, published_at, language, translation_of)
         VALUES (${title}, ${slug}, ${excerpt}, ${content}, ${category}, ${tags}, ${image}, ${author}, ${readTime(content)},
-                ${published}, ${featured}, ${publishedAt})
+                ${published}, ${featured}, ${publishedAt}, ${language}, ${translationOf})
         RETURNING id
       `);
     }
@@ -112,7 +129,7 @@ export async function deletePost(fd: FormData) {
   const id = intField(fd, "id");
   const [row] = await rows<{ featured_image: string | null }>(sql`DELETE FROM blog_posts WHERE id = ${id} RETURNING featured_image`);
   await sql`DELETE FROM seo_meta WHERE entity_type = 'post' AND entity_key = ${String(id)}`;
-  await deleteImage(row?.featured_image ?? null, "blog");
+  if (!(await imageInUse(row?.featured_image ?? null, [id]))) await deleteImage(row?.featured_image ?? null, "blog");
   refreshPublicSite();
   await finish("success", "Post deleted.", PAGE);
 }
@@ -123,10 +140,49 @@ export async function bulkDeletePosts(fd: FormData) {
   if (ids.length) {
     const deleted = await rows<{ featured_image: string | null }>(sql`DELETE FROM blog_posts WHERE id = ANY(${ids}) RETURNING featured_image`);
     await sql`DELETE FROM seo_meta WHERE entity_type = 'post' AND entity_key = ANY(${ids.map(String)})`;
-    for (const r of deleted) await deleteImage(r.featured_image, "blog");
+    for (const r of deleted) if (!(await imageInUse(r.featured_image, ids))) await deleteImage(r.featured_image, "blog");
   }
   refreshPublicSite();
   await finish("success", `${ids.length} post(s) deleted.`, PAGE);
+}
+
+/** Creates a Hindi draft of an English post with Gemini, linked to the original, and opens it for review. */
+export async function translateToHindi(fd: FormData) {
+  await requireAdmin();
+  const id = intField(fd, "id");
+  const back = `${PAGE}?edit=${id}`;
+  if (!geminiEnabled()) await finish("error", "Add GEMINI_API_KEY to translate posts.", back);
+  const [post] = await rows<{ title: string; slug: string; excerpt: string | null; content: string; category: string; tags: string | null; featured_image: string | null; author: string; language: string; translation_of: number | null; seo_title: string | null; seo_description: string | null }>(sql`
+    SELECT p.title, p.slug, p.excerpt, p.content, p.category, p.tags, p.featured_image, p.author, p.language, p.translation_of,
+           m.title AS seo_title, m.description AS seo_description
+    FROM blog_posts p LEFT JOIN seo_meta m ON m.entity_type = 'post' AND m.entity_key = p.id::text WHERE p.id = ${id}
+  `);
+  if (!post) await finish("error", "Post not found.", PAGE);
+  if (post.language !== "en" || post.translation_of) await finish("error", "Only original English posts can be translated.", back);
+  const [existing] = await rows<{ id: number }>(sql`SELECT id FROM blog_posts WHERE translation_of = ${id} AND language = 'hi' LIMIT 1`);
+  if (existing) await finish("error", "This post already has a Hindi version. It is open below.", `${PAGE}?edit=${existing.id}`);
+
+  let hi: Awaited<ReturnType<typeof translatePostToHindi>>;
+  try {
+    hi = await translatePostToHindi({ title: post.title, excerpt: post.excerpt, content: post.content, seoTitle: post.seo_title, seoDescription: post.seo_description });
+  } catch (err) {
+    return finish("error", err instanceof Error ? err.message : "The translation failed. Try again.", back);
+  }
+  const taken = new Set((await rows<{ slug: string }>(sql`SELECT slug FROM blog_posts WHERE slug LIKE ${`${post.slug}-hindi%`}`)).map((r) => r.slug));
+  let slug = `${post.slug}-hindi`;
+  for (let n = 2; taken.has(slug); n++) slug = `${post.slug}-hindi-${n}`;
+  const [{ id: newId }] = await rows<{ id: number }>(sql`
+    INSERT INTO blog_posts (title, slug, excerpt, content, category, tags, featured_image, author, read_time, is_published, is_featured, published_at, language, translation_of)
+    VALUES (${hi.title}, ${slug}, ${hi.excerpt || null}, ${hi.content}, ${post.category}, ${post.tags}, ${post.featured_image}, ${post.author},
+            ${readTime(post.content)}, 0, 0, NULL, 'hi', ${id})
+    RETURNING id
+  `);
+  try {
+    await saveSeoBasics(newId, hi.seoTitle || null, hi.seoDescription || null);
+  } catch (err) {
+    console.error("[translateToHindi] SEO", err);
+  }
+  await finish("success", "Hindi draft created by AI. Read it carefully, fix anything that sounds wrong, then publish.", `${PAGE}?edit=${newId}`);
 }
 
 /** Adds a blog category from the post editor (the PHP page's ?ajax=add_category endpoint). */

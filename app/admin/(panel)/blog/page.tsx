@@ -1,4 +1,4 @@
-import { ExternalLink, Eye, EyeOff, Pencil, Star, Trash2 } from "lucide-react";
+import { ExternalLink, Eye, EyeOff, Languages, Pencil, Star, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -30,6 +30,7 @@ import {
   Th,
   Toggle,
 } from "@/components/admin/ui";
+import { BLOG_LANGS, type BlogLang } from "@/lib/blog-lang";
 import { formatDate } from "@/lib/content";
 import { rows, sql } from "@/lib/db";
 import { mediaUrl } from "@/lib/media";
@@ -41,9 +42,12 @@ import {
   deletePost,
   savePost,
   togglePublish,
+  translateToHindi,
 } from "./actions";
 
 export const metadata = { title: "Blog" };
+// Translating a long post with AI can take a minute or two.
+export const maxDuration = 300;
 
 const PER_PAGE = 20;
 const STATUSES = ["published", "draft", "featured"];
@@ -66,6 +70,10 @@ type Post = {
   seo_description: string | null;
   published_at: Date | null;
   created_at: Date;
+  language: string;
+  translation_of: number | null;
+  /** List only: id of this post's Hindi version, if any. */
+  hindi_id?: number | null;
 };
 type Props = {
   searchParams: Promise<{
@@ -77,9 +85,17 @@ type Props = {
 };
 
 async function PostForm({ row }: { row: Post | null }) {
-  const categories = await rows<{ slug: string; label: string }>(
-    sql`SELECT slug, label FROM blog_categories ORDER BY sort ASC, label ASC`,
-  );
+  const [categories, originals, versions] = await Promise.all([
+    rows<{ slug: string; label: string }>(sql`SELECT slug, label FROM blog_categories ORDER BY sort ASC, label ASC`),
+    rows<{ id: number; title: string }>(sql`SELECT id, title FROM blog_posts WHERE translation_of IS NULL AND id <> ${row?.id ?? 0} ORDER BY created_at DESC`),
+    row
+      ? rows<{ id: number; title: string; language: string; is_published: number }>(sql`
+          SELECT id, title, language, is_published FROM blog_posts
+          WHERE id <> ${row.id} AND (id = ${row.translation_of ?? 0} OR translation_of = ${row.translation_of ?? row.id})
+          ORDER BY id`)
+      : Promise.resolve([]),
+  ]);
+  const canTranslate = !!row && row.language === "en" && !row.translation_of && !versions.some((v) => v.language === "hi");
   return (
     <>
       <div className="flex items-center justify-between mb-6">
@@ -105,6 +121,35 @@ async function PostForm({ row }: { row: Post | null }) {
           </span>
         )}
       </div>
+      {row && (versions.length > 0 || canTranslate) && (
+        <Card className="mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+              <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-zinc-500">
+                <Languages className="h-4 w-4" aria-hidden="true" /> Languages
+              </span>
+              <span className="text-zinc-300">This post: {BLOG_LANGS[row.language as BlogLang]?.label ?? row.language}</span>
+              {versions.map((v) => (
+                <Link key={v.id} href={`/admin/blog?edit=${v.id}`} className="text-brand hover:underline">
+                  {BLOG_LANGS[v.language as BlogLang]?.label ?? v.language} version{v.is_published ? "" : " (draft)"} →
+                </Link>
+              ))}
+            </div>
+            {canTranslate &&
+              (geminiEnabled() ? (
+                <form action={translateToHindi}>
+                  <input type="hidden" name="id" value={row.id} />
+                  <SubmitButton pending="Translating… (up to 2 minutes)" className={smallPrimaryBtn}>
+                    Translate to Hindi with AI
+                  </SubmitButton>
+                </form>
+              ) : (
+                <span className="text-xs text-zinc-500">Add GEMINI_API_KEY to translate with AI.</span>
+              ))}
+          </div>
+          {canTranslate && <p className="border-t border-zinc-800 px-6 py-2.5 text-xs text-zinc-500">Creates a separate Hindi draft linked to this post, with the same image and category. Save this post first if you changed it.</p>}
+        </Card>
+      )}
       <Card>
         <div className="px-6 py-5 border-b border-zinc-800">
           <h2 className="text-xl font-display font-bold text-white">
@@ -143,6 +188,34 @@ async function PostForm({ row }: { row: Post | null }) {
             mode={uploadMode()}
             hint="JPG, PNG, WebP · max 5 MB · 1200×630px recommended"
           />
+          <div className="grid sm:grid-cols-2 gap-5">
+            <div>
+              <label htmlFor="language" className={labelCls}>
+                Language
+              </label>
+              <select id="language" name="language" defaultValue={row?.language ?? "en"} className={inputCls}>
+                {Object.entries(BLOG_LANGS).map(([k, l]) => (
+                  <option key={k} value={k}>
+                    {l.label}
+                    {l.native !== l.label ? ` (${l.native})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="translation_of" className={labelCls}>
+                Translation of <span className="text-zinc-600">(only for a translated version)</span>
+              </label>
+              <select id="translation_of" name="translation_of" defaultValue={row?.translation_of ?? ""} className={inputCls}>
+                <option value="">None, this is an original post</option>
+                {originals.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.title.slice(0, 90)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div className="grid sm:grid-cols-2 gap-5">
             <div>
               <label htmlFor="tags" className={labelCls}>
@@ -247,7 +320,9 @@ async function PostList({
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
   const page = Math.min(Math.max(1, requested), totalPages);
   const posts = await rows<Post>(sql`
-    SELECT id, title, slug, category, featured_image, read_time, is_published, is_featured, published_at, created_at FROM blog_posts
+    SELECT id, title, slug, category, featured_image, read_time, is_published, is_featured, published_at, created_at, language, translation_of,
+      (SELECT h.id FROM blog_posts h WHERE h.translation_of = blog_posts.id AND h.language = 'hi' LIMIT 1) AS hindi_id
+    FROM blog_posts
     WHERE (${status} <> 'published' OR is_published = 1) AND (${status} <> 'draft' OR is_published = 0) AND (${status} <> 'featured' OR is_featured = 1)
     ORDER BY created_at DESC LIMIT ${PER_PAGE} OFFSET ${(page - 1) * PER_PAGE}
   `);
@@ -332,6 +407,12 @@ async function PostList({
                             ) : null}
                             {p.title}
                           </div>
+                          {(p.language !== "en" || p.hindi_id) && (
+                            <div className="mt-0.5 flex gap-1.5">
+                              {p.language !== "en" && <span className="rounded border border-sky-500/30 bg-sky-500/10 px-1.5 text-[10px] font-mono text-sky-300">{BLOG_LANGS[p.language as BlogLang]?.label ?? p.language}{p.translation_of ? " translation" : ""}</span>}
+                              {p.hindi_id ? <Link href={`/admin/blog?edit=${p.hindi_id}`} className="rounded border border-zinc-700 px-1.5 text-[10px] font-mono text-zinc-400 hover:text-brand">+ Hindi</Link> : null}
+                            </div>
+                          )}
                           <div className="font-mono text-[10px] text-zinc-600 truncate max-w-[280px]">
                             /blog/{p.slug}
                             {p.read_time ? ` · ${p.read_time} min read` : ""}

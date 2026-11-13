@@ -54,11 +54,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // 2. Blog posts, with their real last-modified dates
+  //    A post with versions in other languages lists them all as alternates (hreflang).
   const posts = (await sql`
-    SELECT id, slug, COALESCE(updated_at, published_at) AS modified FROM blog_posts WHERE is_published = 1 ORDER BY published_at DESC NULLS LAST
-  `) as { id: number; slug: string; modified: Date | null }[];
+    SELECT id, slug, language, COALESCE(translation_of, id) AS root, COALESCE(updated_at, published_at) AS modified
+    FROM blog_posts WHERE is_published = 1 ORDER BY published_at DESC NULLS LAST
+  `) as { id: number; slug: string; language: string; root: number; modified: Date | null }[];
+  const postUrl = (slug: string) => `${SITE_URL}/blog/${encodeURIComponent(slug)}`;
+  const groups = new Map<number, typeof posts>();
+  for (const p of posts) groups.set(p.root, [...(groups.get(p.root) ?? []), p]);
   for (const p of posts) {
-    add("post", String(p.id), { url: `${SITE_URL}/blog/${encodeURIComponent(p.slug)}`, changeFrequency: "monthly", priority: 0.7, lastModified: p.modified ?? undefined });
+    const group = groups.get(p.root) ?? [];
+    const languages = group.length > 1 ? Object.fromEntries(group.map((g) => [g.language, postUrl(g.slug)])) : undefined;
+    add("post", String(p.id), { url: postUrl(p.slug), changeFrequency: "monthly", priority: 0.7, lastModified: p.modified ?? undefined, ...(languages && { alternates: { languages } }) });
   }
 
   // 3. Portfolio case studies

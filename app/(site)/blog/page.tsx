@@ -10,17 +10,27 @@ import { HyperText } from "@/components/velora/hyper-text";
 import { TiltCard } from "@/components/velora/tilt-card";
 import { WavyBackground } from "@/components/velora/wavy-background";
 import { SITE_URL } from "@/lib/config";
-import { categoryLabel, formatDate, getBlogCategories, getBlogListing } from "@/lib/content";
+import { BLOG_LANGS } from "@/lib/blog-lang";
+import { categoryLabel, formatDate, getBlogCategories, getBlogListing, hasPostsIn } from "@/lib/content";
 import { mediaUrl } from "@/lib/media";
 import { pageMetadata, pageSchema } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
-type Props = { searchParams: Promise<{ cat?: string; tag?: string; q?: string; page?: string }> };
+type Props = { searchParams: Promise<{ cat?: string; tag?: string; q?: string; page?: string; lang?: string }> };
+
+// The default listing shows original posts only; ?lang=hi lists every Hindi post (translations included).
+const listLang = (v?: string) => (v === "hi" ? "hi" : null);
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const sp = await searchParams;
   const base = await pageMetadata("blog");
   if (sp.q || sp.tag) return { ...base, robots: { index: false, follow: true } };
+  if (listLang(sp.lang)) {
+    const title = "हिंदी लेख: वेबसाइट, SEO और बिज़नेस गाइड | Brave Syntax";
+    const description = "Brave Syntax के हिंदी लेख: वेबसाइट, ई-कॉमर्स, SEO और टेक्नोलॉजी को आसान भाषा में समझें।";
+    const url = `${SITE_URL}/blog?lang=hi`;
+    return { ...base, title: { absolute: title }, description, alternates: { canonical: url }, openGraph: { ...base.openGraph, title, description, url, locale: "hi_IN" }, twitter: { ...base.twitter, title, description } };
+  }
 
   const cat = sp.cat && sp.cat !== "all" ? sp.cat : "";
   const page = Math.max(1, Number(sp.page) || 1);
@@ -44,12 +54,18 @@ export default async function BlogPage({ searchParams }: Props) {
   const cat = sp.cat ?? "all";
   const tag = (sp.tag ?? "").trim();
   const q = (sp.q ?? "").trim().slice(0, 80);
-  const [{ posts, total, totalPages, page, featured }, schema, categories] = await Promise.all([getBlogListing({ cat, tag, q, page: Number(sp.page) || 1 }), pageSchema("blog"), getBlogCategories()]);
+  const lang = listLang(sp.lang);
+  const [{ posts, total, totalPages, page, featured }, schema, categories, hasHindi] = await Promise.all([
+    getBlogListing({ cat: lang ? "all" : cat, tag, q, page: Number(sp.page) || 1, lang }),
+    pageSchema("blog"),
+    getBlogCategories(),
+    hasPostsIn("hi"),
+  ]);
   const filters: [string, string][] = [["all", "All"], ...categories.map((c): [string, string] => [c.slug, c.label])];
   const list = featured ? posts.filter((p) => p.id !== featured.id) : posts;
 
   const pageHref = (p: number) => {
-    const qs = new URLSearchParams({ page: String(p), cat });
+    const qs = new URLSearchParams({ page: String(p), ...(lang ? { lang } : { cat }) });
     if (tag) qs.set("tag", tag);
     if (q) qs.set("q", q);
     return `/blog?${qs}`;
@@ -98,12 +114,24 @@ export default async function BlogPage({ searchParams }: Props) {
               key={k}
               href={`/blog?cat=${k}`}
               scroll={false}
-              aria-current={cat === k ? "page" : undefined}
-              className={cn("rounded-full border px-4 py-1.5 text-sm transition-colors", cat === k ? "border-transparent bg-primary font-medium text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground")}
+              aria-current={!lang && cat === k ? "page" : undefined}
+              className={cn("rounded-full border px-4 py-1.5 text-sm transition-colors", !lang && cat === k ? "border-transparent bg-primary font-medium text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground")}
             >
               {label}
             </Link>
           ))}
+          {hasHindi && (
+            <Link
+              href="/blog?lang=hi"
+              scroll={false}
+              lang="hi"
+              hrefLang="hi"
+              aria-current={lang ? "page" : undefined}
+              className={cn("rounded-full border px-4 py-1.5 text-sm transition-colors", lang ? "border-transparent bg-primary font-medium text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground")}
+            >
+              {BLOG_LANGS.hi.native}
+            </Link>
+          )}
           {q && (
             <span className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm text-primary">
               Search: {q}
@@ -140,9 +168,14 @@ export default async function BlogPage({ searchParams }: Props) {
                       )}
                     </div>
                     <div className="flex flex-1 flex-col p-5">
-                      <p className="text-xs font-medium text-primary">{categoryLabel(bp.category)}</p>
-                      <h2 className="mt-2 line-clamp-2 font-medium group-hover:text-primary">{bp.title}</h2>
-                      {bp.excerpt && <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{bp.excerpt}</p>}
+                      <p className="text-xs font-medium text-primary">
+                        {categoryLabel(bp.category)}
+                        {bp.language === "hi" && <span lang="hi" className="ml-2 rounded-full bg-primary/10 px-2 py-0.5">{BLOG_LANGS.hi.native}</span>}
+                      </p>
+                      <div lang={bp.language === "hi" ? "hi" : undefined}>
+                        <h2 className="mt-2 line-clamp-2 font-medium group-hover:text-primary">{bp.title}</h2>
+                        {bp.excerpt && <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{bp.excerpt}</p>}
+                      </div>
                       <p className="mt-auto flex items-center gap-1.5 pt-4 text-xs text-muted-foreground">
                         {formatDate(bp.published_at)}
                         {bp.read_time ? (

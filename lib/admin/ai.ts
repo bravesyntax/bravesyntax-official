@@ -115,3 +115,95 @@ Use only the facts given. Never invent numbers, results, quotes or client opinio
   if (!r.description) throw new Error("Gemini gave no answer. Try again.");
   return r;
 }
+
+// ── Hindi translation of blog posts ──────────────────────────────────────────
+
+const HINDI_RULES = `Translate into natural, simple Hindi written in Devanagari script, the way a good Hindi news site writes for Indian business owners.
+- Keep brand, product and technical names in English (Latin script): Microsoft 365, Outlook, Teams, Google, WhatsApp, SEO, website, email, app, server, cloud, Wi-Fi, URL, DNS, CVE numbers, incident numbers and the like.
+- Keep numbers, prices, dates, times and code exactly as they are.
+- Do not add, remove, summarise or explain anything. Translate every sentence.
+- "Brave Syntax" stays as it is.`;
+
+/** Splits post HTML at <h2> headings into chunks of about `max` characters, so each Gemini call stays small and fast. */
+function htmlChunks(html: string, max = 5000): string[] {
+  const parts = html.split(/(?=<h2[\s>])/i).filter((p) => p.trim());
+  const out: string[] = [];
+  let cur = "";
+  for (const p of parts) {
+    if (cur && cur.length + p.length > max) {
+      out.push(cur);
+      cur = "";
+    }
+    cur += p;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+/** The free tier answers "busy" (429/503) when called too often: wait and try again, a few times. */
+async function patiently<T>(fn: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= 3 || !(err instanceof Error && err.message.includes("busy"))) throw err;
+      await new Promise((r) => setTimeout(r, [10_000, 20_000, 30_000][attempt]));
+    }
+  }
+}
+
+/** Letters from scripts other than Latin and Devanagari: the model occasionally slips into Russian or Chinese mid-word. */
+const FOREIGN_SCRIPT = /[Ͱ-ϿЀ-ӿ֐-ۿ฀-๿぀-ヿ一-鿿가-힯]/;
+
+/** Runs a translation, and runs it again (once) if the answer contains stray letters from another script. */
+async function cleanHindi(run: () => Promise<string>): Promise<string> {
+  const first = await run();
+  if (!FOREIGN_SCRIPT.test(first)) return first;
+  const second = await run();
+  if (FOREIGN_SCRIPT.test(second)) throw new Error("The Hindi translation contained letters from another language. Try again.");
+  return second;
+}
+
+const tagCount = (html: string) => (html.match(/<\/?[a-z][^>]*>/gi) ?? []).length;
+
+async function translateHtmlChunk(html: string): Promise<string> {
+  let out = await cleanHindi(() => patiently(() => generate({
+    maxTokens: 8192,
+    timeoutMs: 120_000,
+    system: `You translate parts of HTML blog articles from English into Hindi.
+${HINDI_RULES}
+- Keep every HTML tag and attribute exactly as given, in the same order, including href links. Translate only the visible text between tags.
+- Return only the translated HTML: no code fences, no notes.`,
+    prompt: html,
+  })));
+  out = out.replace(/^```(?:html)?\s*/i, "").replace(/\s*```$/, "").trim();
+  // A translation that lost much of the markup has dropped content: better to fail than publish half a post.
+  if (tagCount(out) < tagCount(html) * 0.9) throw new Error("The Hindi translation came back incomplete. Try again.");
+  return out;
+}
+
+export type HindiPost = { title: string; excerpt: string; content: string; seoTitle: string; seoDescription: string };
+
+/** Hindi version of a blog post: title, excerpt, SEO text and the full HTML body. Nothing is saved here. */
+export async function translatePostToHindi(post: { title: string; excerpt: string | null; content: string; seoTitle: string | null; seoDescription: string | null }): Promise<HindiPost> {
+  const chunks = htmlChunks(post.content);
+  if (chunks.length > 12) throw new Error("This post is too long to translate in one go.");
+  // One request at a time: parallel calls trip the free tier's rate limit.
+  const meta = await cleanHindi(() => patiently(() => generate({
+    json: true,
+    maxTokens: 1200,
+    timeoutMs: 60_000,
+    system: `You translate blog post details from English into Hindi.
+${HINDI_RULES}
+Return JSON: {"title": string, "excerpt": string, "seo_title": string, "seo_description": string}.
+- seo_title: under 70 characters, ending with " | Brave Syntax".
+- seo_description: 120-160 characters.`,
+    prompt: JSON.stringify({ title: post.title, excerpt: post.excerpt ?? "", seo_title: post.seoTitle ?? post.title, seo_description: post.seoDescription ?? post.excerpt ?? "" }),
+  })));
+  const body: string[] = [];
+  for (const c of chunks) body.push(await translateHtmlChunk(c));
+  const j = JSON.parse(meta) as Record<string, unknown>;
+  const title = clip(j.title, 250);
+  if (!title) throw new Error("Gemini gave no answer. Try again.");
+  return { title, excerpt: clip(j.excerpt, 400), content: body.join("\n"), seoTitle: clip(j.seo_title, 200), seoDescription: clip(j.seo_description, 400) };
+}
