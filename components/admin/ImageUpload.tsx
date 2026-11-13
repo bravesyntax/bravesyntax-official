@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileDrop } from "@/components/velora/file-drop";
 import { mediaUrl, type MediaKind } from "@/lib/media";
 
 // Featured image field for blog posts and portfolio items. The file uploads as soon as it's picked — to Vercel
 // Blob, or (local mode) to public/uploads/ on this server — and the form then submits only the resulting
-// Blob URL or filename (in the hidden "image_url" input).
+// Blob URL or filename (in the hidden "image_url" input). While a file is still uploading, the form can't be
+// saved: otherwise the post is saved without the image and the upload finishes with nothing pointing to it.
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -15,6 +16,13 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
   const [preview, setPreview] = useState("");
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const guard = useRef<HTMLInputElement>(null);
+
+  // A required-looking field that is invalid while uploading: the browser blocks the form and shows the message.
+  useEffect(() => {
+    guard.current?.setCustomValidity(busy ? "Please wait: the image is still uploading. Save once it says Uploaded." : "");
+  }, [busy]);
 
   async function onPick(file: File | undefined) {
     if (!file || busy) return;
@@ -22,7 +30,9 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
     if (file.size > MAX_BYTES) return setStatus("Image too large. Max 5 MB.");
     setPreview(URL.createObjectURL(file));
     setBusy(true);
-    setStatus("Uploading…");
+    setProgress(0);
+    setUrl("");
+    setStatus("Uploading… please wait before saving.");
     try {
       if (mode === "local") {
         const body = new FormData();
@@ -32,7 +42,7 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
         const data = (await res.json().catch(() => ({}))) as { name?: string; error?: string };
         if (!res.ok || !data.name) throw new Error(data.error || "Upload failed.");
         setUrl(data.name);
-        setStatus("Uploaded ✓");
+        setStatus("Uploaded ✓ Now save the post to keep it.");
         return;
       }
       const { upload } = await import("@vercel/blob/client");
@@ -40,9 +50,10 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
       const blob = await upload(`${kind}/${kind === "blog" ? "blog" : "pf"}_${Date.now()}.${ext}`, file, {
         access: "public",
         handleUploadUrl: "/api/admin/upload",
+        onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       });
       setUrl(blob.url);
-      setStatus("Uploaded ✓");
+      setStatus("Uploaded ✓ Now save the post to keep it.");
     } catch (err) {
       setPreview("");
       setStatus(err instanceof Error ? err.message : "Upload failed.");
@@ -57,6 +68,7 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
         Featured Image <span className="text-zinc-600">({hint})</span>
       </span>
       <input type="hidden" name="image_url" value={url} />
+      <input ref={guard} aria-hidden="true" tabIndex={-1} className="sr-only" defaultValue="" />
       <div className="flex items-start gap-5">
         <div className="flex-1">
           {mode ? (
@@ -72,7 +84,16 @@ export default function ImageUpload({ kind, current, mode, hint }: { kind: Media
               Image uploads on Vercel need a Blob store (BLOB_READ_WRITE_TOKEN). Existing images stay as they are.
             </p>
           )}
-          {status && <p className={`mt-2 text-xs font-mono ${status.includes("✓") || status.endsWith("…") ? "text-zinc-400" : "text-red-400"}`}>{status}</p>}
+          {busy && progress > 0 && (
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Upload progress">
+              <div className="h-full bg-brand transition-all" style={{ width: `${progress}%` }} />
+            </div>
+          )}
+          {status && (
+            <p role="status" className={`mt-2 text-xs font-mono ${status.includes("✓") ? "text-brand" : busy ? "text-amber-400" : "text-red-400"}`}>
+              {busy && progress > 0 ? `${status} ${progress}%` : status}
+            </p>
+          )}
         </div>
         {current && (
           <div className="flex-shrink-0">

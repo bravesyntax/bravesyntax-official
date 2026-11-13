@@ -1,5 +1,4 @@
 import NotFoundContent from "@/components/layout/NotFoundContent";
-import { rows, sql } from "@/lib/db";
 import { NOT_FOUND_METADATA } from "@/lib/notFoundMetadata";
 
 // Shown (with HTTP 410) by proxy.ts for pages that were deliberately removed. For a removed city page the
@@ -8,23 +7,19 @@ export const metadata = NOT_FOUND_METADATA;
 
 type Props = { searchParams: Promise<{ city?: string }> };
 
-async function cityName(slug: string): Promise<string | null> {
+/**
+ * City name from its slug ("darbhanga-br" → "Darbhanga", "navi-mumbai-mh" → "Navi Mumbai"): removed city slugs
+ * end in a two-letter state code. Read from the address rather than the database, so bots crawling the old city
+ * pages don't keep the free database awake. proxy.ts only sends slugs of real removed cities here.
+ */
+function cityName(slug: string): string | null {
   if (!/^[a-z][a-z0-9-]{0,49}$/.test(slug)) return null;
-  try {
-    const [r] = await rows<{ name: string }>(sql`
-      SELECT name FROM location_cities WHERE slug = ${slug}
-      UNION ALL SELECT name FROM location_cities_removed_backup WHERE slug = ${slug}
-      LIMIT 1
-    `);
-    return r?.name ?? null;
-  } catch {
-    return null;
-  }
+  const words = slug.replace(/-[a-z]{2}$/, "").split("-").filter(Boolean);
+  return words.length ? words.map((w) => w[0].toUpperCase() + w.slice(1)).join(" ") : null;
 }
 
 export default async function Gone({ searchParams }: Props) {
-  const slug = (await searchParams).city ?? "";
-  const name = slug ? await cityName(slug) : null;
+  const name = cityName((await searchParams).city ?? "");
   if (!name) return <NotFoundContent />;
   return (
     <NotFoundContent

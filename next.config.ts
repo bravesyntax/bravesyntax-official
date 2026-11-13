@@ -12,7 +12,17 @@ const CSP = ["object-src 'none'", "base-uri 'self'", "form-action 'self'", "fram
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Blog and portfolio images uploaded through the admin live in Vercel Blob (public store).
-  images: { remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }] },
+  // Vercel's free plan limits image transformations and optimizer cache writes, so: keep each optimized image
+  // for a month (the default is 4 hours, after which it is optimized again), one format (WebP), and fewer widths
+  // (each width of each image is a separate transformation). Uploaded images get a new file name when replaced,
+  // so a long cache never shows an old picture.
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
+    minimumCacheTTL: 2678400,
+    formats: ["image/webp"],
+    deviceSizes: [640, 828, 1080, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
+  },
   experimental: {
     // ~360 pages are pre-rendered from Neon; fewer at a time avoids bursts of connections that can time out.
     staticGenerationMaxConcurrency: 4,
