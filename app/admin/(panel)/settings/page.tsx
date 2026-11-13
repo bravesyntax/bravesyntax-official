@@ -1,4 +1,4 @@
-import { BarChart3, Building2, KeyRound, Mail, Share2, ShieldCheck } from "lucide-react";
+import { BarChart3, Building2, Images, KeyRound, Mail, Share2, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -7,8 +7,9 @@ import { AdminPage, inputCls, labelCls, primaryBtn } from "@/components/admin/ui
 import { requireAdmin } from "@/lib/admin/auth";
 import { rows, sql } from "@/lib/db";
 import { mailConfigured } from "@/lib/mailer";
+import { canAutoRenew, getInstagramAccount } from "@/lib/instagram";
 import { getSiteSettings } from "@/lib/settings";
-import { changePassword, saveSettings, updateAdminEmail } from "./actions";
+import { changePassword, removeInstagram, saveInstagram, saveSettings, updateAdminEmail } from "./actions";
 
 export const metadata = { title: "Settings" };
 
@@ -41,10 +42,12 @@ function Section({ icon: Icon, title, description, children, cols = "md:grid-col
 
 export default async function SettingsPage() {
   const admin = await requireAdmin();
-  const [s, [account]] = await Promise.all([
+  const [s, [account], ig] = await Promise.all([
     getSiteSettings(),
     rows<{ email: string; full_name: string | null; last_login: Date | null }>(sql`SELECT email, full_name, last_login FROM admin_users WHERE id = ${admin.id}`),
+    getInstagramAccount(),
   ]);
+  const istDate = (d: Date) => d.toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" });
   const v = (k: string, fallback = "") => s[k] || fallback;
 
   return (
@@ -92,6 +95,70 @@ export default async function SettingsPage() {
           <div className="flex justify-end border-t border-zinc-800 pt-6">
             <SubmitButton className={primaryBtn}>Save settings</SubmitButton>
           </div>
+        </form>
+
+
+        <form action={saveInstagram} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 lg:p-8">
+          <Section
+            icon={Images}
+            title="Instagram feed"
+            description="Shows your latest Instagram posts on the home page, updated every hour. Hidden until an account is connected."
+            cols="md:grid-cols-2"
+          >
+            {ig ? (
+              <div className="space-y-2 md:col-span-2">
+                <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+                  Connected{ig.username ? <> as <strong>@{ig.username}</strong></> : null}
+                  {ig.refreshedAt && <>, token saved or renewed on {istDate(ig.refreshedAt)}</>}.
+                  {canAutoRenew(ig.token) ? " It renews itself every week." : null}
+                </p>
+                {!canAutoRenew(ig.token) && ig.refreshedAt && (
+                  <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-amber-300">
+                    This token doesn&apos;t renew itself. Generate a new one in Meta&apos;s dashboard and paste it here before about{" "}
+                    {istDate(new Date(ig.refreshedAt.getTime() + 55 * 24 * 3600 * 1000))}. To make it automatic, add META_APP_ID and META_APP_SECRET (App settings → Basic) to the
+                    Vercel environment variables.
+                  </p>
+                )}
+                {ig.lastError && <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs break-words text-red-300">Last error: {ig.lastError}</p>}
+              </div>
+            ) : (
+              <ol className="list-decimal space-y-1 pl-5 text-xs leading-relaxed text-zinc-400 md:col-span-2">
+                <li>Make the Instagram account a Business or Creator account, and connect it to a Meta business portfolio.</li>
+                <li>
+                  At{" "}
+                  <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">
+                    developers.facebook.com/apps
+                  </a>
+                  , create a Business app with the “Manage messaging &amp; content on Instagram” use case.
+                </li>
+                <li>Add the account as an Instagram Tester (App roles), and accept the invite at instagram.com/accounts/manage_access.</li>
+                <li>In “API setup with Unified login” → Generate access tokens, add the account and generate a token.</li>
+                <li>Paste the token and the account ID (the long number shown next to the account) below.</li>
+              </ol>
+            )}
+            <div>
+              <label htmlFor="instagram_token" className={labelCls}>
+                {ig ? "Replace access token" : "Access token"}
+              </label>
+              <input id="instagram_token" name="instagram_token" type="password" autoComplete="off" required placeholder="EAA… or IG…" className={inputCls} />
+              <p className="mt-1.5 text-[11px] text-zinc-500">Checked with Meta before it&apos;s saved. Never shown on the website.</p>
+            </div>
+            <div>
+              <label htmlFor="instagram_user_id" className={labelCls}>
+                Instagram account ID
+              </label>
+              <input id="instagram_user_id" name="instagram_user_id" inputMode="numeric" defaultValue={ig?.userId ?? ""} placeholder="17841…" className={inputCls} />
+              <p className="mt-1.5 text-[11px] text-zinc-500">Needed for tokens that start with EAA. Not needed for IG… tokens.</p>
+            </div>
+            <div className="flex justify-end gap-3 md:col-span-2">
+              {ig && (
+                <button type="submit" formAction={removeInstagram} formNoValidate className="rounded-xl border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800">
+                  Disconnect
+                </button>
+              )}
+              <SubmitButton className={primaryBtn}>{ig ? "Update token" : "Connect Instagram"}</SubmitButton>
+            </div>
+          </Section>
         </form>
 
         <div className="grid gap-6 lg:grid-cols-2">
