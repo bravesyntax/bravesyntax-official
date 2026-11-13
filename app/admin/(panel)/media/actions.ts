@@ -3,9 +3,10 @@
 import { del } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/auth";
-import { finish, intField } from "@/lib/admin/common";
+import { finish, idsField, intField } from "@/lib/admin/common";
 import { isOurBlobUrl, mediaUsage, type MediaRow } from "@/lib/admin/media-lib";
 import { rows, sql } from "@/lib/db";
+import { formatBytes } from "@/lib/format-bytes";
 import { field } from "@/lib/validation";
 
 const PAGE = "/admin/media";
@@ -45,6 +46,35 @@ export async function saveMediaAlt(fd: FormData) {
   const id = intField(fd, "id");
   await sql`UPDATE media SET alt = ${field(fd, "alt").slice(0, 300) || null} WHERE id = ${id}`;
   await finish("success", "Description saved.", `${PAGE}?${field(fd, "back") || ""}`);
+}
+
+/**
+ * Deletes several files at once: the ticked ones, or (with all_unused) every uploaded file nothing uses. Each one
+ * is checked again here, so a file that is in use, or part of the site code, is skipped rather than deleted.
+ */
+export async function deleteMediaBulk(fd: FormData) {
+  await requireAdmin();
+  const back = `${PAGE}?${field(fd, "back") || ""}`;
+  const all = fd.get("all_unused") === "1";
+  const ids = idsField(fd);
+  if (!all && !ids.length) await finish("error", "Tick the files to delete first.", back);
+  const [candidates, usage] = await Promise.all([
+    all ? rows<{ id: number; url: string; source: string; size_bytes: number | null }>(sql`SELECT id, url, source, size_bytes FROM media WHERE source = 'blob'`)
+      : rows<{ id: number; url: string; source: string; size_bytes: number | null }>(sql`SELECT id, url, source, size_bytes FROM media WHERE id = ANY(${ids})`),
+    mediaUsage(),
+  ]);
+  const doomed = candidates.filter((m) => m.source === "blob" && !(usage.get(m.url) ?? []).length);
+  const skipped = candidates.length - doomed.length;
+  if (!doomed.length) await finish("error", skipped ? "Nothing deleted: those files are in use or part of the site code." : "There are no unused files to delete.", back);
+  try {
+    await del(doomed.map((m) => m.url)); // one storage call for all of them
+  } catch (err) {
+    console.error("[deleteMediaBulk]", err);
+    await finish("error", "Couldn't delete the files from storage. Try again.", back);
+  }
+  await sql`DELETE FROM media WHERE id = ANY(${doomed.map((m) => m.id)})`;
+  const freed = doomed.reduce((n, m) => n + (m.size_bytes ?? 0), 0);
+  await finish("success", `Deleted ${doomed.length} file(s), freeing ${formatBytes(freed) || "0 KB"}.${skipped ? ` Skipped ${skipped} in use or part of the site code.` : ""}`, back);
 }
 
 /** Deletes a file from storage and the library, only when nothing on the site uses it. */

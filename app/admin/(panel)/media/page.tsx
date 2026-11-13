@@ -1,13 +1,13 @@
 import { Film } from "lucide-react";
 import Link from "next/link";
-import { ConfirmButton, SubmitButton } from "@/components/admin/client";
+import { BulkDeleteButton, ConfirmButton, RowCheckbox, SelectAll, SubmitButton } from "@/components/admin/client";
 import { CopyLink, MediaUploader } from "@/components/admin/MediaTools";
 import { AdminPage, Card, EmptyState, FilterTabs, Pagination, StatGrid, timeAgo } from "@/components/admin/ui";
 import { BLOB_FREE_BYTES, mediaUsage, type MediaRow } from "@/lib/admin/media-lib";
 import { uploadMode } from "@/lib/admin/images";
 import { formatBytes } from "@/lib/format-bytes";
 import { rows, sql } from "@/lib/db";
-import { deleteMedia, saveMediaAlt } from "./actions";
+import { deleteMedia, deleteMediaBulk, saveMediaAlt } from "./actions";
 
 export const metadata = { title: "Media" };
 
@@ -25,6 +25,9 @@ export default async function MediaPage({ searchParams }: Props) {
 
   const blobBytes = all.filter((m) => m.source === "blob").reduce((n, m) => n + (m.size_bytes ?? 0), 0);
   const unused = all.filter((m) => !usedIn(m).length);
+  // Only files uploaded through the admin can be deleted (old-site files are part of the code).
+  const deletable = unused.filter((m) => m.source === "blob");
+  const deletableBytes = deletable.reduce((n, m) => n + (m.size_bytes ?? 0), 0);
   const matching = all.filter(
     (m) =>
       (filter === "all" || (filter === "unused" ? !usedIn(m).length : m.kind === filter)) &&
@@ -80,6 +83,33 @@ export default async function MediaPage({ searchParams }: Props) {
         </form>
       </div>
 
+      <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-2.5">
+        {list.some((m) => m.source === "blob" && !usedIn(m).length) && (
+          <label className="inline-flex items-center gap-2 text-xs text-zinc-400">
+            <SelectAll formId="bulk-media" /> Select all unused on this page
+          </label>
+        )}
+        <form id="bulk-media" action={deleteMediaBulk}>
+          <input type="hidden" name="back" value={back} />
+          <BulkDeleteButton formId="bulk-media" noun="file(s) from storage. This can't be undone" />
+        </form>
+        <span className="ml-auto text-xs text-zinc-500">
+          {deletable.length ? `${deletable.length} unused upload(s), ${formatBytes(deletableBytes)}` : "No unused uploads"}
+        </span>
+        {deletable.length > 0 && (
+          <form action={deleteMediaBulk}>
+            <input type="hidden" name="all_unused" value="1" />
+            <input type="hidden" name="back" value={back} />
+            <ConfirmButton
+              message={`Delete all ${deletable.length} unused file(s) (${formatBytes(deletableBytes)}) permanently? Files used anywhere on the site are kept. This can't be undone.`}
+              className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/20"
+            >
+              Delete all unused
+            </ConfirmButton>
+          </form>
+        )}
+      </div>
+
       <Card>
         {list.length === 0 ? (
           <EmptyState>{filter === "unused" ? "Every file is in use." : "No files here yet. Upload some above."}</EmptyState>
@@ -88,7 +118,12 @@ export default async function MediaPage({ searchParams }: Props) {
             {list.map((m) => {
               const used = usedIn(m);
               return (
-                <li key={m.id} className="flex flex-col bg-zinc-950 p-4">
+                <li key={m.id} className="relative flex flex-col bg-zinc-950 p-4">
+                  {m.source === "blob" && !used.length && (
+                    <span className="absolute top-6 right-6 z-10 rounded bg-black/70 p-1.5 leading-none">
+                      <RowCheckbox formId="bulk-media" value={m.id} />
+                    </span>
+                  )}
                   <a href={m.url} target="_blank" rel="noopener noreferrer" className="relative block aspect-video overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
                     {m.kind === "video" ? (
                       <>
