@@ -133,5 +133,5 @@ export async function proxy(req: NextRequest, event: NextFetchEvent) {
 
 export const config = {
   // Every page request (admin redirects can target any path), but not Next internals or static assets.
-  matcher: ["/((?!_next/|favicon\\.ico|.*\\.(?:png|jpe?g|gif|webp|avif|svg|ico|css|js|mjs|map|woff2?|ttf|otf|wasm|txt|xml|json)$).*)"],
+  matcher: ["/((?!_next/|favicon\\.ico|.*\\.(?:png|jpe?g|gif|webp|avif|svg|ico|css|js|mjs|map|woff2?|ttf|otf|wasm|txt|xml|json|mp4|webm)$).*)"],
 };

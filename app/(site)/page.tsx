@@ -1,8 +1,9 @@
-import { ArrowUpRight, Boxes, Clock, Code2, Eraser, FileText, Gauge, Handshake, LockKeyhole, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowUpRight, Boxes, Check, Clock, Code2, Eraser, FileText, Gauge, Handshake, LockKeyhole, ShieldCheck, Wallet } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import HeroBuilder from "@/components/home/HeroBuilder";
+import ReelVideo from "@/components/home/ReelVideo";
 import JsonLd from "@/components/JsonLd";
 import { container, CtaLink, IconChip, Section, SectionHeading, ShimmerLink } from "@/components/site/ui";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -179,6 +180,45 @@ export default async function HomePage() {
           </div>
         </BlurFade>
       </Section>
+
+      {/* ═══ REEL ═══ (always dark, so the phone frame blends into the video) */}
+      <section aria-label="Watch: what makes a website bring customers" className="dark relative isolate overflow-hidden bg-background py-14 text-foreground sm:py-24 lg:py-28">
+        <div className="absolute -top-40 -right-40 -z-10 size-[36rem] rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+        <div className={`${container} grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-16`}>
+          <BlurFade>
+            <p className="text-sm font-medium text-primary">In 18 seconds</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance lg:text-5xl">
+              A website should bring <span className="bg-linear-to-r from-brand-from via-brand-via to-brand-to bg-clip-text text-transparent">enquiries</span>, not just look good.
+            </h2>
+            <p className="mt-4 max-w-xl text-pretty text-muted-foreground">
+              Most sites lose visitors to the same few problems: slow loading, a broken mobile layout and no quick way to get in touch. Every site we build is designed to fix exactly that.
+            </p>
+            <ul className="mt-7 space-y-3">
+              {["Fast, mobile-first builds", "One-tap WhatsApp and call buttons", "A fixed price, agreed before work starts"].map((t) => (
+                <li key={t} className="flex items-center gap-3">
+                  <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+                    <Check className="size-3.5" aria-hidden="true" />
+                  </span>
+                  {t}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <ShimmerLink href="/contact">Get a fixed quote</ShimmerLink>
+              <CtaLink href="/services#pricing" variant="outline">
+                See pricing
+              </CtaLink>
+            </div>
+          </BlurFade>
+          <BlurFade delay={0.1}>
+            <ReelVideo
+              src="/media/home-reel.mp4"
+              poster="/media/home-reel-poster.jpg"
+              label="Brave Syntax reel: common website problems, how we fix them, and pricing from ₹8,000"
+            />
+          </BlurFade>
+        </div>
+      </section>
 
       {/* ═══ WHY US ═══ */}
       <Section muted label="Why Brave Syntax">
