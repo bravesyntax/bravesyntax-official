@@ -1,5 +1,7 @@
 "use server";
 
+import { after } from "next/server";
+import { submitToIndexNow } from "@/lib/indexnow";
 import { requireAdmin } from "@/lib/admin/auth";
 import {
   checkbox,
@@ -116,6 +118,8 @@ export async function saveProject(fd: FormData) {
     await finish("error", "DB error saving the project.", back);
   }
   refreshPublicSite("portfolio");
+  // Tell Bing & co. about the visible project straight away (runs after the response).
+  if (active) after(() => submitToIndexNow([`/portfolio/${encodeURIComponent(slug)}`, "/portfolio"]));
   await finish(
     "success",
     id ? "Project updated." : "Project added successfully.",

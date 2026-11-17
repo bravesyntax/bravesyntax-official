@@ -75,17 +75,35 @@ const FEED = [
   ["Live on your domain", "Backups and monitoring on"],
 ];
 
+/** "Ghaziabad Uttar Pradesh 201003, India" → structured address parts, so Google can place the business locally. */
+function addressParts(address: string) {
+  const pin = address.match(/\b(\d{6})\b/)?.[1];
+  const region = /uttar pradesh/i.test(address) ? "Uttar Pradesh" : /delhi/i.test(address) ? "Delhi" : undefined;
+  const locality = /ghaziabad/i.test(address) ? "Ghaziabad" : /noida/i.test(address) ? "Noida" : /delhi/i.test(address) ? "New Delhi" : undefined;
+  return { "@type": "PostalAddress", streetAddress: address, ...(locality && { addressLocality: locality }), ...(region && { addressRegion: region }), ...(pin && { postalCode: pin }), addressCountry: "IN" };
+}
+
+// Ghaziabad city centre (the business is in Ghaziabad 201003).
+const GEO = { "@type": "GeoCoordinates", latitude: 28.6692, longitude: 77.4538 };
+const AREA_SERVED = ["Ghaziabad", "Noida", "Delhi", "Greater Noida", "Delhi NCR", "India"].map((name) => ({ "@type": name === "India" ? "Country" : "City", name }));
+
 /** Organisation schema from the admin settings and the live service list (no invented ratings or reviews). */
 function localBusinessSchema(c: ContactInfo, services: DbService[]) {
   return {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
+    "@id": `${SITE_URL}/#business`,
     name: c.siteName,
-    description: `${c.siteName} is a design and development agency building websites, web apps, e-commerce stores and brand identities for growing businesses.`,
+    description: `${c.siteName} is a web design and development studio in Ghaziabad (Delhi NCR) building websites, online stores, web apps and brand identities for growing businesses across India.`,
     url: SITE_URL,
+    logo: `${SITE_URL}/brand/logo-on-light.png`,
+    image: `${SITE_URL}/brand/og-default.png`,
     email: c.email,
     ...(c.phone ? { telephone: c.phone } : {}),
-    ...(c.address ? { address: { "@type": "PostalAddress", streetAddress: c.address, addressCountry: "IN" } } : {}),
+    ...(c.address ? { address: addressParts(c.address), geo: GEO } : {}),
+    areaServed: AREA_SERVED,
+    priceRange: "₹8,000 – ₹60,000+",
+    currenciesAccepted: "INR",
     serviceType: services.map((x) => x.title),
     ...(c.socials.length ? { sameAs: c.socials.map((x) => x.url) } : {}),
   };

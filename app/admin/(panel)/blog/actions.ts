@@ -1,6 +1,8 @@
 "use server";
 
+import { after } from "next/server";
 import { translatePostToHindi } from "@/lib/admin/ai";
+import { submitToIndexNow } from "@/lib/indexnow";
 import { requireAdmin } from "@/lib/admin/auth";
 import { checkbox, finish, idsField, intField, makeSlug, refreshPublicSite } from "@/lib/admin/common";
 import { resolveImage } from "@/lib/admin/images";
@@ -99,6 +101,8 @@ export async function savePost(fd: FormData) {
     seoSaved = false;
   }
   refreshPublicSite("blog");
+  // Tell Bing & co. about the published post straight away (runs after the response, never delays the admin).
+  if (published) after(() => submitToIndexNow([`/blog/${encodeURIComponent(slug)}`, "/blog", "/"]));
   if (!seoSaved) await finish("error", "The post was saved, but its SEO title and description weren't. Open it and save again.", `${PAGE}?edit=${postId}`);
   await finish("success", id ? "Blog post updated." : `Blog post "${title}" created.`, PAGE);
 }
@@ -114,6 +118,10 @@ export async function togglePublish(fd: FormData) {
     WHERE id = ${id}
   `;
   refreshPublicSite("blog");
+  if (next) {
+    const [p] = await rows<{ slug: string }>(sql`SELECT slug FROM blog_posts WHERE id = ${id}`);
+    if (p) after(() => submitToIndexNow([`/blog/${encodeURIComponent(p.slug)}`, "/blog"]));
+  }
   await finish("success", next ? "Post published." : "Post unpublished (draft).", PAGE);
 }
 
