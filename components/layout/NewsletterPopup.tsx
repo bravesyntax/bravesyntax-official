@@ -37,10 +37,11 @@ export function NewsletterPopup() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(subscribeNewsletter, initial);
-  const hidden = pathname === "/contact" || pathname.startsWith("/tools/") || pathname.startsWith("/pdf-tools/") || pathname.startsWith("/newsletter");
+  const hidden = pathname === "/contact" || pathname.startsWith("/tools/") || pathname.startsWith("/pdf-tools/") || pathname.startsWith("/newsletter") || pathname.startsWith("/ebooks");
 
   useEffect(() => {
-    if (hidden || snoozed()) return;
+    // The ebook store (its own subdomain) sells from the page: a popup would cover the buy form.
+    if (hidden || window.location.hostname.startsWith("store.") || snoozed()) return;
     let timer = 0;
     const start = () => {
       window.clearTimeout(timer);

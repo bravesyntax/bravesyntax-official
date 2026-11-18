@@ -2,6 +2,8 @@ import { neon } from "@neondatabase/serverless";
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { SESSION_COOKIE, SESSION_TTL_SECONDS, sessionCookieOptions, signSession, verifySession } from "@/lib/admin/session";
 import { matchRedirect, type RedirectRule } from "@/lib/redirects";
+import { SITE_URL } from "@/lib/config";
+import { EBOOKS, EBOOKS_URL } from "@/lib/ebooks";
 import { NOT_CITIES } from "@/lib/reserved";
 import { LEGACY_PDF_TOOL_IDS } from "@/lib/tools/registry";
 
@@ -136,6 +138,9 @@ async function adminGate(req: NextRequest): Promise<NextResponse> {
 export async function proxy(req: NextRequest, event: NextFetchEvent) {
   const { pathname, searchParams } = req.nextUrl;
 
+  const store = ebookStore(req);
+  if (store) return store;
+
   if (pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/")) {
     return adminGate(req);
   }
@@ -196,6 +201,46 @@ export async function proxy(req: NextRequest, event: NextFetchEvent) {
     }
   }
   return NextResponse.next();
+}
+
+// Ebook store on its own subdomain (store.bravesyntax.com), served by the /ebooks pages of this app:
+//   store.<site>/            → rewrite to /ebooks
+//   store.<site>/<book>      → rewrite to /ebooks/<book>
+//   store.<site>/ebooks/...  → 301 to the short URL above
+//   store.<site>/<other>     → 301 to the main site (header/footer links), /api/* passes through
+//   <site>/ebooks/...         → 301 to the subdomain, so each page has one URL
+// Only when the request's host matches; localhost and preview deployments keep plain /ebooks.
+const EBOOK_SLUGS = new Set(EBOOKS.map((e) => e.slug));
+const hostOf = (url: string) => {
+  try {
+    return new URL(url).host;
+  } catch {
+    return "";
+  }
+};
+const STORE_HOST = hostOf(EBOOKS_URL);
+const MAIN_HOST = hostOf(SITE_URL);
+
+function ebookStore(req: NextRequest): NextResponse | null {
+  const host = (req.headers.get("host") ?? "").toLowerCase();
+  const { pathname, search } = req.nextUrl;
+  if (!STORE_HOST || STORE_HOST === MAIN_HOST) return null;
+
+  if (host === STORE_HOST) {
+    if (pathname.startsWith("/api/")) return null;
+    if (pathname === "/ebooks" || pathname.startsWith("/ebooks/")) {
+      return NextResponse.redirect(new URL(`${EBOOKS_URL}${pathname.slice("/ebooks".length) || "/"}${search}`), 301);
+    }
+    const [first, ...rest] = pathname.split("/").filter(Boolean);
+    if (!first) return NextResponse.rewrite(new URL(`/ebooks${search}`, req.url));
+    if (EBOOK_SLUGS.has(first) && !rest.length) return NextResponse.rewrite(new URL(`/ebooks/${first}${search}`, req.url));
+    return NextResponse.redirect(new URL(`${SITE_URL}${pathname}${search}`), 301);
+  }
+
+  if (host === MAIN_HOST && (pathname === "/ebooks" || pathname.startsWith("/ebooks/"))) {
+    return NextResponse.redirect(new URL(`${EBOOKS_URL}${pathname.slice("/ebooks".length) || "/"}${search}`), 301);
+  }
+  return null;
 }
 
 export const config = {

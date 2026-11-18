@@ -161,3 +161,32 @@ export function applicationAutoReply(c: ContactInfo, d: { name: string; role: st
     }),
   };
 }
+
+// ── Ebook store ───────────────────────────────────────────────
+
+export function ebookPurchaseEmail(
+  c: ContactInfo,
+  d: { name: string; title: string; amount: number; orderId: string; downloadUrl: string },
+): Email {
+  return {
+    subject: `Aapki ebook "${d.title}" ready hai — ${c.siteName}`,
+    html: renderEmail({
+      contact: c,
+      preheader: `Thank you ${d.name}! Neeche diye button se apni PDF download karein.`,
+      eyebrow: "Payment successful",
+      title: `Thank you, ${d.name}!`,
+      body:
+        paragraph(`Aapka payment mil gaya hai. <strong>${esc(d.title)}</strong> ki PDF neeche diye button se download karein.`) +
+        buttons([["PDF download karein", d.downloadUrl]]) +
+        detailsTable([
+          ["Ebook", esc(d.title)],
+          ["Amount", `₹${esc(d.amount.toLocaleString("en-IN"))}`],
+          ["Order ID", esc(d.orderId)],
+          ["Date", esc(istNow())],
+        ]) +
+        paragraph("Is email ko sambhal ke rakhein. Ye link aage bhi kaam karega, lekin ise kisi ke saath share mat karein.") +
+        small(`Download mein koi problem ho to ${mailto(c.email)} par Order ID ke saath email karein.`),
+      note: `You're receiving this because you bought an ebook from ${esc(c.siteName)}.`,
+    }),
+  };
+}
