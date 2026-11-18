@@ -21,6 +21,20 @@ export type Ebook = {
   chapters: { title: string; desc: string }[];
   bonuses: string[];
   faqs: [q: string, a: string][];
+  /** Store category this product is listed under (lib/store.ts). */
+  category: "ebooks";
+  /** Front cover image (public/), shown as the product thumbnail and 3D mockup. */
+  cover: string;
+  /** Real pages from the book, shown as a preview gallery. */
+  previews: { src: string; caption: string }[];
+  /** Big numbers for the stats strip. */
+  stats: [value: string, label: string][];
+  /** "Kya ye aapki situation hai?" — problems the book solves, in the book's own terms. */
+  painPoints: string[];
+  /** The step-by-step path the book takes the reader along, with the chapter for each step. */
+  journey: [step: string, chapter: string][];
+  /** Who it is not for (honest fit). */
+  notFor: string[];
 };
 
 export const EBOOKS: Ebook[] = [
@@ -75,6 +89,47 @@ export const EBOOKS: Ebook[] = [
       ["Payment kaise hogi?", "Razorpay se: UPI, debit/credit card, net banking ya wallet. Payment poori tarah secure hai."],
       ["Download link kho gaya to?", "Purchase email mein link hamesha rehta hai. Phir bhi problem ho to support@bravesyntax.com par order ID ke saath email karein."],
       ["Kya income ki guarantee hai?", "Nahi. Results aapki mehnat, skill aur situation par depend karte hain. Book aapko ek tested process aur templates deti hai."],
+      ["Refund milega?", "Ye digital product hai, isliye download ke baad refund nahi hota. Khareedne se pehle upar 8 asli pages dekh lo, taaki pata ho ki book kaisi hai."],
+    ],
+    category: "ebooks",
+    cover: "/store/pehla-client/cover.webp",
+    previews: [
+      { src: "/store/pehla-client/preview-contents.webp", caption: "Contents: 9 chapters, 30-din plan, bonus" },
+      { src: "/store/pehla-client/preview-chapter.webp", caption: "Har chapter ka opener" },
+      { src: "/store/pehla-client/preview-myths.webp", caption: "Freelancing ke 4 myths vs sach" },
+      { src: "/store/pehla-client/preview-price-range.webp", caption: "Kaunsi service kitne mein bikti hai" },
+      { src: "/store/pehla-client/preview-packages.webp", caption: "3-package pricing" },
+      { src: "/store/pehla-client/preview-message.webp", caption: "Client ko message kaise likhein" },
+      { src: "/store/pehla-client/preview-proposal.webp", caption: "Ready project proposal template" },
+      { src: "/store/pehla-client/preview-resources.webp", caption: "40+ free tools aur links" },
+    ],
+    stats: [
+      ["80", "pages"],
+      ["9", "chapters"],
+      ["38", "visuals"],
+      ["6", "templates"],
+      ["40+", "free tools"],
+    ],
+    painPoints: [
+      "Coding aati hai, par ek bhi paying client nahi mila",
+      "Portfolio mein dikhane ko koi real project nahi hai",
+      "Pata nahi kitna charge karein, aur sasta kaam karke thak gaye",
+      "Platforms par proposals bheje, reply gine-chune aaye",
+      "Client se call par baat karte hue atak jaate ho",
+    ],
+    journey: [
+      ["Service aur niche chuno", "Ch 2"],
+      ["Bina client ke portfolio", "Ch 3"],
+      ["Price set karo", "Ch 4"],
+      ["Clients dhoondho", "Ch 5"],
+      ["Deal close karo", "Ch 6"],
+      ["Project deliver karo", "Ch 7"],
+      ["Referral aur repeat clients", "Ch 8"],
+      ["Paisa aur tax sambhalo", "Ch 9"],
+    ],
+    notFor: [
+      "Jinhe abhi coding bilkul nahi aati: pehle 2-3 mahine basics seekho",
+      "Jo bina mehnat ke turant income dhoondh rahe hain",
     ],
   },
 ];
