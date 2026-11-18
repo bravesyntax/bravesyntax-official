@@ -47,3 +47,6 @@ next-env.d.ts
 # Copied from node_modules by scripts/copy-vendor.mjs
 /public/vendor
 /public/_qa
+
+# Ebook source and builds stay off this public repo: book.md is the full text of a paid ebook.
+/ebooks-src/

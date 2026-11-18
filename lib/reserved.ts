@@ -3,5 +3,5 @@
 export const NOT_CITIES = new Set([
   "about", "blog", "careers", "contact", "industries", "portfolio", "services", "pdf-tools", "tools", "bg-remover", "gone",
   "api", "admin", "gsc", "quotation", "assets", "cache", "config", "includes", "uploads", "vendor", "pages",
-  "sitemap", "robots", "js", "privacy-policy", "terms", "newsletter", "llms.txt", "missing", "brand", "media", ".well-known", "_vercel",
+  "sitemap", "robots", "js", "privacy-policy", "terms", "newsletter", "ebooks", "llms.txt", "missing", "brand", "media", ".well-known", "_vercel",
 ]);
