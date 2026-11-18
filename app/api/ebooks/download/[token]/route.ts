@@ -18,7 +18,7 @@ function blobAuth(): { token: string } | { storeId: string } | Record<string, ne
 // marked paid and is used at most EBOOK_MAX_DOWNLOADS times.
 export async function GET(_req: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  if (!/^[A-Za-z0-9_-]{20,64}$/.test(token)) return new NextResponse("Link sahi nahi hai.", { status: 404 });
+  if (!/^[A-Za-z0-9_-]{20,64}$/.test(token)) return new NextResponse("This link is not valid.", { status: 404 });
 
   const [order] = await rows<{ ebook_slug: string }>(sql`
     UPDATE ebook_orders SET download_count = download_count + 1
@@ -27,7 +27,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
   `);
   if (!order) {
     return new NextResponse(
-      "Ye link kaam nahi kar raha ya iski download limit poori ho gayi hai. support@bravesyntax.com par Order ID ke saath email karein.",
+      "This link has expired or reached its download limit. Email support@bravesyntax.com with your Order ID.",
       { status: 410, headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   }
@@ -41,7 +41,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
   if (!ebook || !blob || blob.statusCode !== 200) {
     console.error("[ebook download] file missing for", order.ebook_slug);
     await sql`UPDATE ebook_orders SET download_count = download_count - 1 WHERE download_token = ${token}`;
-    return new NextResponse("File abhi available nahi hai. Thodi der baad try karein ya support@bravesyntax.com par email karein.", {
+    return new NextResponse("The file isn't available right now. Try again shortly or email support@bravesyntax.com.", {
       status: 503,
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });

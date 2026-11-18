@@ -50,14 +50,14 @@ type Buyer = { name: string; email: string; phone: string | null };
 
 export async function createEbookOrder(slug: string, buyer: Buyer, ipHash: string | null) {
   const ebook = getEbook(slug);
-  if (!ebook) return { error: "Ye ebook nahi mili." } as const;
-  if (!razorpayConfigured()) return { error: "Payments abhi band hain. Thodi der baad try karein." } as const;
+  if (!ebook) return { error: "This ebook was not found." } as const;
+  if (!razorpayConfigured()) return { error: "Payments are paused right now. Please try again in a little while." } as const;
 
   if (ipHash) {
     const [{ n }] = await rows<{ n: number }>(sql`
       SELECT COUNT(*)::int AS n FROM ebook_orders WHERE ip_hash = ${ipHash} AND created_at > LOCALTIMESTAMP - INTERVAL '1 hour'
     `);
-    if (n >= ORDERS_PER_IP_HOUR) return { error: "Bahut saari koshishein ho gayi hain. Thodi der baad try karein." } as const;
+    if (n >= ORDERS_PER_IP_HOUR) return { error: "Too many attempts. Please try again in a little while." } as const;
   }
 
   const amount = ebook.price * 100;
@@ -69,7 +69,7 @@ export async function createEbookOrder(slug: string, buyer: Buyer, ipHash: strin
   });
   if (!res.ok) {
     console.error("[ebook order] Razorpay", res.status, await res.text().catch(() => ""));
-    return { error: "Payment shuru nahi ho paya. Dobara try karein." } as const;
+    return { error: "Couldn't start the payment. Please try again." } as const;
   }
   const order = (await res.json()) as { id: string; amount: number; currency: string };
   await sql`

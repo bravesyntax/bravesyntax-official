@@ -10,9 +10,9 @@ export async function POST(req: Request) {
   const email = sanitizeEmail(str("email")).toLowerCase();
   const phone = sanitizePhone(str("phone")).slice(0, 40) || null;
 
-  if (name.length < 2) return NextResponse.json({ error: "Apna naam likhein." }, { status: 400 });
-  if (!isValidEmail(email)) return NextResponse.json({ error: "Sahi email address likhein. PDF isi par aayegi." }, { status: 400 });
-  if (body?.consent !== true) return NextResponse.json({ error: "Aage badhne ke liye terms se sahmati dein." }, { status: 400 });
+  if (name.length < 2) return NextResponse.json({ error: "Please enter your name." }, { status: 400 });
+  if (!isValidEmail(email)) return NextResponse.json({ error: "Please enter a valid email address. The PDF will be sent there." }, { status: 400 });
+  if (body?.consent !== true) return NextResponse.json({ error: "Please accept the terms to continue." }, { status: 400 });
 
   const ip = await getClientIp();
   const result = await createEbookOrder(str("slug"), { name, email, phone }, ip ? ebookIpHash(ip) : null);

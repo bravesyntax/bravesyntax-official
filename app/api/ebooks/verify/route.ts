@@ -11,12 +11,12 @@ export async function POST(req: Request) {
   const signature = str("razorpay_signature");
 
   if (!orderId || !paymentId || !verifyCheckoutSignature(orderId, paymentId, signature)) {
-    return NextResponse.json({ error: "Payment verify nahi ho paya." }, { status: 400 });
+    return NextResponse.json({ error: "Couldn't verify the payment." }, { status: 400 });
   }
   const token = await markEbookPaid(orderId, paymentId);
   if (!token) {
     return NextResponse.json(
-      { error: "Payment confirm hone mein time lag raha hai. Kuch minute mein download link aapke email par aa jaayega." },
+      { error: "Your payment is taking a moment to confirm. The download link will reach your email in a few minutes." },
       { status: 202 },
     );
   }

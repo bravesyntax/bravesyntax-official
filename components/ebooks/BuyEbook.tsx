@@ -57,11 +57,11 @@ export function BuyEbook({ slug, priceLabel }: { slug: string; priceLabel: strin
     ]);
     const data = res ? await res.json().catch(() => null) : null;
     if (!res?.ok || !data?.orderId) {
-      setError(data?.error ?? "Kuch gadbad ho gayi. Dobara try karein.");
+      setError(data?.error ?? "Something went wrong. Please try again.");
       return setState({ kind: "form" });
     }
     if (!ok || !window.Razorpay) {
-      setError("Payment window load nahi hui. Internet check karke dobara try karein.");
+      setError("The payment window didn't load. Check your internet connection and try again.");
       return setState({ kind: "form" });
     }
 
@@ -86,13 +86,13 @@ export function BuyEbook({ slug, priceLabel }: { slug: string; priceLabel: strin
         setState({
           kind: "done",
           token: null,
-          message: vd?.error ?? "Payment mil gaya hai. Download link kuch minute mein aapke email par aa jaayega.",
+          message: vd?.error ?? "Payment received. Your download link will reach your email in a few minutes.",
         });
       },
       modal: { ondismiss: () => setState({ kind: "form" }) },
     });
     rzp.on("payment.failed", (r) => {
-      setError(r.error?.description ?? "Payment fail ho gaya. Dobara try karein.");
+      setError(r.error?.description ?? "The payment failed. Please try again.");
       setState({ kind: "form" });
     });
     rzp.open();
@@ -105,10 +105,10 @@ export function BuyEbook({ slug, priceLabel }: { slug: string; priceLabel: strin
         <h3 className="mt-3 text-xl font-semibold">Thank you! Payment successful.</h3>
         {state.token ? (
           <>
-            <p className="mt-2 text-sm text-muted-foreground">Apni PDF abhi download karein. Link aapke email par bhi bhej diya hai.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Download your PDF now. We’ve also emailed you the link.</p>
             <Button asChild size="lg" className="mt-5 h-11 px-5 text-base">
               <a href={`/api/ebooks/download/${state.token}`}>
-                <Download className="size-4" aria-hidden="true" /> PDF download karein
+                <Download className="size-4" aria-hidden="true" /> Download the PDF
               </a>
             </Button>
           </>
@@ -123,11 +123,11 @@ export function BuyEbook({ slug, priceLabel }: { slug: string; priceLabel: strin
   return (
     <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border bg-card p-6 shadow-sm">
       <div className="space-y-1.5">
-        <Label htmlFor="eb-name">Naam</Label>
+        <Label htmlFor="eb-name">Name</Label>
         <Input id="eb-name" name="name" required minLength={2} maxLength={150} autoComplete="name" />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="eb-email">Email (PDF isi par aayegi)</Label>
+        <Label htmlFor="eb-email">Email (we’ll send the PDF here)</Label>
         <Input id="eb-email" name="email" type="email" required maxLength={254} autoComplete="email" />
       </div>
       <div className="space-y-1.5">
@@ -137,15 +137,15 @@ export function BuyEbook({ slug, priceLabel }: { slug: string; priceLabel: strin
       <label className="flex items-start gap-3 text-sm text-muted-foreground">
         <input type="checkbox" name="consent" value="yes" required className="mt-0.5 size-4 shrink-0 accent-primary" />
         <span>
-          Main{" "}
+          I agree to the{" "}
           <Link href="https://bravesyntax.com/terms" target="_blank" className="font-medium text-primary underline underline-offset-2">
             terms
           </Link>{" "}
-          aur{" "}
+          and{" "}
           <Link href="https://bravesyntax.com/privacy-policy" target="_blank" className="font-medium text-primary underline underline-offset-2">
             privacy policy
-          </Link>{" "}
-          se sahmat hoon. Digital product hone ki wajah se download ke baad refund nahi hota.
+          </Link>
+          . As this is a digital product, it can’t be refunded once downloaded.
         </span>
       </label>
       {error && (
@@ -155,9 +155,9 @@ export function BuyEbook({ slug, priceLabel }: { slug: string; priceLabel: strin
       )}
       <Button type="submit" size="lg" className="h-11 w-full text-base" disabled={busy}>
         {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Lock className="size-4" aria-hidden="true" />}
-        {busy ? "Please wait…" : `${priceLabel} mein abhi khareedein`}
+        {busy ? "Please wait…" : `Buy now for ${priceLabel}`}
       </Button>
-      <p className="text-center text-xs text-muted-foreground">UPI, cards, net banking aur wallets · Secure payment by Razorpay</p>
+      <p className="text-center text-xs text-muted-foreground">UPI, cards, net banking and wallets · Secure payment by Razorpay</p>
     </form>
   );
 }

@@ -3,7 +3,7 @@
 import { ArrowLeft, Check, Clock, IndianRupee, MessageCircle, RotateCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { AssistantChat } from "@/components/planner/AssistantChat";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { track } from "@/lib/analytics";
@@ -32,8 +32,14 @@ export function ProjectPlanner({ whatsappHref, assistant }: { whatsappHref: stri
   const [industry, setIndustry] = useState("");
   const [features, setFeatures] = useState<string[]>([]);
   const [timeline, setTimeline] = useState("");
+  // The store (its own subdomain, or /ebooks) sells products: a project-estimate button would sit on its buy bar.
+  const onStore = useSyncExternalStore(
+    () => () => {},
+    () => window.location.hostname.startsWith("store."),
+    () => false,
+  );
 
-  if (HIDDEN_ON.includes(pathname) || pathname.startsWith("/pdf-tools/") || pathname.startsWith("/tools/")) return null;
+  if (onStore || pathname.startsWith("/ebooks") || HIDDEN_ON.includes(pathname) || pathname.startsWith("/pdf-tools/") || pathname.startsWith("/tools/")) return null;
 
   const restart = () => {
     setStep(0);
