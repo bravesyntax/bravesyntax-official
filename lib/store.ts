@@ -14,10 +14,10 @@ export type Category = {
 };
 
 export const CATEGORIES: Category[] = [
-  { slug: "ebooks", name: "Ebooks & guides", blurb: "Freelancing aur web business ki practical guides, Hinglish mein, templates ke saath.", icon: "BookOpen" },
-  { slug: "apparel", name: "Apparel", blurb: "Developers aur creators ke liye T-shirts aur hoodies.", icon: "Shirt" },
-  { slug: "fashion", name: "Fashion & accessories", blurb: "Roz ke use ki accessories.", icon: "Gem" },
-  { slug: "crm", name: "CRM & business software", blurb: "Small business ke liye CRM aur ready tools.", icon: "LayoutDashboard" },
+  { slug: "ebooks", name: "Ebooks & guides", blurb: "Practical guides on freelancing and running a web business, with ready templates.", icon: "BookOpen" },
+  { slug: "apparel", name: "Apparel", blurb: "T-shirts and hoodies for developers and creators.", icon: "Shirt" },
+  { slug: "fashion", name: "Fashion & accessories", blurb: "Everyday accessories.", icon: "Gem" },
+  { slug: "crm", name: "CRM & business software", blurb: "A CRM and ready-made tools for small businesses.", icon: "LayoutDashboard" },
 ];
 
 export type Product = Ebook;

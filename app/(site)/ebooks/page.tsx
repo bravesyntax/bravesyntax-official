@@ -9,7 +9,7 @@ import { CATEGORIES, isLive, PRODUCTS, productsIn } from "@/lib/store";
 
 export const metadata: Metadata = {
   title: "Store",
-  description: `${SITE_NAME} Store: ebooks aur guides abhi, apparel, fashion aur business software jaldi.`,
+  description: `${SITE_NAME} Store: ebooks and guides now; apparel, fashion and business software coming soon.`,
   alternates: { canonical: EBOOKS_URL },
   openGraph: { images: [{ url: `${SITE_URL}${PRODUCTS[0].cover}`, alt: PRODUCTS[0].title }] },
 };
@@ -18,9 +18,9 @@ const ICONS = { BookOpen, Shirt, Gem, LayoutDashboard };
 
 const PROMISES = [
   { icon: Lock, title: "Secure payment", text: "Razorpay: UPI, cards, net banking, wallets" },
-  { icon: Zap, title: "Turant delivery", text: "Digital products payment ke turant baad" },
-  { icon: Mail, title: "Email par bhi", text: "Har order ka link aapke inbox mein" },
-  { icon: Sparkles, title: "Practical, Hinglish", text: "Seedhi bhasha, ready-to-use templates" },
+  { icon: Zap, title: "Instant delivery", text: "Digital products right after payment" },
+  { icon: Mail, title: "Sent to your inbox", text: "Every order's link, by email too" },
+  { icon: Sparkles, title: "Practical", text: "Step-by-step guides with ready-to-use templates" },
 ];
 
 export default function StorePage() {
@@ -38,10 +38,10 @@ export default function StorePage() {
               <BookOpen className="size-4" aria-hidden /> {SITE_NAME} Store
             </span>
             <h1 className="mt-6 text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-              Seekho, banao, <span className="text-emerald-400">kamao</span>
+              Learn it. Build it. <span className="text-emerald-400">Earn from it.</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-pretty text-white/70">
-              Freelancers aur small businesses ke liye practical guides, templates aur tools. Ebooks abhi live, apparel aur business software jaldi.
+              Practical guides, templates and tools for freelancers and small businesses. Ebooks are live now; apparel and business software are coming soon.
             </p>
 
             <div className="mt-9 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
@@ -55,7 +55,7 @@ export default function StorePage() {
               </div>
               <div className="mt-5 flex flex-wrap items-center gap-4">
                 <Link href={`/ebooks/${featured.slug}`} className="inline-flex h-12 items-center gap-2 rounded-lg bg-emerald-500 px-6 font-medium text-[#04130d] hover:bg-emerald-400">
-                  Dekho aur khareedo <ArrowRight className="size-4" aria-hidden />
+                  View and buy <ArrowRight className="size-4" aria-hidden />
                 </Link>
                 <span className="text-lg font-semibold">{rupees(featured.price)}</span>
                 {featured.mrp && <span className="text-white/50 line-through">{rupees(featured.mrp)}</span>}
@@ -63,7 +63,7 @@ export default function StorePage() {
               </div>
             </div>
           </div>
-          <Link href={`/ebooks/${featured.slug}`} aria-label={`${featured.title} dekho`} className="order-first block lg:order-none">
+          <Link href={`/ebooks/${featured.slug}`} aria-label={`View ${featured.title}`} className="order-first block lg:order-none">
             <BookMockup src={featured.cover} alt={`${featured.title} ebook cover`} priority className="w-44 sm:w-56 lg:w-80" />
           </Link>
         </div>
@@ -71,7 +71,7 @@ export default function StorePage() {
 
       {/* ── Categories ─────────────────────────────────────────── */}
       <Section label="Categories" className="!py-16 lg:!py-24">
-        <SectionHeading eyebrow="Shop by category" title="Store mein kya hai" />
+        <SectionHeading eyebrow="Shop by category" title="What's in the store" />
         <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CATEGORIES.map((c) => {
             const Icon = ICONS[c.icon];
@@ -86,12 +86,12 @@ export default function StorePage() {
                   {live ? (
                     <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">{count} live</span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"><Clock className="size-3.5" aria-hidden /> Jaldi aa raha hai</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground"><Clock className="size-3.5" aria-hidden /> Coming soon</span>
                   )}
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">{c.name}</h3>
                 <p className="mt-1 flex-1 text-sm text-muted-foreground">{c.blurb}</p>
-                {live && <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">Shop karo <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden /></span>}
+                {live && <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">Shop now <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden /></span>}
               </div>
             );
             return <li key={c.slug}>{live ? <Link href={`#${c.slug}`} className="block h-full">{card}</Link> : card}</li>;
@@ -102,7 +102,7 @@ export default function StorePage() {
       {/* ── Live products by category ──────────────────────────── */}
       {CATEGORIES.filter((c) => isLive(c.slug)).map((c) => (
         <Section key={c.slug} id={c.slug} muted label={c.name} className="!py-16 lg:!py-24">
-          <SectionHeading eyebrow={c.name} title="Abhi available" />
+          <SectionHeading eyebrow={c.name} title="Available now" />
           {/* one product: a wide card; several: a grid */}
           <ul className={`mt-10 grid gap-6 ${productsIn(c.slug).length > 1 ? "sm:grid-cols-2 lg:grid-cols-3" : ""}`}>
             {productsIn(c.slug).map((p) => (
@@ -133,7 +133,7 @@ export default function StorePage() {
                         <span className="text-xl font-semibold">{rupees(p.price)}</span>
                         {p.mrp && <span className="ml-2 text-sm text-muted-foreground line-through">{rupees(p.mrp)}</span>}
                       </span>
-                      <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">Dekho <ArrowRight className="size-4" aria-hidden /></span>
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">View <ArrowRight className="size-4" aria-hidden /></span>
                     </div>
                   </div>
                 </Link>
@@ -144,7 +144,7 @@ export default function StorePage() {
       ))}
 
       {/* ── Promises ───────────────────────────────────────────── */}
-      <Section label="Kyun yahan se" className="!py-16 lg:!py-20">
+      <Section label="Why buy here" className="!py-16 lg:!py-20">
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {PROMISES.map(({ icon: Icon, title, text }) => (
             <li key={title} className="flex gap-4">

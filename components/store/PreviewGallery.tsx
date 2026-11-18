@@ -44,7 +44,7 @@ export function PreviewGallery({ items, title }: { items: Item[]; title: string 
               type="button"
               onClick={() => show(i)}
               className="group block w-full cursor-pointer text-left focus-visible:outline-none"
-              aria-label={`Page dekho: ${it.caption}`}
+              aria-label={`View page: ${it.caption}`}
             >
               <span className="relative block aspect-[148/210] overflow-hidden rounded-xl border bg-muted shadow-sm ring-primary/40 transition duration-200 group-hover:-translate-y-1 group-hover:shadow-lg group-focus-visible:ring-4 motion-reduce:transition-none">
                 <Image src={it.src} alt={`${title}: ${it.caption}`} fill sizes="(min-width: 1024px) 260px, (min-width: 640px) 30vw, 45vw" className="object-cover object-top" />
@@ -74,15 +74,15 @@ export function PreviewGallery({ items, title }: { items: Item[]; title: string 
                 {current.caption} <span className="text-white/60">· {open! + 1}/{items.length}</span>
               </span>
               <span className="flex gap-2">
-                <button type="button" onClick={() => step(-1)} aria-label="Pichhla page" className="inline-flex size-10 cursor-pointer items-center justify-center rounded-full bg-white/15 hover:bg-white/25">
+                <button type="button" onClick={() => step(-1)} aria-label="Previous page" className="inline-flex size-10 cursor-pointer items-center justify-center rounded-full bg-white/15 hover:bg-white/25">
                   <ChevronLeft className="size-5" aria-hidden />
                 </button>
-                <button type="button" onClick={() => step(1)} aria-label="Agla page" className="inline-flex size-10 cursor-pointer items-center justify-center rounded-full bg-white/15 hover:bg-white/25">
+                <button type="button" onClick={() => step(1)} aria-label="Next page" className="inline-flex size-10 cursor-pointer items-center justify-center rounded-full bg-white/15 hover:bg-white/25">
                   <ChevronRight className="size-5" aria-hidden />
                 </button>
               </span>
             </figcaption>
-            <button type="button" onClick={close} aria-label="Band karo" className="absolute -top-3 -right-3 inline-flex size-10 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-lg hover:bg-white/90">
+            <button type="button" onClick={close} aria-label="Close" className="absolute -top-3 -right-3 inline-flex size-10 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-lg hover:bg-white/90">
               <X className="size-5" aria-hidden />
             </button>
           </figure>

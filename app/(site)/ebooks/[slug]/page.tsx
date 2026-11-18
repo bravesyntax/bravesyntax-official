@@ -36,17 +36,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const ebook = getEbook((await params).slug);
   if (!ebook) return {};
   const title = `${ebook.title}: ${ebook.subtitle}`;
-  const description = `${ebook.subtitle}. ${ebook.pages}, ${ebook.language} mein, 38 visuals aur ready templates ke saath. Sirf ${rupees(ebook.price)}.`;
+  const description = `${ebook.subtitle}. ${ebook.pages}, written in ${ebook.language}, with 38 visuals and ready templates. Only ${rupees(ebook.price)}.`;
   const url = `${EBOOKS_URL}/${ebook.slug}`;
   const image = `${SITE_URL}${ebook.cover}`;
   return { title, description, alternates: { canonical: url }, openGraph: { title, description, url, type: "website", images: [{ url: image, width: 1100, height: 1561, alt: ebook.title }] } };
 }
 
 const TRUST = [
-  { icon: Lock, text: "Razorpay se secure payment" },
-  { icon: Zap, text: "Payment ke turant baad download" },
-  { icon: Mail, text: "Download link email par bhi" },
-  { icon: Smartphone, text: "Phone, laptop, tablet par padho" },
+  { icon: Lock, text: "Secure payment via Razorpay" },
+  { icon: Zap, text: "Instant download after payment" },
+  { icon: Mail, text: "Download link sent by email too" },
+  { icon: Smartphone, text: "Read on phone, laptop or tablet" },
 ];
 
 export default async function EbookPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -107,7 +107,7 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
                 <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1"><FileText className="size-3.5" aria-hidden /> {ebook.pages}</span>
               </div>
               <h1 className="mt-4 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{ebook.title}</h1>
-              <p className="mt-3 text-lg text-pretty text-muted-foreground">{ebook.subtitle}. Zero portfolio se pehla paying client tak, ready templates ke saath.</p>
+              <p className="mt-3 text-lg text-pretty text-muted-foreground">{ebook.subtitle}: from zero portfolio to your first paying client, with ready templates.</p>
 
               <ul className="mt-6 space-y-2.5">
                 {ebook.outcomes.slice(0, 4).map((o) => (
@@ -124,7 +124,7 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
                   {mrp && <span className="text-lg text-muted-foreground line-through">{mrp}</span>}
                   {off > 0 && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-semibold text-primary">{off}% off</span>}
                 </div>
-                <p className="mt-1 mb-5 text-sm text-muted-foreground">Ek baar payment · PDF hamesha aapki</p>
+                <p className="mt-1 mb-5 text-sm text-muted-foreground">One-time payment · The PDF is yours to keep</p>
                 <BuyEbook slug={ebook.slug} priceLabel={price} />
               </div>
 
@@ -142,7 +142,7 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
       </section>
 
       {/* ── Stats ─────────────────────────────────────────────── */}
-      <section aria-label="Book ek nazar mein" className="border-b bg-muted/30">
+      <section aria-label="The book at a glance" className="border-b bg-muted/30">
         <div className={`${container} grid grid-cols-2 gap-px sm:grid-cols-5`}>
           {ebook.stats.map(([v, l]) => (
             <div key={l} className="px-4 py-7 text-center">
@@ -154,10 +154,10 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
       </section>
 
       {/* ── Problem → solution ───────────────────────────────── */}
-      <Section label="Kya ye aapki situation hai" className="!py-16 lg:!py-24">
+      <Section label="Does this sound like you" className="!py-16 lg:!py-24">
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 sm:p-8">
-            <p className="text-sm font-semibold tracking-wide text-destructive uppercase">Kya ye aapki situation hai?</p>
+            <p className="text-sm font-semibold tracking-wide text-destructive uppercase">Does this sound like you?</p>
             <ul className="mt-5 space-y-4">
               {ebook.painPoints.map((p) => (
                 <li key={p} className="flex gap-3">
@@ -168,7 +168,7 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
             </ul>
           </div>
           <div className="rounded-2xl border border-primary/25 bg-primary/5 p-6 sm:p-8">
-            <p className="text-sm font-semibold tracking-wide text-primary uppercase">Is book ke baad aap</p>
+            <p className="text-sm font-semibold tracking-wide text-primary uppercase">After this book, you’ll have</p>
             <ul className="mt-5 space-y-4">
               {ebook.outcomes.map((o) => (
                 <li key={o} className="flex gap-3">
@@ -183,8 +183,8 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
 
       {/* ── Journey ──────────────────────────────────────────── */}
       <Section muted label="Pehle client tak ka raasta" className="!py-16 lg:!py-24">
-        <SectionHeading eyebrow="Step by step" title="Zero portfolio se pehle paying client tak" center>
-          Book aapko ek-ek step mein le jaati hai. Har step ka apna chapter, apna Action Task.
+        <SectionHeading eyebrow="Step by step" title="From zero portfolio to your first paying client" center>
+          The book takes you one step at a time. Each step has its own chapter and its own Action Task.
         </SectionHeading>
         <ol className="relative mt-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {ebook.journey.map(([s, ch], i) => (
@@ -194,17 +194,17 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
                 <span className="text-xs font-medium text-muted-foreground">{ch}</span>
               </div>
               <p className="mt-4 font-medium">{s}</p>
-              {i === 4 && <p className="mt-1 text-sm text-primary">Yahan pehla paisa aata hai</p>}
+              {i === 4 && <p className="mt-1 text-sm text-primary">This is where the first payment comes in</p>}
             </li>
           ))}
         </ol>
       </Section>
 
       {/* ── Preview ──────────────────────────────────────────── */}
-      <Section label="Andar ki jhalak" className="!py-16 lg:!py-24">
+      <Section label="Look inside" className="!py-16 lg:!py-24">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <SectionHeading eyebrow="Andar ki jhalak" title={`${ebook.previews.length} asli pages, khareedne se pehle dekho`}>
-            Diagrams, tables aur templates: har point samjhaane ke liye visual. Kisi bhi page par click karke bada dekho.
+          <SectionHeading eyebrow="Look inside" title={`${ebook.previews.length} real pages, see them before you buy`}>
+            Diagrams, tables and templates: a visual for every key point. Click any page to see it full size.
           </SectionHeading>
         </div>
         <div className="mt-10">
@@ -214,7 +214,7 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
 
       {/* ── Chapters ─────────────────────────────────────────── */}
       <Section muted label="Chapters" className="!py-16 lg:!py-24">
-        <SectionHeading eyebrow="Andar kya hai" title="9 chapters, 30-din plan aur bonus" />
+        <SectionHeading eyebrow="What's inside" title="9 chapters, a 30-day plan and bonus templates" />
         <ol className="mt-10 grid gap-3 sm:grid-cols-2">
           {ebook.chapters.map((c, i) => (
             <li key={c.title} className="flex gap-4 rounded-2xl border bg-background p-5">
@@ -231,8 +231,8 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
       {/* ── Bonus ────────────────────────────────────────────── */}
       <Section label="Bonus" className="!py-16 lg:!py-24">
         <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.2fr]">
-          <SectionHeading eyebrow="Bonus" title="Copy karo, naam badlo, bhej do">
-            Messages, proposal, invoice, agreement aur pricing calculator: sab ready. Saath mein 40+ free tools ke clickable links.
+          <SectionHeading eyebrow="Bonus" title="Copy, add your name, send">
+            Messages, a proposal, an invoice, an agreement and a pricing calculator, all ready to use. Plus clickable links to 40+ free tools.
           </SectionHeading>
           <ul className="grid gap-3 sm:grid-cols-2">
             {ebook.bonuses.map((b) => (
@@ -246,10 +246,10 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
       </Section>
 
       {/* ── Fit ──────────────────────────────────────────────── */}
-      <Section muted label="Kiske liye" className="!py-16 lg:!py-24">
+      <Section muted label="Who it's for" className="!py-16 lg:!py-24">
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
           <div className="rounded-2xl border bg-background p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight">Ye book aapke liye hai agar aap</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">This book is for you if you’re</h2>
             <ul className="mt-5 space-y-3">
               {ebook.audience.map((a) => (
                 <li key={a} className="flex gap-3"><BadgeCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden /><span>{a}</span></li>
@@ -257,7 +257,7 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
             </ul>
           </div>
           <div className="rounded-2xl border bg-background p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight">Aapke liye nahi agar</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">It’s not for you if</h2>
             <ul className="mt-5 space-y-3">
               {ebook.notFor.map((a) => (
                 <li key={a} className="flex gap-3 text-muted-foreground"><X className="mt-0.5 size-5 shrink-0" aria-hidden /><span>{a}</span></li>
@@ -274,13 +274,13 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
             <Logo className="h-auto w-full" />
           </div>
           <div>
-            <p className="text-sm font-medium text-primary">Likhne wale</p>
+            <p className="text-sm font-medium text-primary">Written by</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight">Brave Syntax</h2>
             <p className="mt-3 max-w-3xl text-muted-foreground">
-              Ghaziabad (Delhi NCR) ka design aur development studio, 2025 se. Businesses ke liye websites, web apps aur online stores banate hain. Is book mein wahi process hai jo hum apne clients ke saath follow karte hain: likhit scope, fixed quote, 50% advance aur launch ke baad support.
+              A design and development studio in Ghaziabad (Delhi NCR), working since 2025. We build websites, web apps and online stores for businesses. This book follows the same process we use with our own clients: a written scope, a fixed quote, a 50% advance and support after launch.
             </p>
             <Link href={`${SITE_URL}/portfolio`} className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-              Hamara kaam dekho <ArrowRight className="size-4" aria-hidden />
+              See our work <ArrowRight className="size-4" aria-hidden />
             </Link>
           </div>
         </div>
@@ -289,7 +289,7 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
       {/* ── FAQ ──────────────────────────────────────────────── */}
       <Section muted label="FAQ" className="!py-16 lg:!py-24">
         <div className="mx-auto max-w-3xl">
-          <SectionHeading eyebrow="FAQ" title="Aapke sawaal" center />
+          <SectionHeading eyebrow="FAQ" title="Questions" center />
           <Accordion type="single" collapsible className="mt-8">
             {ebook.faqs.map(([q, a]) => (
               <AccordionItem key={q} value={q}>
@@ -302,15 +302,15 @@ export default async function EbookPage({ params }: { params: Promise<{ slug: st
       </Section>
 
       {/* ── Final CTA ────────────────────────────────────────── */}
-      <section aria-label="Abhi khareedo" className="relative isolate overflow-hidden bg-[#0b1220] text-white">
+      <section aria-label="Buy now" className="relative isolate overflow-hidden bg-[#0b1220] text-white">
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(50%_80%_at_80%_20%,rgba(16,185,129,0.35),transparent_70%)]" />
         <div className={`${container} grid items-center gap-10 py-16 lg:grid-cols-[1fr_260px] lg:py-20`}>
           <div>
-            <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Pehla client dhoondhna aaj se shuru karo</h2>
-            <p className="mt-3 max-w-xl text-white/70">{ebook.pages}, 9 chapters, 38 visuals, 6 templates aur 40+ free tools. Ek baar ka payment, PDF hamesha aapki.</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Start finding your first client today</h2>
+            <p className="mt-3 max-w-xl text-white/70">{ebook.pages}, 9 chapters, 38 visuals, 6 templates and 40+ free tools. One-time payment, and the PDF is yours to keep.</p>
             <div className="mt-7 flex flex-wrap items-center gap-4">
               <a href="#buy" className="inline-flex h-12 items-center gap-2 rounded-lg bg-primary px-6 font-medium text-primary-foreground hover:bg-primary/90">
-                {price} mein abhi khareedo <ArrowRight className="size-4" aria-hidden />
+                Buy now for {price} <ArrowRight className="size-4" aria-hidden />
               </a>
               {mrp && <span className="text-white/60"><span className="line-through">{mrp}</span> · {off}% off</span>}
             </div>

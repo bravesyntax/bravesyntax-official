@@ -31,7 +31,7 @@ export function StickyBuyBar({ title, price, mrp }: { title: string; price: stri
           tabIndex={show ? 0 : -1}
           className="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg bg-primary px-5 font-medium text-primary-foreground hover:bg-primary/90"
         >
-          <ShoppingBag className="size-4" aria-hidden /> Abhi khareedo
+          <ShoppingBag className="size-4" aria-hidden /> Buy now
         </a>
       </div>
     </div>

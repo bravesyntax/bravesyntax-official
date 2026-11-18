@@ -169,23 +169,23 @@ export function ebookPurchaseEmail(
   d: { name: string; title: string; amount: number; orderId: string; downloadUrl: string },
 ): Email {
   return {
-    subject: `Aapki ebook "${d.title}" ready hai — ${c.siteName}`,
+    subject: `Your ebook "${d.title}" is ready — ${c.siteName}`,
     html: renderEmail({
       contact: c,
-      preheader: `Thank you ${d.name}! Neeche diye button se apni PDF download karein.`,
+      preheader: `Thank you ${d.name}! Download your PDF with the button below.`,
       eyebrow: "Payment successful",
       title: `Thank you, ${d.name}!`,
       body:
-        paragraph(`Aapka payment mil gaya hai. <strong>${esc(d.title)}</strong> ki PDF neeche diye button se download karein.`) +
-        buttons([["PDF download karein", d.downloadUrl]]) +
+        paragraph(`We've received your payment. Download <strong>${esc(d.title)}</strong> with the button below.`) +
+        buttons([["Download the PDF", d.downloadUrl]]) +
         detailsTable([
           ["Ebook", esc(d.title)],
           ["Amount", `₹${esc(d.amount.toLocaleString("en-IN"))}`],
           ["Order ID", esc(d.orderId)],
           ["Date", esc(istNow())],
         ]) +
-        paragraph("Is email ko sambhal ke rakhein. Ye link aage bhi kaam karega, lekin ise kisi ke saath share mat karein.") +
-        small(`Download mein koi problem ho to ${mailto(c.email)} par Order ID ke saath email karein.`),
+        paragraph("Keep this email safe. The link will keep working, but please don't share it with anyone.") +
+        small(`Trouble downloading? Email ${mailto(c.email)} with your Order ID.`),
       note: `You're receiving this because you bought an ebook from ${esc(c.siteName)}.`,
     }),
   };
