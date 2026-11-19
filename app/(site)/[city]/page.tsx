@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import LocationPage, { locationMetadata } from "@/components/location/LocationPage";
-import { getIndexableLocationPaths } from "@/lib/locations";
 
 type Props = { params: Promise<{ city: string }> };
 
-// Indexable cities are pre-built; any other active city renders on first request.
-export async function generateStaticParams() {
-  return (await getIndexableLocationPaths()).cities.map((city) => ({ city }));
+// Not built at deploy time: each page is rendered and cached on its first visit. Building every page on every
+// deployment cost ~9,000 Vercel ISR write units per deploy (the free plan allows 200K a month). Unknown slugs never
+// get here: proxy.ts answers them with the pre-built 404 page.
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

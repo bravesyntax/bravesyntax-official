@@ -12,14 +12,17 @@ import { ContainerScroll } from "@/components/velora/container-scroll";
 import { FocusCards } from "@/components/velora/focus-cards";
 import { Lens } from "@/components/velora/lens";
 import { SITE_URL } from "@/lib/config";
-import { capitalize, getPortfolioBySlug, getPortfolios, getPortfolioSlugs, splitList } from "@/lib/content";
+import { capitalize, getPortfolioBySlug, getPortfolios, splitList } from "@/lib/content";
 import { absoluteMediaUrl, mediaUrl, isExternalImage } from "@/lib/media";
 import { buildMetadata, customSchema, projectSeoDefaults, resolveSeo } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export async function generateStaticParams() {
-  return (await getPortfolioSlugs()).map((slug) => ({ slug }));
+// Not built at deploy time: each page is rendered and cached on its first visit. Building every page on every
+// deployment cost ~9,000 Vercel ISR write units per deploy (the free plan allows 200K a month). Unknown slugs never
+// get here: proxy.ts answers them with the pre-built 404 page.
+export function generateStaticParams() {
+  return [];
 }
 
 /** Built-in SEO for a project; anything saved in Admin → SEO → Case studies overrides it. */

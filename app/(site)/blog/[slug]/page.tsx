@@ -13,7 +13,7 @@ import { BorderBeam } from "@/components/velora/border-beam";
 import { TracingBeam } from "@/components/velora/tracing-beam";
 import { SITE_URL } from "@/lib/config";
 import { BLOG_LANGS, isBlogLang, POST_UI, type BlogLang } from "@/lib/blog-lang";
-import { categoryLabel, formatDate, getBlogPostBySlug, getBlogSlugs, getPostVersions, getRelatedPosts, splitList } from "@/lib/content";
+import { categoryLabel, formatDate, getBlogPostBySlug, getPostVersions, getRelatedPosts, splitList } from "@/lib/content";
 import { decodeEntities } from "@/lib/html";
 import { buildMetadata, customSchema, postSeoDefaults, resolveSeo } from "@/lib/seo";
 import { sanitizeRichHtml } from "@/lib/sanitize";
@@ -38,8 +38,11 @@ function hreflang(versions: { slug: string; language: string }[]): Record<string
   return map;
 }
 
-export async function generateStaticParams() {
-  return (await getBlogSlugs()).map((slug) => ({ slug }));
+// Not built at deploy time: each page is rendered and cached on its first visit. Building every page on every
+// deployment cost ~9,000 Vercel ISR write units per deploy (the free plan allows 200K a month). Unknown slugs never
+// get here: proxy.ts answers them with the pre-built 404 page.
+export function generateStaticParams() {
+  return [];
 }
 
 /** Built-in SEO for a post; anything saved in Admin → SEO → Blog posts overrides it. */

@@ -5,7 +5,16 @@ import { matchRedirect, type RedirectRule } from "@/lib/redirects";
 import { SITE_URL } from "@/lib/config";
 import { EBOOKS, EBOOKS_URL } from "@/lib/ebooks";
 import { NOT_CITIES } from "@/lib/reserved";
-import { LEGACY_PDF_TOOL_IDS } from "@/lib/tools/registry";
+import { INDUSTRIES } from "@/lib/industries";
+import { LEGACY_PDF_TOOL_IDS, PDF_TOOL_LIST, WEB_TOOL_LIST } from "@/lib/tools/registry";
+
+// Pages whose slugs are fixed in the code. They're rendered on first visit (not at deploy), so anything else
+// must get the pre-built 404 here instead of rendering and caching a 404 page of its own.
+const STATIC_SLUGS: Record<string, Set<string>> = {
+  tools: new Set(WEB_TOOL_LIST.map((t) => t.slug)),
+  "pdf-tools": new Set(PDF_TOOL_LIST.map((t) => t.slug)),
+  industries: new Set(INDUSTRIES.map((i) => i.slug)),
+};
 
 // 0) Admin panel: every /admin page and /api/admin route needs a valid session cookie; an active session is
 //    re-issued so the 1-hour timeout counts from the last request (pages and actions also re-check the
@@ -193,7 +202,10 @@ export async function proxy(req: NextRequest, event: NextFetchEvent) {
       return missing(req);
     }
     const dynamicChild: Record<string, keyof Known> = { blog: "blog", portfolio: "portfolio", services: "service" };
-    if (segs.length === 2 && dynamicChild[first]) {
+    const fixedChild = STATIC_SLUGS[first];
+    if (segs.length === 2 && fixedChild) {
+      if (!fixedChild.has(slug)) return missing(req);
+    } else if (segs.length === 2 && dynamicChild[first]) {
       if (!(await slugExists(dynamicChild[first], slug))) return missing(req);
     } else if (!NOT_CITIES.has(first)) {
       // Not a real top-level route: only an active city (and, below it, an active location service) exists here.

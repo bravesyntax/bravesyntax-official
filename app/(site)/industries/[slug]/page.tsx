@@ -22,10 +22,12 @@ import { getActiveServices } from "@/lib/services";
 type Props = { params: Promise<{ slug: string }> };
 
 export const revalidate = 86400; // admin edits refresh it immediately
-export const dynamicParams = false;
 
+// Not built at deploy time: each page is rendered and cached on its first visit. Building every page on every
+// deployment cost ~9,000 Vercel ISR write units per deploy (the free plan allows 200K a month). Unknown slugs never
+// get here: proxy.ts answers them with the pre-built 404 page.
 export function generateStaticParams() {
-  return INDUSTRIES.map((i) => ({ slug: i.slug }));
+  return [];
 }
 
 const find = (slug: string) => {
